@@ -3,21 +3,46 @@
 }
 
 <style>
-    .page-wrapper {
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: Arial, sans-serif;
+    }
+
+    .background {
+        background-image: url('/images/ff134a71-db8d-405e-a883-a69138619dd3.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 20px;
+        box-sizing: border-box;
+    }
+
+    .content {
         text-align: center;
-        margin-top: 100px;
+        background-color: rgba(0, 0, 0, 0.6); /* Dark overlay for readability */
+        color: white;
+        padding: 40px;
+        border-radius: 12px;
+        max-width: 900px;
+        width: 100%;
     }
 
-    .page-wrapper h1 {
-        font-size: 48px;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
+        .content h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
 
-    .page-wrapper p {
-        font-size: 18px;
-        color: #333;
-    }
+        .content p {
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
 
     .event-button {
         background-color: #007bff;
@@ -28,20 +53,31 @@
         border-radius: 8px;
         cursor: pointer;
         text-decoration: none;
-        margin-top: 30px;
         display: inline-block;
         transition: background-color 0.3s ease;
     }
 
-    .event-button:hover {
-        background-color: #0056b3;
+        .event-button:hover {
+            background-color: #0056b3;
+        }
+
+    /* Ensure footer stays at the bottom */
+    .wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .main-content {
+        flex: 1;
     }
 </style>
 
-<div class="page-wrapper">
-    <h1>Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-
-    <br />
-
+<div class="background">
+    <div class="content">
+        <h1>Welcome</h1>
+        <p>Innovation from <strong>Kumaraguru School of Innovation (KSI)</strong>, a part of Kumaraguru Institutions. KSI is powered by <strong>Forge Accelerator</strong>, India’s pioneering hardware incubator.</p>
+        <a href="#" class="event-button">Explore Events</a>
+    </div>
 </div>
+   

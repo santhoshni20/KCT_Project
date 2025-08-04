@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "CGPA Calculation";
+}
+
+<style>
+    .cgpa-container {
+        max-width: 800px;
+        margin: 60px auto;
+        padding: 30px;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .cgpa-header {
+        margin-bottom: 20px;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .result-box {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .result-box input {
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            padding: 5px;
+        }
+</style>
+
+<div class="cgpa-container">
+    <h2 class="text-center cgpa-header">CGPA Calculation</h2>
+
+    <form>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label for="rollNo" class="form-label">Roll No:</label>
+                <input type="text" class="form-control" id="rollNo" name="rollNo" />
+            </div>
+            <div class="col-md-6">
+                <label for="semester" class="form-label">Semester:</label>
+                <input type="number" class="form-control" id="semester" name="semester" min="1" max="10" />
+            </div>
+        </div>
+
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Courses</th>
+                    <th>Gained Grade</th>
+                    <th>CAT - I</th>
+                    <th>CAT - II</th>
+                    <th>Assignment</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < 5; i++) // you can increase row count as needed
+                {
+                    <tr>
+                        <td><input type="text" class="form-control" name="courseName" /></td>
+                        <td><input type="text" class="form-control" name="grade" /></td>
+                        <td><input type="number" class="form-control" name="cat1" /></td>
+                        <td><input type="number" class="form-control" name="cat2" /></td>
+                        <td><input type="number" class="form-control" name="assignment" /></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="result-box">
+            <label for="sgpa">Your SGPA:</label>
+            <input type="text" id="sgpa" name="sgpa" readonly />
+        </div>
+    </form>
+</div>

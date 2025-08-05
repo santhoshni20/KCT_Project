@@ -8,76 +8,44 @@
         padding: 0;
         height: 100%;
         font-family: Arial, sans-serif;
+        overflow: hidden; /* Prevent all scrolling */
     }
 
     .background {
-        background-image: url('/images/ff134a71-db8d-405e-a883-a69138619dd3.png');
+        background-image: url('/images/your-image.png');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        min-height: 100%;
+        position: fixed;
+        top: 0;
+        left: 240px; /* Respect the sidebar width */
+        right: 0;
+        bottom: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 80px 20px;
+        padding: 20px;
         box-sizing: border-box;
     }
 
     .content {
         text-align: center;
-        background-color: rgba(0, 0, 0, 0.6); /* Dark overlay for readability */
+        background-color: rgba(0, 0, 0, 0.6);
         color: white;
         padding: 40px;
         border-radius: 12px;
         max-width: 900px;
         width: 100%;
     }
-
-        .content h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-
-        .content p {
-            font-size: 20px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-    .event-button {
-        background-color: #007bff;
-        color: white;
-        padding: 12px 28px;
-        font-size: 18px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
-        transition: background-color 0.3s ease;
-    }
-
-        .event-button:hover {
-            background-color: #0056b3;
-        }
-
-    /* Ensure footer stays at the bottom */
-    .wrapper {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-
-    .main-content {
-        flex: 1;
-    }
 </style>
 
 <div class="background">
     <div class="content">
         <h1>Welcome</h1>
-        <p>Innovation from <strong>Kumaraguru School of Innovation (KSI)</strong>, a part of Kumaraguru Institutions. KSI is powered by <strong>Forge Accelerator</strong>, India’s pioneering hardware incubator.</p>
-        <a href="#" class="event-button">Explore Events</a>
+        <p>
+            Innovation from <strong>Kumaraguru School of Innovation (KSI)</strong>,
+            a part of Kumaraguru Institutions. KSI is powered by
+            <strong>Forge Accelerator</strong>, India’s pioneering hardware incubator.
+        </p>
     </div>
 </div>
-   

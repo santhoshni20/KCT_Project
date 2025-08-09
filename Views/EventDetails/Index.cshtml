@@ -2,86 +2,151 @@
     ViewData["Title"] = "Event Details";
 }
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+
 <style>
-    .event-form-container {
-        max-width: 600px;
-        margin: 60px auto;
-        padding: 30px;
+    .event-box {
         background-color: #f8f9fa;
-        border-radius: 12px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 10px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
 
-        .event-form-container h2 {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-    .form-label {
-        font-weight: bold;
-        margin-top: 15px;
+    .modal-content {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 20px;
     }
 
-    .form-check-inline {
-        margin-right: 20px;
+    .btn-add {
+        float: right;
+        margin-bottom: 20px;
     }
-
-    .download-icon {
-        font-size: 28px;
-        color: #007bff;
-        display: flex;
-        justify-content: center;
-        margin-top: 10px;
-    }
-
-        .download-icon:hover {
-            color: #0056b3;
-            cursor: pointer;
-        }
 </style>
 
-<div class="event-form-container">
-    <h2>Event Details</h2>
-    <form>
+<div class="container mt-5">
+    <h2 class="mb-4">Today's Events</h2>
+    <button class="btn btn-primary btn-add" data-bs-toggle="modal" data-bs-target="#eventModal">
+        <i class="fas fa-plus"></i> Add Event
+    </button>
 
-        <div class="mb-3">
-            <label class="form-label">Event Name</label>
-            <input type="text" class="form-control" name="eventName" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Deadline</label>
-            <input type="date" class="form-control" name="deadline" />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Eligibility</label>
-            <textarea class="form-control" rows="2" name="eligibility"></textarea>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Division</label><br />
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="division" value="Intra" id="intra">
-                <label class="form-check-label" for="intra">Intra</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="division" value="Inter" id="inter">
-                <label class="form-check-label" for="inter">Inter</label>
-            </div>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Brochure Download</label><br />
-            <div class="download-icon">
-                <i class="fas fa-arrow-circle-down"></i>
-            </div>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Contact</label>
-            <input type="text" class="form-control" name="contact" />
-        </div>
-
-    </form>
+    <div id="eventList">
+        <!-- Event cards will be rendered here -->
+    </div>
 </div>
+
+<!-- Modal for adding event -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <h4 class="mb-4">Add New Event</h4>
+            <form id="eventForm">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label>Event Name</label>
+                        <input type="text" class="form-control" name="eventName" required />
+                    </div>
+                    <div class="col">
+                        <label>Contact Number</label>
+                        <input type="text" class="form-control" name="contactNumber" required />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label>Deadline Date</label>
+                        <input type="date" class="form-control" name="deadlineDate" required />
+                    </div>
+                    <div class="col">
+                        <label>Event Date</label>
+                        <input type="date" class="form-control" name="eventDate" required />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>Eligibility</label>
+                    <textarea class="form-control" name="eligibility"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Division</label>
+                    <select class="form-select" name="division">
+                        <option value="Intra">Intra</option>
+                        <option value="Inter">Inter</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Brochure URL</label>
+                    <input type="text" class="form-control" name="brochureUrl" />
+                </div>
+
+                <button type="submit" class="btn btn-success">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            loadEvents();
+
+            $('#eventForm').submit(function (e) {
+                e.preventDefault();
+
+                var formData = {
+                    eventName: $('[name="eventName"]').val(),
+                    deadlineDate: $('[name="deadlineDate"]').val(),
+                    eventDate: $('[name="eventDate"]').val(),
+                    eligibility: $('[name="eligibility"]').val(),
+                    division: $('[name="division"]').val(),
+                    brochureUrl: $('[name="brochureUrl"]').val(),
+                    contactNumber: $('[name="contactNumber"]').val(),
+                    createdBy: 1 // Replace with session or login info if needed
+                };
+
+                $.ajax({
+                    url: '/api/EventDetails/save',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (res) {
+                        if (res === true || res.success === true) {
+                            alert("Event Saved!");
+                            $('#eventModal').modal('hide');
+                            $('#eventForm')[0].reset();
+                            loadEvents();
+                        } else {
+                            alert("Failed to save event.");
+                        }
+                    },
+                    error: function () {
+                        alert("Something went wrong while saving the event.");
+                    }
+                });
+            });
+        });
+
+        function loadEvents() {
+            $.get('/api/EventDetails/today', function (res) {
+                if (!res || !res.data) return;
+
+                let html = '';
+                res.data.forEach(e => {
+                    html += `
+                        <div class="event-box">
+                            <h5>${e.eventName}</h5>
+                            <p><strong>Date:</strong> ${e.eventDate?.split('T')[0]}</p>
+                            <p><strong>Eligibility:</strong> ${e.eligibility}</p>
+                            <p><strong>Division:</strong> ${e.division}</p>
+                            <p><strong>Contact:</strong> ${e.contactNumber}</p>
+                            ${e.brochureUrl ? `<a href="${e.brochureUrl}" target="_blank">📄 Download Brochure</a>` : ''}
+                        </div>`;
+                });
+                $('#eventList').html(html);
+            });
+        }
+    </script>
+}

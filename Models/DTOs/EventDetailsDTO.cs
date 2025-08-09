@@ -11,6 +11,11 @@
         public string BrochureUrl { get; set; }
         public string ContactNumber { get; set; }
 
+        // New fields causing errors
+        public string Description { get; set; }
+        public string Location { get; set; }
+        public DateTime CreatedOn { get; set; }
+
         public int CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
     }

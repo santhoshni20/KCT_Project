@@ -108,7 +108,7 @@
                 };
 
                 $.ajax({
-                    url: '/api/EventDetails/save',
+                    url: '/EventDetails/SaveEvent',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
@@ -130,7 +130,8 @@
         });
 
         function loadEvents() {
-            $.get('/api/EventDetails/today', function (res) {
+            //$.get('/api/EventDetails/GetTodaysEvents', function (res) {
+            $.get('/EventDetails/GetTodaysEvents', function (res) {
                 if (!res || !res.data) return;
 
                 let html = '';

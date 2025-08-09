@@ -14,7 +14,8 @@ namespace KSI_Project.Models.Entity
         public string Division { get; set; }
         public string BrochureUrl { get; set; }
         public string ContactNumber { get; set; }
-
+        public string Location { get; set; }
+        public string Description { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime CreatedDate { get; set; }
         public int CreatedBy { get; set; }

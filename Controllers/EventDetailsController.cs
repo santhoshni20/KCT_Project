@@ -1,17 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using KSI_Project.Interfaces;
+﻿using KSI_Project.Interfaces;
 using KSI_Project.Models.DTOs;
+using Microsoft.AspNetCore.Mvc;
+using KSI_Project.Repository;
+using System;
+using System.Threading.Tasks;
 
 namespace KSI_Project.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
     public class EventDetailsController : Controller
     {
-        public IActionResult Index()
-        {
-            return View(); // Make sure you have a corresponding View
-        }
         private readonly IEventDetailsRepository _eventRepo;
 
         public EventDetailsController(IEventDetailsRepository eventRepo)
@@ -19,34 +16,38 @@ namespace KSI_Project.Controllers
             _eventRepo = eventRepo;
         }
 
-        [HttpPost("save")]
-        public async Task<IActionResult> SaveEvent(EventDetailsDTO dto)
+        // Loads the Event Details page
+        public IActionResult Index()
         {
-            var response = await _eventRepo.SaveOrUpdateEventAsync(dto);
-            return Ok(response);
+            return View();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEvent(int id, int updatedBy)
+        // Save or Update Event
+        [HttpPost]
+        public async Task<ApiResponseDTO> SaveEvent(EventDetailsDTO dto)
         {
-            var response = await _eventRepo.DeleteEventAsync(id, updatedBy);
-            return Ok(response);
+            return await _eventRepo.SaveOrUpdateEventAsync(dto);
         }
 
-        [HttpGet("today")]
-        public async Task<IActionResult> GetTodaysEvents()
+        // Delete Event
+        [HttpPost]
+        public async Task<ApiResponseDTO> DeleteEvent(int id, int updatedBy)
         {
-            var events = await _eventRepo.GetTodaysEventsAsync();
-            return Ok(new ApiResponseDTO { success = true, data = events });
+            return await _eventRepo.DeleteEventAsync(id, updatedBy);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetEventById(int id)
+        // Get Today's Events
+        [HttpGet]
+        public async Task<ApiResponseDTO> GetTodaysEvents()
         {
-            var eventDto = await _eventRepo.GetEventByIdAsync(id);
-            return Ok(new ApiResponseDTO { success = true, data = eventDto });
+            return await _eventRepo.GetTodaysEventsAsync();
         }
 
-
+        // Get Event By Id
+        [HttpGet]
+        public async Task<ApiResponseDTO> GetEventById(int id)
+        {
+            return await _eventRepo.GetEventByIdAsync(id);
+        }
     }
 }

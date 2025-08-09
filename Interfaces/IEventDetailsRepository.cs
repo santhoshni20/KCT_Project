@@ -1,4 +1,5 @@
 ﻿using KSI_Project.Models.DTOs;
+using System.Threading.Tasks;
 
 namespace KSI_Project.Interfaces
 {
@@ -6,8 +7,7 @@ namespace KSI_Project.Interfaces
     {
         Task<ApiResponseDTO> SaveOrUpdateEventAsync(EventDetailsDTO dto);
         Task<ApiResponseDTO> DeleteEventAsync(int id, int updatedBy);
-        Task<EventDetailsDTO> GetEventByIdAsync(int id);
-        Task<List<EventDetailsDTO>> GetTodaysEventsAsync();
-
+        Task<ApiResponseDTO> GetTodaysEventsAsync();
+        Task<ApiResponseDTO> GetEventByIdAsync(int id);
     }
 }

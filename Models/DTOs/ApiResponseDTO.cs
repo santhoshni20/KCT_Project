@@ -6,4 +6,7 @@
         public string message { get; set; } = "Success";
         public object data { get; set; }
     }
+
+
 }
+

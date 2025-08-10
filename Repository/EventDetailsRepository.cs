@@ -25,6 +25,13 @@ namespace KSI_Project.Repository
 
             try
             {
+                if (dto == null)
+                {
+                    response.success = false;
+                    response.message = "DTO is null";
+                    return response;
+                }
+
                 if (dto.EventId > 0)
                 {
                     // Update existing
@@ -38,10 +45,10 @@ namespace KSI_Project.Repository
                         return response;
                     }
 
-                    existingEvent.EventName = dto.EventName;
+                    existingEvent.EventName = dto.EventName ?? existingEvent.EventName;
                     existingEvent.EventDate = dto.EventDate;
-                    existingEvent.Location = dto.Location;
-                    existingEvent.Description = dto.Description;
+                    existingEvent.Location = dto.Location ?? existingEvent.Location;
+                    existingEvent.Description = dto.Description ?? existingEvent.Description;
                     existingEvent.UpdatedBy = dto.UpdatedBy;
                     existingEvent.UpdatedDate = DateTime.Now;
 
@@ -49,14 +56,19 @@ namespace KSI_Project.Repository
                 }
                 else
                 {
-                    // Insert new
+                    // Fill defaults for optional fields to avoid NOT NULL DB errors
                     var newEvent = new EventDetails
                     {
-                        EventName = dto.EventName,
+                        EventName = dto.EventName ?? string.Empty,
+                        DeadlineDate = dto.DeadlineDate,
                         EventDate = dto.EventDate,
-                        Location = dto.Location,
-                        Description = dto.Description,
-                        CreatedBy = dto.CreatedBy,
+                        Eligibility = dto.Eligibility ?? string.Empty,
+                        Division = dto.Division ?? string.Empty,
+                        BrochureUrl = dto.BrochureUrl ?? string.Empty,
+                        ContactNumber = dto.ContactNumber ?? string.Empty,
+                        Location = dto.Location ?? string.Empty,
+                        Description = dto.Description ?? string.Empty,
+                        CreatedBy = dto.CreatedBy > 0 ? dto.CreatedBy : 1, // fallback if caller didn't set
                         CreatedDate = DateTime.Now
                     };
 
@@ -67,14 +79,17 @@ namespace KSI_Project.Repository
 
                 response.success = true;
                 response.message = "Event saved successfully";
+                return response;
             }
             catch (Exception ex)
             {
+                // Log full exception (stack + inner). Check app logs/console for this output.
+                Console.WriteLine("[SaveEventRepo Error] " + ex.ToString());
+
                 response.success = false;
                 response.message = $"Error saving event: {ex.Message} | Inner: {ex.InnerException?.Message}";
+                return response;
             }
-
-            return response;
         }
 
         public async Task<ApiResponseDTO> DeleteEventAsync(int id, int updatedBy)

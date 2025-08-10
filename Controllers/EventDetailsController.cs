@@ -23,10 +23,37 @@ namespace KSI_Project.Controllers
         }
 
         // Save or Update Event
+        //[HttpPost]
+        //public async Task<ApiResponseDTO> SaveEvent(EventDetailsDTO dto)
+        //{
+        //    return await _eventRepo.SaveOrUpdateEventAsync(dto);
+        //}
         [HttpPost]
-        public async Task<ApiResponseDTO> SaveEvent(EventDetailsDTO dto)
+        public async Task<IActionResult> SaveEvent([FromBody] EventDetailsDTO dto)
         {
-            return await _eventRepo.SaveOrUpdateEventAsync(dto);
+            Console.WriteLine("DEBUG: SaveEvent called");
+
+            if (dto == null)
+            {
+                Console.WriteLine("DEBUG: dto is null - raw body may not be JSON or model binding failed.");
+                return Json(new ApiResponseDTO { success = false, message = "Invalid payload (dto null)" });
+            }
+
+            // Show incoming DTO for debug (safe in dev only — remove in prod)
+            Console.WriteLine("DEBUG: Incoming DTO -> " + System.Text.Json.JsonSerializer.Serialize(dto));
+
+            try
+            {
+                var result = await _eventRepo.SaveOrUpdateEventAsync(dto);
+                // Always return JSON — repo always returns ApiResponseDTO
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                // Unhandled error in controller - return message so frontend sees it
+                Console.WriteLine("[SaveEvent Controller Error] " + ex.ToString());
+                return Json(new ApiResponseDTO { success = false, message = $"Unhandled error: {ex.Message}" });
+            }
         }
 
         // Delete Event

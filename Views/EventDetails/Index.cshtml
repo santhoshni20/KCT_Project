@@ -113,7 +113,7 @@
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
                     success: function (res) {
-                        if (res === true || res.success === true) {
+                        if (res && res.success) {
                             alert("Event Saved!");
                             $('#eventModal').modal('hide');
                             $('#eventForm')[0].reset();

@@ -1,9 +1,10 @@
-﻿using KSI_Project.Interfaces;
+﻿using KSI_Project.Helpers.DbContexts;
+using KSI_Project.Interfaces;
 using KSI_Project.Models;
-using KSI_Project.Models.Entity;
 using KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
-using KSI_Project.Helpers.DbContexts;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,75 +22,55 @@ namespace KSI_Project.Repository
 
         public async Task<ApiResponseDTO> SaveOrUpdateEventAsync(EventDetailsDTO dto)
         {
-            var response = new ApiResponseDTO();
+            string imagePath = null;
 
-            try
+            if (dto.BrochureFile != null && dto.BrochureFile.Length > 0)
             {
-                if (dto == null)
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/events");
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.BrochureFile.FileName);
+                var fullPath = Path.Combine(folderPath, fileName);
+
+                using (var stream = new FileStream(fullPath, FileMode.Create))
                 {
-                    response.success = false;
-                    response.message = "DTO is null";
-                    return response;
+                    await dto.BrochureFile.CopyToAsync(stream);
                 }
 
-                if (dto.EventId > 0)
-                {
-                    // Update existing
-                    var existingEvent = await _context.EventDetails
-                        .FirstOrDefaultAsync(e => e.EventId == dto.EventId);
-
-                    if (existingEvent == null)
-                    {
-                        response.success = false;
-                        response.message = "Event not found";
-                        return response;
-                    }
-
-                    existingEvent.EventName = dto.EventName ?? existingEvent.EventName;
-                    existingEvent.EventDate = dto.EventDate;
-                    existingEvent.Location = dto.Location ?? existingEvent.Location;
-                    existingEvent.Description = dto.Description ?? existingEvent.Description;
-                    existingEvent.UpdatedBy = dto.UpdatedBy;
-                    existingEvent.UpdatedDate = DateTime.Now;
-
-                    _context.EventDetails.Update(existingEvent);
-                }
-                else
-                {
-                    // Fill defaults for optional fields to avoid NOT NULL DB errors
-                    var newEvent = new EventDetails
-                    {
-                        EventName = dto.EventName ?? string.Empty,
-                        DeadlineDate = dto.DeadlineDate,
-                        EventDate = dto.EventDate,
-                        Eligibility = dto.Eligibility ?? string.Empty,
-                        Division = dto.Division ?? string.Empty,
-                        BrochureUrl = dto.BrochureUrl ?? string.Empty,
-                        ContactNumber = dto.ContactNumber ?? string.Empty,
-                        Location = dto.Location ?? string.Empty,
-                        Description = dto.Description ?? string.Empty,
-                        CreatedBy = dto.CreatedBy > 0 ? dto.CreatedBy : 1, // fallback if caller didn't set
-                        CreatedDate = DateTime.Now
-                    };
-
-                    await _context.EventDetails.AddAsync(newEvent);
-                }
-
-                await _context.SaveChangesAsync();
-
-                response.success = true;
-                response.message = "Event saved successfully";
-                return response;
+                imagePath = "/images/events/" + fileName; // for web access
             }
-            catch (Exception ex)
+
+            if (dto.EventId == 0) // create
             {
-                // Log full exception (stack + inner). Check app logs/console for this output.
-                Console.WriteLine("[SaveEventRepo Error] " + ex.ToString());
-
-                response.success = false;
-                response.message = $"Error saving event: {ex.Message} | Inner: {ex.InnerException?.Message}";
-                return response;
+                var newEvent = new EventDetails
+                {
+                    EventName = dto.EventName,
+                    EventDate = dto.EventDate ?? DateTime.Now,
+                    Description = dto.Description,
+                    EventImagePath = imagePath
+                };
+                _context.EventDetails.Add(newEvent);
             }
+            else // update
+            {
+                var existingEvent = await _context.EventDetails.FindAsync(dto.EventId);
+                if (existingEvent != null)
+                {
+                    existingEvent.EventName = dto.EventName;
+                    existingEvent.EventDate = dto.EventDate ?? existingEvent.EventDate;
+                    existingEvent.Description = dto.Description;
+                    if (!string.IsNullOrEmpty(imagePath))
+                        existingEvent.EventImagePath = imagePath;
+                }
+            }
+
+            bool isSaved = await _context.SaveChangesAsync() > 0;
+            return new ApiResponseDTO
+            {
+                success = isSaved,
+                message = isSaved ? "Event saved successfully" : "Failed to save event"
+            };
         }
 
         public async Task<ApiResponseDTO> DeleteEventAsync(int id, int updatedBy)

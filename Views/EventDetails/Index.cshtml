@@ -75,10 +75,9 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label>Brochure URL</label>
-                    <input type="text" class="form-control" name="brochureUrl" />
+                    <label>Brochure Image</label>
+                    <input type="file" class="form-control" name="brochureFile" accept="image/*" required />
                 </div>
-
                 <button type="submit" class="btn btn-success">Save</button>
             </form>
         </div>
@@ -96,22 +95,34 @@
             $('#eventForm').submit(function (e) {
                 e.preventDefault();
 
-                var formData = {
-                    eventName: $('[name="eventName"]').val(),
-                    deadlineDate: $('[name="deadlineDate"]').val(),
-                    eventDate: $('[name="eventDate"]').val(),
-                    eligibility: $('[name="eligibility"]').val(),
-                    division: $('[name="division"]').val(),
-                    brochureUrl: $('[name="brochureUrl"]').val(),
-                    contactNumber: $('[name="contactNumber"]').val(),
-                    createdBy: 1 // Replace with session or login info if needed
-                };
+                var deadlineVal = $('[name="deadlineDate"]').val();
+                var eventDateVal = $('[name="eventDate"]').val();
+
+                var formData = new FormData();
+                formData.append("EventName", $('[name="eventName"]').val());
+                formData.append("DeadlineDate", deadlineVal ? new Date(deadlineVal).toISOString() : null);
+                formData.append("EventDate", eventDateVal ? new Date(eventDateVal).toISOString() : null);
+                formData.append("Eligibility", $('[name="eligibility"]').val());
+                formData.append("Division", $('[name="division"]').val());
+                formData.append("ContactNumber", $('[name="contactNumber"]').val());
+                formData.append("Description", "");
+                formData.append("Location", "");
+                formData.append("CreatedBy", 1);
+                formData.append("UpdatedBy", null);
+                formData.append("CreatedDate", new Date().toISOString());
+
+                // Add brochure file
+                var fileInput = $('[name="brochureFile"]')[0];
+                if (fileInput.files.length > 0) {
+                    formData.append("BrochureFile", fileInput.files[0]);
+                }
 
                 $.ajax({
                     url: '/EventDetails/SaveEvent',
                     type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(formData),
+                    data: formData,
+                    processData: false, // important for file upload
+                    contentType: false, // important for file upload
                     success: function (res) {
                         if (res && res.success) {
                             alert("Event Saved!");
@@ -127,27 +138,26 @@
                     }
                 });
             });
-        });
 
-        function loadEvents() {
-            //$.get('/api/EventDetails/GetTodaysEvents', function (res) {
-            $.get('/EventDetails/GetTodaysEvents', function (res) {
-                if (!res || !res.data) return;
+            function loadEvents() {
+                $.get('/EventDetails/GetTodaysEvents', function (res) {
+                    if (!res || !res.data) return;
 
-                let html = '';
-                res.data.forEach(e => {
-                    html += `
-                        <div class="event-box">
-                            <h5>${e.eventName}</h5>
-                            <p><strong>Date:</strong> ${e.eventDate?.split('T')[0]}</p>
-                            <p><strong>Eligibility:</strong> ${e.eligibility}</p>
-                            <p><strong>Division:</strong> ${e.division}</p>
-                            <p><strong>Contact:</strong> ${e.contactNumber}</p>
-                            ${e.brochureUrl ? `<a href="${e.brochureUrl}" target="_blank">📄 Download Brochure</a>` : ''}
-                        </div>`;
+                    let html = '';
+                    res.data.forEach(e => {
+                        html += `
+                            <div class="event-box">
+                                <h5>${e.eventName}</h5>
+                                <p><strong>Date:</strong> ${e.eventDate?.split('T')[0]}</p>
+                                <p><strong>Eligibility:</strong> ${e.eligibility}</p>
+                                <p><strong>Division:</strong> ${e.division}</p>
+                                <p><strong>Contact:</strong> ${e.contactNumber}</p>
+                                ${e.brochureUrl ? `<a href="${e.brochureUrl}" target="_blank">📄 Download Brochure</a>` : ''}
+                            </div>`;
+                    });
+                    $('#eventList').html(html);
                 });
-                $('#eventList').html(html);
-            });
-        }
+            }
+        });
     </script>
 }

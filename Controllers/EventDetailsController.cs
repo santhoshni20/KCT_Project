@@ -23,37 +23,26 @@ namespace KSI_Project.Controllers
         }
 
         // Save or Update Event
-        //[HttpPost]
-        //public async Task<ApiResponseDTO> SaveEvent(EventDetailsDTO dto)
-        //{
-        //    return await _eventRepo.SaveOrUpdateEventAsync(dto);
-        //}
         [HttpPost]
-        public async Task<IActionResult> SaveEvent([FromBody] EventDetailsDTO dto)
+        public async Task<IActionResult> SaveEvent([FromForm] EventDetailsDTO dto)
         {
-            Console.WriteLine("DEBUG: SaveEvent called");
-
-            if (dto == null)
+            if (dto.BrochureFile != null)
             {
-                Console.WriteLine("DEBUG: dto is null - raw body may not be JSON or model binding failed.");
-                return Json(new ApiResponseDTO { success = false, message = "Invalid payload (dto null)" });
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.BrochureFile.FileName);
+                var filePath = Path.Combine("wwwroot/uploads", uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.BrochureFile.CopyToAsync(stream);
+                }
+
+                dto.BrochureFile = "/uploads/" + uniqueFileName;
             }
 
-            // Show incoming DTO for debug (safe in dev only — remove in prod)
-            Console.WriteLine("DEBUG: Incoming DTO -> " + System.Text.Json.JsonSerializer.Serialize(dto));
+            // Save dto to DB
+            var result = await _eventService.SaveEventAsync(dto);
 
-            try
-            {
-                var result = await _eventRepo.SaveOrUpdateEventAsync(dto);
-                // Always return JSON — repo always returns ApiResponseDTO
-                return Json(result);
-            }
-            catch (Exception ex)
-            {
-                // Unhandled error in controller - return message so frontend sees it
-                Console.WriteLine("[SaveEvent Controller Error] " + ex.ToString());
-                return Json(new ApiResponseDTO { success = false, message = $"Unhandled error: {ex.Message}" });
-            }
+            return Json(new { success = result });
         }
 
         // Delete Event

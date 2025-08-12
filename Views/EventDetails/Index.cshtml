@@ -6,32 +6,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
 
 <style>
-    .event-box {
-        background-color: #f8f9fa;
-        padding: 20px;
-        margin: 15px 0;
-        border-radius: 10px;
-        box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-
-    .modal-content {
-        background-color: #ffffff;
-        border-radius: 10px;
-        padding: 20px;
-    }
-
-    .btn-add {
-        float: right;
-        margin-bottom: 20px;
-    }
-
     .event-section {
         margin-bottom: 40px;
     }
-
-        .event-section h4 {
-            margin-bottom: 15px;
-        }
 
     .event-slider {
         display: flex;
@@ -53,31 +30,23 @@
             font-size: 1.1rem;
             margin-bottom: 10px;
         }
-
-        .event-card small {
-            color: #666;
-        }
-
-        .event-card .btn {
-            margin-top: 10px;
-        }
 </style>
 
 <div class="container mt-5">
-    <h2 class="mb-4">Today's Events</h2>
-    <button class="btn btn-primary btn-add" data-bs-toggle="modal" data-bs-target="#eventModal">
+    <h2 class="mb-4">Event Details</h2>
+    <button class="btn btn-primary float-end mb-3" data-bs-toggle="modal" data-bs-target="#eventModal">
         <i class="fas fa-plus"></i> Add Event
     </button>
 
-    <div id="eventList">
-        <!-- Event cards will be rendered here -->
+    <div id="eventsContainer">
+        <!-- Date-wise event sections will be rendered here -->
     </div>
 </div>
 
 <!-- Modal for adding event -->
-<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+<div class="modal fade" id="eventModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+        <div class="modal-content p-4">
             <h4 class="mb-4">Add New Event</h4>
             <form id="eventForm">
                 <div class="row mb-3">
@@ -106,12 +75,11 @@
                 </div>
                 <div class="mb-3">
                     <label>Description</label>
-                    <textarea class="form-control" name="description" placeholder="Enter event description"></textarea>
+                    <textarea class="form-control" name="description"></textarea>
                 </div>
-
                 <div class="mb-3">
                     <label>Location</label>
-                    <input type="text" class="form-control" name="location" placeholder="Enter event location" />
+                    <input type="text" class="form-control" name="location" />
                 </div>
                 <div class="mb-3">
                     <label>Division</label>
@@ -122,7 +90,7 @@
                 </div>
                 <div class="mb-3">
                     <label>Brochure Image</label>
-                    <input type="file" class="form-control" name="brochureFile" accept="image/*" required />
+                    <input type="file" class="form-control" name="brochureFile" accept="image/*" />
                 </div>
                 <button type="submit" class="btn btn-success">Save</button>
             </form>
@@ -130,16 +98,8 @@
     </div>
 </div>
 
-<div class="container mt-5">
-    <h2 class="mb-4">Event Details</h2>
-
-    <div id="eventsContainer">
-        <!-- Sections will be dynamically generated here -->
-    </div>
-</div>
-
-<!-- Modal for full details -->
-<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="eventDetailsLabel" aria-hidden="true">
+<!-- Modal for full event details -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content p-4">
             <h4 id="eventDetailsTitle"></h4>
@@ -167,132 +127,77 @@
                 e.preventDefault();
 
                 var formData = new FormData();
-
-                formData.append("EventId", $('[name="eventId"]').val() || 0);
                 formData.append("EventName", $('[name="eventName"]').val());
-
-                var deadlineVal = $('[name="deadlineDate"]').val();
-                var eventDateVal = $('[name="eventDate"]').val();
-                formData.append("DeadlineDate", deadlineVal ? new Date(deadlineVal).toISOString() : null);
-                formData.append("EventDate", eventDateVal ? new Date(eventDateVal).toISOString() : null);
-
+                formData.append("DeadlineDate", $('[name="deadlineDate"]').val());
+                formData.append("EventDate", $('[name="eventDate"]').val());
                 formData.append("Eligibility", $('[name="eligibility"]').val());
                 formData.append("Division", $('[name="division"]').val());
                 formData.append("ContactNumber", $('[name="contactNumber"]').val());
-                formData.append("Description", $('[name="description"]').val() || "");
-                formData.append("Location", $('[name="location"]').val() || "");
-                formData.append("CreatedBy", 1);
-                formData.append("UpdatedBy", null);
-                formData.append("CreatedDate", new Date().toISOString());
-
+                formData.append("Description", $('[name="description"]').val());
+                formData.append("Location", $('[name="location"]').val());
                 var fileInput = $('[name="brochureFile"]')[0];
                 if (fileInput.files.length > 0) {
                     formData.append("BrochureFile", fileInput.files[0]);
                 }
 
-
                 $.ajax({
                     url: '/EventDetails/SaveEvent',
                     type: 'POST',
                     data: formData,
-                    processData: false, // important for file upload
-                    contentType: false, // important for file upload
+                    processData: false,
+                    contentType: false,
                     success: function (res) {
-                        if (res && res.success) {
-                            alert("Event Saved!");
+                        if (res.success) {
                             $('#eventModal').modal('hide');
                             $('#eventForm')[0].reset();
                             loadEvents();
                         } else {
-                            alert("Failed to save event.");
+                            alert(res.message || "Failed to save event.");
                         }
-                    },
-                    error: function () {
-                        alert("Something went wrong while saving the event.");
                     }
                 });
             });
 
             function loadEvents() {
                 $.get('/EventDetails/GetTodaysEvents', function (res) {
-                    if (!res || !res.data) {
-                        alert(res?.message || "Failed to load events.");
-                        return;
-                    }
+                    if (!res || !res.data) return;
+                    let grouped = {};
+
+                    res.data.forEach(e => {
+                        let dateKey = e.eventDate ? e.eventDate.split('T')[0] : 'Unknown Date';
+                        if (!grouped[dateKey]) grouped[dateKey] = [];
+                        grouped[dateKey].push(e);
+                    });
 
                     let html = '';
-                    res.data.forEach(e => {
-                        html += `
-                            <div class="event-box">
-                                <h5>${e.eventName}</h5>
-                                
-                                <p><strong>Date:</strong> ${e.eventDate ? e.eventDate.split('T')[0] : ''}</p>
-                                <p><strong>Eligibility:</strong> ${e.eligibility}</p>
-                                <p><strong>Division:</strong> ${e.division}</p>
-                                <p><strong>Contact:</strong> ${e.contactNumber}</p>
-                                ${e.brochureUrl ? `<a href="${e.brochureUrl}" target="_blank">📄 Download Brochure</a>` : ''}
-                            </div>`;
-                    });
-                    $('#eventList').html(html);
+                    for (let date in grouped) {
+                        html += `<div class="event-section">
+                                    <h4>${date}</h4>
+                                    <div class="event-slider">`;
+                        grouped[date].forEach(ev => {
+                            html += `<div class="event-card">
+                                        <h5>${ev.eventName}</h5>
+                                        <button class="btn btn-sm btn-primary" onclick='showDetails(${JSON.stringify(ev)})'>View Details</button>
+                                     </div>`;
+                        });
+                        html += `</div></div>`;
+                    }
+                    $('#eventsContainer').html(html);
                 });
             }
+
+            window.showDetails = function (ev) {
+                $('#eventDetailsTitle').text(ev.eventName);
+                $('#eventDetailsDate').text(ev.eventDate ? ev.eventDate.split('T')[0] : '');
+                $('#eventDetailsDeadline').text(ev.deadlineDate ? ev.deadlineDate.split('T')[0] : '');
+                $('#eventDetailsEligibility').text(ev.eligibility || '');
+                $('#eventDetailsDivision').text(ev.division || '');
+                $('#eventDetailsContact').text(ev.contactNumber || '');
+                $('#eventDetailsLocation').text(ev.location || '');
+                $('#eventDetailsDescription').text(ev.description || '');
+                $('#eventDetailsBrochure').html(ev.brochureUrl ? `<a href="${ev.brochureUrl}" target="_blank">📄 View Brochure</a>` : '');
+                $('#eventDetailsModal').modal('show');
+            }
         });
-
-        function loadAllEvents() {
-            $.get('/EventDetails/GetTodaysEvents', function (res) {
-                if (!res || !res.data) {
-                    $('#eventsContainer').html('<p>No events found.</p>');
-                    return;
-                }
-
-                // Group events by Date & Division
-                let grouped = {};
-                res.data.forEach(e => {
-                    let dateKey = e.eventDate ? e.eventDate.split('T')[0] : 'Unknown';
-                    if (!grouped[dateKey]) grouped[dateKey] = {};
-                    if (!grouped[dateKey][e.division]) grouped[dateKey][e.division] = [];
-                    grouped[dateKey][e.division].push(e);
-                });
-
-                let html = '';
-                Object.keys(grouped).sort().forEach(date => {
-                    Object.keys(grouped[date]).forEach(division => {
-                        html += `
-                            <div class="event-section">
-                                <h4>${division} - ${date}</h4>
-                                <div class="event-slider">
-                        `;
-
-                        grouped[date][division].forEach(e => {
-                            html += `
-                                <div class="event-card">
-                                    <h5>${e.eventName}</h5>
-                                    <small>${e.location || ''}</small><br>
-                                    <button class="btn btn-primary btn-sm" onclick='viewEventDetails(${JSON.stringify(e)})'>View Details</button>
-                                </div>
-                            `;
-                        });
-
-                        html += `</div></div>`;
-                    });
-                });
-
-                $('#eventsContainer').html(html);
-            });
-        }
-
-        function viewEventDetails(event) {
-            $('#eventDetailsTitle').text(event.eventName);
-            $('#eventDetailsDate').text(event.eventDate ? event.eventDate.split('T')[0] : '');
-            $('#eventDetailsDeadline').text(event.deadlineDate ? event.deadlineDate.split('T')[0] : '');
-            $('#eventDetailsEligibility').text(event.eligibility || '');
-            $('#eventDetailsDivision').text(event.division || '');
-            $('#eventDetailsContact').text(event.contactNumber || '');
-            $('#eventDetailsLocation').text(event.location || '');
-            $('#eventDetailsDescription').text(event.description || '');
-            $('#eventDetailsBrochure').html(event.brochureUrl ? `<a href="${event.brochureUrl}" target="_blank" class="btn btn-link">📄 View Brochure</a>` : '');
-
-            $('#eventDetailsModal').modal('show');
-        }
     </script>
 }

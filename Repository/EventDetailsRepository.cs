@@ -48,7 +48,18 @@ namespace KSI_Project.Repository
                     EventName = dto.EventName,
                     EventDate = dto.EventDate,
                     DeadlineDate = dto.DeadlineDate,
-                    Description = dto.Description
+                    Description = dto.Description,
+                    Eligibility = dto.Eligibility,
+                    Division = dto.Division,
+                    ContactNumber = dto.ContactNumber,
+                    Location = dto.Location,
+                    CreatedBy = dto.CreatedBy,
+                    CreatedDate = dto.CreatedDate ?? DateTime.Now,
+                    UpdatedBy = dto.UpdatedBy,
+                    UpdatedDate = dto.UpdatedDate,
+                    DeletedBy = null,
+                    DeletedDate = null,
+                    BrochureUrl = imagePath // from file upload
                 };
                 await _context.EventDetails.AddAsync(newEvent);
             }
@@ -64,8 +75,14 @@ namespace KSI_Project.Repository
                 existingEvent.EventDate = dto.EventDate;
                 existingEvent.DeadlineDate = dto.DeadlineDate;
                 existingEvent.Description = dto.Description;
-
-                _context.EventDetails.Update(existingEvent);
+                existingEvent.Eligibility = dto.Eligibility;
+                existingEvent.Division = dto.Division;
+                existingEvent.ContactNumber = dto.ContactNumber;
+                existingEvent.Location = dto.Location;
+                existingEvent.UpdatedBy = dto.UpdatedBy;
+                existingEvent.UpdatedDate = DateTime.Now;
+                if (imagePath != null)
+                    existingEvent.BrochureUrl = imagePath;
             }
 
             bool isSaved = await _context.SaveChangesAsync() > 0;

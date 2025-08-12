@@ -24,6 +24,43 @@
         float: right;
         margin-bottom: 20px;
     }
+
+    .event-section {
+        margin-bottom: 40px;
+    }
+
+        .event-section h4 {
+            margin-bottom: 15px;
+        }
+
+    .event-slider {
+        display: flex;
+        overflow-x: auto;
+        gap: 15px;
+        padding-bottom: 10px;
+    }
+
+    .event-card {
+        flex: 0 0 auto;
+        width: 250px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        padding: 15px;
+    }
+
+        .event-card h5 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .event-card small {
+            color: #666;
+        }
+
+        .event-card .btn {
+            margin-top: 10px;
+        }
 </style>
 
 <div class="container mt-5">
@@ -89,6 +126,31 @@
                 </div>
                 <button type="submit" class="btn btn-success">Save</button>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Event Details</h2>
+
+    <div id="eventsContainer">
+        <!-- Sections will be dynamically generated here -->
+    </div>
+</div>
+
+<!-- Modal for full details -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="eventDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-4">
+            <h4 id="eventDetailsTitle"></h4>
+            <p><strong>Date:</strong> <span id="eventDetailsDate"></span></p>
+            <p><strong>Deadline:</strong> <span id="eventDetailsDeadline"></span></p>
+            <p><strong>Eligibility:</strong> <span id="eventDetailsEligibility"></span></p>
+            <p><strong>Division:</strong> <span id="eventDetailsDivision"></span></p>
+            <p><strong>Contact:</strong> <span id="eventDetailsContact"></span></p>
+            <p><strong>Location:</strong> <span id="eventDetailsLocation"></span></p>
+            <p><strong>Description:</strong> <span id="eventDetailsDescription"></span></p>
+            <div id="eventDetailsBrochure"></div>
         </div>
     </div>
 </div>
@@ -175,5 +237,62 @@
                 });
             }
         });
+
+        function loadAllEvents() {
+            $.get('/EventDetails/GetTodaysEvents', function (res) {
+                if (!res || !res.data) {
+                    $('#eventsContainer').html('<p>No events found.</p>');
+                    return;
+                }
+
+                // Group events by Date & Division
+                let grouped = {};
+                res.data.forEach(e => {
+                    let dateKey = e.eventDate ? e.eventDate.split('T')[0] : 'Unknown';
+                    if (!grouped[dateKey]) grouped[dateKey] = {};
+                    if (!grouped[dateKey][e.division]) grouped[dateKey][e.division] = [];
+                    grouped[dateKey][e.division].push(e);
+                });
+
+                let html = '';
+                Object.keys(grouped).sort().forEach(date => {
+                    Object.keys(grouped[date]).forEach(division => {
+                        html += `
+                            <div class="event-section">
+                                <h4>${division} - ${date}</h4>
+                                <div class="event-slider">
+                        `;
+
+                        grouped[date][division].forEach(e => {
+                            html += `
+                                <div class="event-card">
+                                    <h5>${e.eventName}</h5>
+                                    <small>${e.location || ''}</small><br>
+                                    <button class="btn btn-primary btn-sm" onclick='viewEventDetails(${JSON.stringify(e)})'>View Details</button>
+                                </div>
+                            `;
+                        });
+
+                        html += `</div></div>`;
+                    });
+                });
+
+                $('#eventsContainer').html(html);
+            });
+        }
+
+        function viewEventDetails(event) {
+            $('#eventDetailsTitle').text(event.eventName);
+            $('#eventDetailsDate').text(event.eventDate ? event.eventDate.split('T')[0] : '');
+            $('#eventDetailsDeadline').text(event.deadlineDate ? event.deadlineDate.split('T')[0] : '');
+            $('#eventDetailsEligibility').text(event.eligibility || '');
+            $('#eventDetailsDivision').text(event.division || '');
+            $('#eventDetailsContact').text(event.contactNumber || '');
+            $('#eventDetailsLocation').text(event.location || '');
+            $('#eventDetailsDescription').text(event.description || '');
+            $('#eventDetailsBrochure').html(event.brochureUrl ? `<a href="${event.brochureUrl}" target="_blank" class="btn btn-link">📄 View Brochure</a>` : '');
+
+            $('#eventDetailsModal').modal('show');
+        }
     </script>
 }

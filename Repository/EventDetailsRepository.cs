@@ -124,6 +124,31 @@ namespace KSI_Project.Repository
             return response;
         }
 
+        //public async Task<ApiResponseDTO> GetTodaysEventsAsync()
+        //{
+        //    var response = new ApiResponseDTO();
+
+        //    try
+        //    {
+        //        var today = DateTime.Today;
+        //        var tomorrow = today.AddDays(1);
+
+        //        var events = await _context.EventDetails
+        //            .Where(e => e.EventDate >= today && e.EventDate < tomorrow)
+        //            .ToListAsync();
+
+        //        response.success = true;
+        //        response.data = events;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.success = false;
+        //        response.message = $"Error fetching today's events: {ex.Message}";
+        //    }
+
+        //    return response;
+        //}
+
         public async Task<ApiResponseDTO> GetTodaysEventsAsync()
         {
             var response = new ApiResponseDTO();
@@ -131,10 +156,11 @@ namespace KSI_Project.Repository
             try
             {
                 var today = DateTime.Today;
-                var tomorrow = today.AddDays(1);
 
+                // Get all events from today onwards (future events included)
                 var events = await _context.EventDetails
-                    .Where(e => e.EventDate >= today && e.EventDate < tomorrow)
+                    .Where(e => e.EventDate >= today)
+                    .OrderBy(e => e.EventDate)
                     .ToListAsync();
 
                 response.success = true;
@@ -143,11 +169,12 @@ namespace KSI_Project.Repository
             catch (Exception ex)
             {
                 response.success = false;
-                response.message = $"Error fetching today's events: {ex.Message}";
+                response.message = $"Error fetching events: {ex.Message}";
             }
 
             return response;
         }
+
 
         public async Task<ApiResponseDTO> GetEventByIdAsync(int id)
         {

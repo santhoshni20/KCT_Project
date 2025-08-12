@@ -26,23 +26,9 @@ namespace KSI_Project.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveEvent([FromForm] EventDetailsDTO dto)
         {
-            if (dto.BrochureFile != null)
-            {
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.BrochureFile.FileName);
-                var filePath = Path.Combine("wwwroot/uploads", uniqueFileName);
+            var result = await _eventRepo.SaveOrUpdateEventAsync(dto);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await dto.BrochureFile.CopyToAsync(stream);
-                }
-
-                dto.BrochureFile = "/uploads/" + uniqueFileName;
-            }
-
-            // Save dto to DB
-            var result = await _eventService.SaveEventAsync(dto);
-
-            return Json(new { success = result });
+            return Json(new { success = result.success, message = result.message });
         }
 
         // Delete Event

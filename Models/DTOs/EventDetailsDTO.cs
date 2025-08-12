@@ -8,16 +8,11 @@
         public DateTime? EventDate { get; set; }
         public string Eligibility { get; set; }
         public string Division { get; set; }
-        //public string BrochureUrl { get; set; }
-
         public string ContactNumber { get; set; }
         public IFormFile BrochureFile { get; set; }
-
-        // New fields causing errors
         public string Description { get; set; }
         public string Location { get; set; }
         public DateTime? CreatedDate { get; set; }
-
         public int CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
     }

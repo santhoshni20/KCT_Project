@@ -26,7 +26,7 @@ namespace KSI_Project.Repository
 
             if (dto.BrochureFile != null && dto.BrochureFile.Length > 0)
             {
-                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/events");
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
                 if (!Directory.Exists(folderPath))
                     Directory.CreateDirectory(folderPath);
 
@@ -38,34 +38,53 @@ namespace KSI_Project.Repository
                     await dto.BrochureFile.CopyToAsync(stream);
                 }
 
-                imagePath = "/images/events/" + fileName; // for web access
+                imagePath = "/uploads/" + fileName; // relative web path
             }
 
-            if (dto.EventId == 0) // create
+            if (dto.EventId == 0) // create new event
             {
                 var newEvent = new EventDetails
                 {
                     EventName = dto.EventName,
+                    DeadlineDate = dto.DeadlineDate ?? DateTime.Now,
                     EventDate = dto.EventDate ?? DateTime.Now,
+                    Eligibility = dto.Eligibility,
+                    Division = dto.Division,
+                    ContactNumber = dto.ContactNumber,
                     Description = dto.Description,
-                    EventImagePath = imagePath
+                    Location = dto.Location,
+                    BrochureUrl = imagePath,
+                    CreatedDate = dto.CreatedDate ?? DateTime.Now,
+                    CreatedBy = dto.CreatedBy,
+                    IsActive = true
                 };
+
                 _context.EventDetails.Add(newEvent);
             }
-            else // update
+            else // update existing event
             {
                 var existingEvent = await _context.EventDetails.FindAsync(dto.EventId);
                 if (existingEvent != null)
                 {
                     existingEvent.EventName = dto.EventName;
+                    existingEvent.DeadlineDate = dto.DeadlineDate ?? existingEvent.DeadlineDate;
                     existingEvent.EventDate = dto.EventDate ?? existingEvent.EventDate;
+                    existingEvent.Eligibility = dto.Eligibility;
+                    existingEvent.Division = dto.Division;
+                    existingEvent.ContactNumber = dto.ContactNumber;
                     existingEvent.Description = dto.Description;
+                    existingEvent.Location = dto.Location;
+
                     if (!string.IsNullOrEmpty(imagePath))
-                        existingEvent.EventImagePath = imagePath;
+                        existingEvent.BrochureUrl = imagePath;
+
+                    existingEvent.UpdatedBy = dto.UpdatedBy;
+                    existingEvent.UpdatedDate = DateTime.Now;
                 }
             }
 
             bool isSaved = await _context.SaveChangesAsync() > 0;
+
             return new ApiResponseDTO
             {
                 success = isSaved,

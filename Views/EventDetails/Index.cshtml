@@ -95,27 +95,30 @@
             $('#eventForm').submit(function (e) {
                 e.preventDefault();
 
+                var formData = new FormData();
+
+                formData.append("EventId", $('[name="eventId"]').val() || 0);
+                formData.append("EventName", $('[name="eventName"]').val());
+
                 var deadlineVal = $('[name="deadlineDate"]').val();
                 var eventDateVal = $('[name="eventDate"]').val();
-
-                var formData = new FormData();
-                formData.append("EventName", $('[name="eventName"]').val());
                 formData.append("DeadlineDate", deadlineVal ? new Date(deadlineVal).toISOString() : null);
                 formData.append("EventDate", eventDateVal ? new Date(eventDateVal).toISOString() : null);
+
                 formData.append("Eligibility", $('[name="eligibility"]').val());
                 formData.append("Division", $('[name="division"]').val());
                 formData.append("ContactNumber", $('[name="contactNumber"]').val());
-                formData.append("Description", "");
-                formData.append("Location", "");
+                formData.append("Description", $('[name="description"]').val() || "");
+                formData.append("Location", $('[name="location"]').val() || "");
                 formData.append("CreatedBy", 1);
                 formData.append("UpdatedBy", null);
                 formData.append("CreatedDate", new Date().toISOString());
 
-                // Add brochure file
                 var fileInput = $('[name="brochureFile"]')[0];
                 if (fileInput.files.length > 0) {
                     formData.append("BrochureFile", fileInput.files[0]);
                 }
+
 
                 $.ajax({
                     url: '/EventDetails/SaveEvent',
@@ -141,14 +144,18 @@
 
             function loadEvents() {
                 $.get('/EventDetails/GetTodaysEvents', function (res) {
-                    if (!res || !res.data) return;
+                    if (!res || !res.data) {
+                        alert(res?.message || "Failed to load events.");
+                        return;
+                    }
 
                     let html = '';
                     res.data.forEach(e => {
                         html += `
                             <div class="event-box">
                                 <h5>${e.eventName}</h5>
-                                <p><strong>Date:</strong> ${e.eventDate?.split('T')[0]}</p>
+                                
+                                <p><strong>Date:</strong> ${e.eventDate ? e.eventDate.split('T')[0] : ''}</p>
                                 <p><strong>Eligibility:</strong> ${e.eligibility}</p>
                                 <p><strong>Division:</strong> ${e.division}</p>
                                 <p><strong>Contact:</strong> ${e.contactNumber}</p>

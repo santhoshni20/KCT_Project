@@ -41,46 +41,31 @@ namespace KSI_Project.Repository
                 imagePath = "/uploads/" + fileName; // relative web path
             }
 
-            if (dto.EventId == 0) // create new event
+            if (dto.EventId == 0) // Insert
             {
                 var newEvent = new EventDetails
                 {
                     EventName = dto.EventName,
-                    DeadlineDate = dto.DeadlineDate ?? DateTime.Now,
-                    EventDate = dto.EventDate ?? DateTime.Now,
-                    Eligibility = dto.Eligibility,
-                    Division = dto.Division,
-                    ContactNumber = dto.ContactNumber,
-                    Description = dto.Description,
-                    Location = dto.Location,
-                    BrochureUrl = imagePath,
-                    CreatedDate = dto.CreatedDate ?? DateTime.Now,
-                    CreatedBy = dto.CreatedBy,
-                    IsActive = true
+                    EventDate = dto.EventDate,
+                    DeadlineDate = dto.DeadlineDate,
+                    Description = dto.Description
                 };
-
-                _context.EventDetails.Add(newEvent);
+                await _context.EventDetails.AddAsync(newEvent);
             }
-            else // update existing event
+            else // Update
             {
-                var existingEvent = await _context.EventDetails.FindAsync(dto.EventId);
-                if (existingEvent != null)
-                {
-                    existingEvent.EventName = dto.EventName;
-                    existingEvent.DeadlineDate = dto.DeadlineDate ?? existingEvent.DeadlineDate;
-                    existingEvent.EventDate = dto.EventDate ?? existingEvent.EventDate;
-                    existingEvent.Eligibility = dto.Eligibility;
-                    existingEvent.Division = dto.Division;
-                    existingEvent.ContactNumber = dto.ContactNumber;
-                    existingEvent.Description = dto.Description;
-                    existingEvent.Location = dto.Location;
+                var existingEvent = await _context.EventDetails
+                    .FirstOrDefaultAsync(e => e.EventId == dto.EventId);
 
-                    if (!string.IsNullOrEmpty(imagePath))
-                        existingEvent.BrochureUrl = imagePath;
+                if (existingEvent == null)
+                    throw new Exception("Event not found");
 
-                    existingEvent.UpdatedBy = dto.UpdatedBy;
-                    existingEvent.UpdatedDate = DateTime.Now;
-                }
+                existingEvent.EventName = dto.EventName;
+                existingEvent.EventDate = dto.EventDate;
+                existingEvent.DeadlineDate = dto.DeadlineDate;
+                existingEvent.Description = dto.Description;
+
+                _context.EventDetails.Update(existingEvent);
             }
 
             bool isSaved = await _context.SaveChangesAsync() > 0;
@@ -129,8 +114,10 @@ namespace KSI_Project.Repository
             try
             {
                 var today = DateTime.Today;
+                var tomorrow = today.AddDays(1);
+
                 var events = await _context.EventDetails
-                    .Where(e => e.EventDate.Date == today)
+                    .Where(e => e.EventDate >= today && e.EventDate < tomorrow)
                     .ToListAsync();
 
                 response.success = true;

@@ -7,15 +7,15 @@ namespace KSI_Project.Models.Entity
         [Key]
         public int EventId { get; set; }
         public string EventName { get; set; }
-        public DateTime DeadlineDate { get; set; }
-        public DateTime EventDate { get; set; }
+        public DateTime? DeadlineDate { get; set; }
+        public DateTime? EventDate { get; set; }
         public string Eligibility { get; set; }
         public string Division { get; set; }
         public string BrochureUrl { get; set; }
         public string ContactNumber { get; set; }
         public string Location { get; set; }
         public string Description { get; set; }
-        public string EventImagePath { get; set; }
+        //public string EventImagePath { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime CreatedDate { get; set; }
         public int CreatedBy { get; set; }

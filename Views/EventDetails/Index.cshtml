@@ -211,7 +211,6 @@
                     let grouped = {};
 
                     res.data.forEach(e => {
-                        //let dateKey = e.eventDate ? e.eventDate.split('T')[0] : 'Unknown Date';
                         let dateKey = e.eventDate ? formatDate(e.eventDate) : 'Unknown Date';
                         if (!grouped[dateKey]) grouped[dateKey] = [];
                         grouped[dateKey].push(e);

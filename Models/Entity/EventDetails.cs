@@ -15,7 +15,6 @@ namespace KSI_Project.Models.Entity
         public string? ContactNumber { get; set; }
         public string? Location { get; set; }
         public string? Description { get; set; }
-        //public string EventImagePath { get; set; }
         public bool IsActive { get; set; } = true;
         public DateTime CreatedDate { get; set; }
         public int CreatedBy { get; set; }

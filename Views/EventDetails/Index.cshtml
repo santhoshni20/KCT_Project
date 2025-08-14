@@ -174,6 +174,8 @@
                 var formData = new FormData();
                 formData.append("EventName", $('[name="eventName"]').val());
                 formData.append("DeadlineDate", $('[name="deadlineDate"]').val());
+                formData.append("EventId", 0); // or existing id for update
+                formData.append("CreatedBy", 1); // replace with logged-in user id
                 formData.append("EventDate", $('[name="eventDate"]').val());
                 formData.append("Eligibility", $('[name="eligibility"]').val());
                 formData.append("Division", $('[name="division"]').val());
@@ -220,16 +222,10 @@
                         html += `<div class="event-section">
                                     <h4>${date}</h4>
                                     <div class="event-slider">`;
-                        // html += `<div class="event-card">
-                        //             <h5>${ev.eventName}</h5>
-                        //             <button class="btn btn-sm btn-primary" onclick='showDetails(${JSON.stringify(ev)})'>View Details</button>
-                        //          </div>`;
+                       
 
                         grouped[date].forEach(ev => {
-                            // html += `<div class="event-card">
-                            //             <h5>${ev.eventName}</h5>
-                            //             <button class="btn btn-sm btn-primary" onclick='showDetails(${JSON.stringify(ev)})'>View Details</button>
-                            //          </div>`;
+                           
                             html += `<div class="event-card">
                                 <img src="${ev.brochureUrl || 'https://via.placeholder.com/100'}" alt="${ev.eventName}">
                                 <h5>${ev.eventName}</h5>
@@ -245,8 +241,7 @@
 
             window.showDetails = function (ev) {
                 $('#eventDetailsTitle').text(ev.eventName);
-                // $('#eventDetailsDate').text(ev.eventDate ? ev.eventDate.split('T')[0] : '');
-                // $('#eventDetailsDeadline').text(ev.deadlineDate ? ev.deadlineDate.split('T')[0] : '');
+               
                 $('#eventDetailsDate').text(formatDate(ev.eventDate));
                 $('#eventDetailsDeadline').text(formatDate(ev.deadlineDate));
                 $('#eventDetailsEligibility').text(ev.eligibility || '');

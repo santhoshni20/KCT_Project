@@ -22,77 +22,105 @@ namespace KSI_Project.Repository
 
         public async Task<ApiResponseDTO> SaveOrUpdateEventAsync(EventDetailsDTO dto)
         {
+            var response = new ApiResponseDTO();
             string imagePath = null;
 
-            if (dto.BrochureFile != null && dto.BrochureFile.Length > 0)
+            try
             {
-                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                if (!Directory.Exists(folderPath))
-                    Directory.CreateDirectory(folderPath);
-
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.BrochureFile.FileName);
-                var fullPath = Path.Combine(folderPath, fileName);
-
-                using (var stream = new FileStream(fullPath, FileMode.Create))
+                // ✅ Handle file upload (if provided)
+                if (dto.BrochureFile != null && dto.BrochureFile.Length > 0)
                 {
-                    await dto.BrochureFile.CopyToAsync(stream);
+                    var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(folderPath))
+                        Directory.CreateDirectory(folderPath);
+
+                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.BrochureFile.FileName)}";
+                    var fullPath = Path.Combine(folderPath, fileName);
+
+                    using (var stream = new FileStream(fullPath, FileMode.Create))
+                    {
+                        await dto.BrochureFile.CopyToAsync(stream);
+                    }
+
+                    // Relative path for DB
+                    imagePath = $"/uploads/{fileName}";
                 }
 
-                imagePath = "/uploads/" + fileName; // relative web path
-            }
+                // ✅ Normalize date values — prevent DateTime.MinValue
+                DateTime? eventDate = (dto.EventDate.HasValue && dto.EventDate.Value.Year > 1900)
+                    ? dto.EventDate
+                    : null;
 
-            if (dto.EventId == 0) // Insert
-            {
-                var newEvent = new EventDetails
+                DateTime? deadlineDate = (dto.DeadlineDate.HasValue && dto.DeadlineDate.Value.Year > 1900)
+                    ? dto.DeadlineDate
+                    : null;
+
+                if (dto.EventId == 0) // Insert
                 {
-                    EventName = dto.EventName,
-                    EventDate = dto.EventDate,
-                    DeadlineDate = dto.DeadlineDate,
-                    Description = dto.Description,
-                    Eligibility = dto.Eligibility,
-                    Division = dto.Division,
-                    ContactNumber = dto.ContactNumber,
-                    Location = dto.Location,
-                    CreatedBy = dto.CreatedBy,
-                    CreatedDate = dto.CreatedDate ?? DateTime.Now,
-                    UpdatedBy = dto.UpdatedBy,
-                    UpdatedDate = dto.UpdatedDate,
-                    DeletedBy = null,
-                    DeletedDate = null,
-                    BrochureUrl = imagePath // from file upload
-                };
-                await _context.EventDetails.AddAsync(newEvent);
+                    var newEvent = new EventDetails
+                    {
+                        EventName = dto.EventName?.Trim(),
+                        EventDate = eventDate,
+                        DeadlineDate = deadlineDate,
+                        Description = dto.Description?.Trim(),
+                        Eligibility = dto.Eligibility?.Trim(),
+                        Division = dto.Division?.Trim(),
+                        ContactNumber = dto.ContactNumber?.Trim(),
+                        Location = dto.Location?.Trim(),
+                        CreatedBy = dto.CreatedBy,
+                        CreatedDate = DateTime.Now, // ✅ Always server-side
+                        BrochureUrl = imagePath,
+                        IsActive = true
+                    };
+
+                    await _context.EventDetails.AddAsync(newEvent);
+                }
+                else // Update
+                {
+                    var existingEvent = await _context.EventDetails
+                        .FirstOrDefaultAsync(e => e.EventId == dto.EventId);
+
+                    if (existingEvent == null)
+                    {
+                        response.success = false;
+                        response.message = "Event not found";
+                        return response;
+                    }
+
+                    existingEvent.EventName = dto.EventName?.Trim();
+                    existingEvent.EventDate = eventDate;
+                    existingEvent.DeadlineDate = deadlineDate;
+                    existingEvent.Description = dto.Description?.Trim();
+                    existingEvent.Eligibility = dto.Eligibility?.Trim();
+                    existingEvent.Division = dto.Division?.Trim();
+                    existingEvent.ContactNumber = dto.ContactNumber?.Trim();
+                    existingEvent.Location = dto.Location?.Trim();
+                    existingEvent.UpdatedBy = dto.UpdatedBy;
+                    existingEvent.UpdatedDate = DateTime.Now; // ✅ Always server-side
+                    if (imagePath != null) // Update image only if new file uploaded
+                        existingEvent.BrochureUrl = imagePath;
+                }
+
+                bool isSaved = await _context.SaveChangesAsync() > 0;
+                response.success = isSaved;
+                response.message = isSaved ? "Event saved successfully" : "No changes were made";
             }
-            else // Update
+            catch (Exception ex)
             {
-                var existingEvent = await _context.EventDetails
-                    .FirstOrDefaultAsync(e => e.EventId == dto.EventId);
-
-                if (existingEvent == null)
-                    throw new Exception("Event not found");
-
-                existingEvent.EventName = dto.EventName;
-                existingEvent.EventDate = dto.EventDate;
-                existingEvent.DeadlineDate = dto.DeadlineDate;
-                existingEvent.Description = dto.Description;
-                existingEvent.Eligibility = dto.Eligibility;
-                existingEvent.Division = dto.Division;
-                existingEvent.ContactNumber = dto.ContactNumber;
-                existingEvent.Location = dto.Location;
-                existingEvent.UpdatedBy = dto.UpdatedBy;
-                existingEvent.UpdatedDate = DateTime.Now;
-                if (imagePath != null)
-                    existingEvent.BrochureUrl = imagePath;
+                Console.WriteLine(ex.Message);
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine(ex.InnerException.Message);
+                    if (ex.InnerException.InnerException != null)
+                    {
+                        Console.WriteLine(ex.InnerException.InnerException.Message);
+                    }
+                }
             }
 
-            bool isSaved = await _context.SaveChangesAsync() > 0;
-
-            return new ApiResponseDTO
-            {
-                success = isSaved,
-                message = isSaved ? "Event saved successfully" : "Failed to save event"
-            };
+            return response;
         }
+
 
         public async Task<ApiResponseDTO> DeleteEventAsync(int id, int updatedBy)
         {

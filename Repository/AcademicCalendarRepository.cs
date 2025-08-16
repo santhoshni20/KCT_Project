@@ -1,6 +1,6 @@
 ﻿namespace KCT_Project.Repositories
 {
-    public class AcademicCalenderRepository
+    public class AcademicCalendarRepository
     {
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace KCT_Project.Interfaces
 {
-    public interface IAcademicCalenderRepository
+    public interface IAcademicCalendarRepository
     {
     }
 }

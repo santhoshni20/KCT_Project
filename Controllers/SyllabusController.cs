@@ -2,7 +2,7 @@
 
 namespace YourProject.Controllers
 {
-    public class AcademicCalendarController : Controller
+    public class SyllabusController : Controller
     {
         public IActionResult Index()
         {

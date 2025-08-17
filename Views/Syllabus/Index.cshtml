@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Syllabus";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+
+<style>
+    .page-container {
+        margin-top: 80px;
+        text-align: center;
+    }
+
+    .batch-section {
+        margin-bottom: 30px;
+    }
+
+    .batch-label {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-right: 10px;
+    }
+
+    .download-btn {
+        font-size: 1.1rem;
+        font-weight: 600;
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.3s;
+    }
+
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+</style>
+
+<div class="container page-container">
+    <!-- Batch Dropdown -->
+    <div class="batch-section d-flex justify-content-center align-items-center">
+        <label class="batch-label">Batch</label>
+        <select class="form-select w-auto" id="batchDropdown">
+            <option value="">-- Select Batch --</option>
+            <option value="2022">2022 - 2026</option>
+            <option value="2023">2023 - 2027</option>
+            <option value="2024">2024 - 2028</option>
+        </select>
+    </div>
+
+    <!-- Department Dropdown (initially disabled) -->
+    <div class="batch-section d-flex justify-content-center align-items-center">
+        <label class="batch-label">Department</label>
+        <select class="form-select w-auto" id="deptDropdown" disabled>
+            <option value="">-- Select Department --</option>
+        </select>
+    </div>
+
+    <!-- Download Syllabus -->
+    <div>
+        <button class="download-btn" id="downloadBtn">
+            <i class="fas fa-download"></i> Download Syllabus
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const deptOptions = [
+            { value: "AE", text: "Aeronautical Engineering" },
+            { value: "AIDS", text: "Artificial Intelligence and Data Science" },
+            { value: "AU", text: "Automobile Engineering" },
+            { value: "BT", text: "Biotechnology" },
+            { value: "CE", text: "Civil Engineering" },
+            { value: "CSE", text: "Computer Science and Engineering" },
+            { value: "EEE", text: "Electrical and Electronics Engineering" },
+            { value: "ECE", text: "Electronics and Communication Engineering" },
+            { value: "EI", text: "Electronics and Instrumentation Engineering" },
+            { value: "FT", text: "Fashion Technology" },
+            { value: "IT", text: "Information Technology" },
+            { value: "ME", text: "Mechanical Engineering" },
+            { value: "MC", text: "Mechatronics Engineering" },
+            { value: "TT", text: "Textile Technology" }
+        ];
+
+        document.getElementById("batchDropdown").addEventListener("change", function () {
+            var batch = this.value;
+            var deptDropdown = document.getElementById("deptDropdown");
+            deptDropdown.innerHTML = "<option value=''>-- Select Department --</option>";
+
+            if (batch) {
+                deptOptions.forEach(d => {
+                    var opt = document.createElement("option");
+                    opt.value = d.value;
+                    opt.text = d.text;
+                    deptDropdown.appendChild(opt);
+                });
+                deptDropdown.disabled = false;
+            } else {
+                deptDropdown.disabled = true;
+            }
+        });
+
+        document.getElementById("downloadBtn").addEventListener("click", function () {
+            var batch = document.getElementById("batchDropdown").value;
+            var dept = document.getElementById("deptDropdown").value;
+
+            if (!batch) {
+                alert("Please select a batch before downloading!");
+                return;
+            }
+            if (!dept) {
+                alert("Please select a department before downloading!");
+                return;
+            }
+
+            // Call backend syllabus controller
+            window.location.href = "/Syllabus/Download?batch=" + batch + "&dept=" + dept;
+        });
+    </script>
+}

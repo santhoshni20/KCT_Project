@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-//using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-//using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace KSI_Project.Models
 {

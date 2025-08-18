@@ -7,6 +7,11 @@ namespace KSI_Project.Controllers
 {
     public class SyllabusController : Controller
     {
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View(); // This will return Views/Syllabus/Index.cshtml
+        }
         private readonly ISyllabusRepository _syllabusRepository;
 
         public SyllabusController(ISyllabusRepository syllabusRepository)

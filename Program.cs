@@ -1,3 +1,5 @@
+using KCT_Project.Interfaces;
+using KCT_Project.Repositories;
 using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
 using KSI_Project.Repositories;
@@ -17,6 +19,7 @@ builder.Services.AddDbContext<kctDbContext>(options =>
 // ? Register Repositories
 builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
+builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 
 // ? Add MVC
 builder.Services.AddControllersWithViews();

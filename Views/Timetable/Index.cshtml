@@ -1,5 +1,166 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Timetable";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+
+<style>
+    .page-container {
+        margin-top: 60px;
+    }
+
+    .batch-section {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .batch-label {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-right: 10px;
+    }
+
+    .table-container {
+        margin-top: 30px;
+    }
+
+    table {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container page-container">
+    <!-- Batch Dropdown -->
+    <div class="batch-section d-flex justify-content-center align-items-center">
+        <label class="batch-label">Batch</label>
+        <select class="form-select w-auto" id="batchDropdown">
+            <option value="">-- Select Batch --</option>
+            <option value="2022">2022 - 2026</option>
+            <option value="2023">2023 - 2027</option>
+            <option value="2024">2024 - 2028</option>
+            <option value="2025">2025 - 2029</option>
+        </select>
+    </div>
+
+    <!-- Department Dropdown -->
+    <div class="batch-section d-flex justify-content-center align-items-center">
+        <label class="batch-label">Department with Sec</label>
+        <select class="form-select w-auto" id="deptDropdown" disabled>
+            <option value="">-- Select Department --</option>
+        </select>
+    </div>
+
+    <!-- Day Dropdown -->
+    <div class="batch-section d-flex justify-content-center align-items-center">
+        <label class="batch-label">Day</label>
+        <select class="form-select w-auto" id="dayDropdown" disabled>
+            <option value="">-- Select Day --</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+        </select>
+    </div>
+
+    <!-- Timetable Table -->
+    <div class="table-container">
+        <table class="table table-bordered" id="timetableTable">
+            <thead>
+                <tr>
+                    <th>Hour</th>
+                    <th>Subject</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="2">Select batch, department & day</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const deptOptions = [
+            { value: "AIDS-A", text: "AI & DS - Sec A" },
+            { value: "AIDS-B", text: "AI & DS - Sec B" },
+            { value: "CSE-A", text: "CSE - Sec A" },
+            { value: "CSE-B", text: "CSE - Sec B" },
+            { value: "IT-A", text: "IT - Sec A" },
+            { value: "IT-B", text: "IT - Sec B" }
+        ];
+
+        const batchDropdown = document.getElementById("batchDropdown");
+        const deptDropdown = document.getElementById("deptDropdown");
+        const dayDropdown = document.getElementById("dayDropdown");
+        const timetableBody = document.querySelector("#timetableTable tbody");
+
+        // Enable department after selecting batch
+        batchDropdown.addEventListener("change", function () {
+            const batch = this.value;
+            deptDropdown.innerHTML = "<option value=''>-- Select Department --</option>";
+            dayDropdown.value = "";
+            dayDropdown.disabled = true;
+            timetableBody.innerHTML = "<tr><td colspan='2'>Select batch, department & day</td></tr>";
+
+            if (batch) {
+                deptOptions.forEach(d => {
+                    const opt = document.createElement("option");
+                    opt.value = d.value;
+                    opt.text = d.text;
+                    deptDropdown.appendChild(opt);
+                });
+                deptDropdown.disabled = false;
+            } else {
+                deptDropdown.disabled = true;
+            }
+        });
+
+        // Enable day after selecting department
+        deptDropdown.addEventListener("change", function () {
+            dayDropdown.value = "";
+            dayDropdown.disabled = !this.value;
+            timetableBody.innerHTML = "<tr><td colspan='2'>Select batch, department & day</td></tr>";
+        });
+
+        // Fetch timetable after selecting day
+        dayDropdown.addEventListener("change", function () {
+            const batch = batchDropdown.value;
+            const dept = deptDropdown.value;
+            const day = this.value;
+
+            if (batch && dept && day) {
+                fetch(`/api/timetable/get?batch=${batch}&dept=${dept}&day=${day}`)
+                    .then(response => response.json())
+                    .then(resp => {
+                        timetableBody.innerHTML = "";
+                        if (resp.success && resp.data.length > 0) {
+                            resp.data.forEach(row => {
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
+                                    <td>${row.hourNo}</td>
+                                    <td>${row.subject}</td>
+                                `;
+                                timetableBody.appendChild(tr);
+                            });
+                        } else {
+                            timetableBody.innerHTML = `<tr><td colspan='2'>${resp.message}</td></tr>`;
+                        }
+                    })
+                    .catch(err => {
+                        timetableBody.innerHTML = "<tr><td colspan='2'>Error loading timetable</td></tr>";
+                        console.error(err);
+                    });
+            }
+        });
+    </script>
 }

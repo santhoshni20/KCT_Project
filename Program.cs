@@ -16,6 +16,7 @@ builder.Services.AddDbContext<kctDbContext>(options =>
 builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
+builder.Services.AddScoped<IFacultySupportRepository, FacultySupportRepository>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

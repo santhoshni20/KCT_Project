@@ -2,7 +2,10 @@
 using KCT_Project.Interfaces;
 using KCT_Project.Models.Entity;
 using KSI_Project.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace KCT_Project.Repositories
 {
@@ -15,54 +18,82 @@ namespace KCT_Project.Repositories
             _context = context;
         }
 
-        public ApiResponseDTO GetTimetable(string batch, string dept, string day)
+        public async Task<ApiResponseDTO> GetTimetableAsync(string batch, string dept, string day)
         {
             var response = new ApiResponseDTO();
 
-            if (string.IsNullOrEmpty(batch) || string.IsNullOrEmpty(dept) || string.IsNullOrEmpty(day))
+            try
+            {
+                if (string.IsNullOrEmpty(batch) || string.IsNullOrEmpty(dept) || string.IsNullOrEmpty(day))
+                {
+                    response.success = false;
+                    response.message = "Batch, Department, and Day are required.";
+                    return response;
+                }
+
+                var timetable = await _context.Timetables
+                    .Where(t => t.Batch == batch && t.Department == dept && t.Day == day)
+                    .OrderBy(t => t.HourNo)
+                    .ToListAsync();
+
+                if (!timetable.Any())
+                {
+                    response.success = false;
+                    response.message = "No timetable found for the selected day.";
+                    return response;
+                }
+
+                // You can choose whether to return full timetable entity or select subset properties
+                response.data = timetable.Select(t => new
+                {
+                    t.HourNo,
+                    t.Subject
+                }).ToList();
+
+                response.success = true;
+            }
+            catch (Exception ex)
             {
                 response.success = false;
-                response.message = "Batch, Department, and Day are required.";
-                return response;
+                response.message = $"Error fetching timetable: {ex.Message}";
             }
-
-            var timetable = _context.Timetables
-                                    .Where(t => t.Batch == batch && t.Department == dept && t.Day == day)
-                                    .OrderBy(t => t.HourNo)
-                                    .ToList();
-
-            if (!timetable.Any())
-            {
-                response.success = false;
-                response.message = "No timetable found for the selected day.";
-                return response;
-            }
-
-            response.data = timetable.Select(t => new
-            {
-                t.HourNo,
-                t.Subject
-            });
 
             return response;
         }
 
-        public ApiResponseDTO AddTimetable(Timetable timetable)
+        public async Task<ApiResponseDTO> AddTimetableAsync(Timetable timetable)
         {
             var response = new ApiResponseDTO();
 
-            if (timetable == null)
+            try
+            {
+                if (timetable == null)
+                {
+                    response.success = false;
+                    response.message = "Invalid timetable data.";
+                    return response;
+                }
+
+                await _context.Timetables.AddAsync(timetable);
+                var saved = await _context.SaveChangesAsync() > 0;
+
+                if (saved)
+                {
+                    response.success = true;
+                    response.message = "Timetable entry added successfully.";
+                    response.data = timetable;
+                }
+                else
+                {
+                    response.success = false;
+                    response.message = "Failed to add timetable entry.";
+                }
+            }
+            catch (Exception ex)
             {
                 response.success = false;
-                response.message = "Invalid timetable data.";
-                return response;
+                response.message = $"Error adding timetable entry: {ex.Message}";
             }
-
-            _context.Timetables.Add(timetable);
-            _context.SaveChanges();
-
-            response.message = "Timetable entry added successfully.";
-            response.data = timetable;
 
             return response;
         }

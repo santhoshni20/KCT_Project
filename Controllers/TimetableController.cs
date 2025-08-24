@@ -2,6 +2,7 @@
 using KCT_Project.Models.Entity;
 using KSI_Project.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace KCT_Project.Controllers
 {
@@ -16,15 +17,17 @@ namespace KCT_Project.Controllers
             _repository = repository;
         }
 
+        [HttpGet]
+        [Route("")]
         public IActionResult Index()
         {
-            return View();
+            return View(); 
         }
 
         [HttpGet("get")]
-        public IActionResult Get(string batch, string dept, string day)
+        public async Task<IActionResult> Get(string batch, string dept, string day)
         {
-            var response = _repository.GetTimetable(batch, dept, day);
+            var response = await _repository.GetTimetableAsync(batch, dept, day);
 
             if (!response.success)
                 return BadRequest(response);
@@ -33,9 +36,9 @@ namespace KCT_Project.Controllers
         }
 
         [HttpPost("add")]
-        public IActionResult Add([FromBody] Timetable timetable)
+        public async Task<IActionResult> Add([FromBody] Timetable timetable)
         {
-            var response = _repository.AddTimetable(timetable);
+            var response = await _repository.AddTimetableAsync(timetable);
 
             if (!response.success)
                 return BadRequest(response);

@@ -1,6 +1,10 @@
 ﻿using KSI_Project.Models;
+using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 using MySql.Data.MySqlClient;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Threading.Tasks;
 
 namespace KSI_Project.Repositories
 {
@@ -13,51 +17,80 @@ namespace KSI_Project.Repositories
             _connectionString = configuration.GetConnectionString("MySQLConnectionString");
         }
 
-        public async Task UploadAsync(SyllabusFile file)
+        public async Task<ApiResponseDTO> UploadAsync(SyllabusFile file)
         {
-            using (var conn = new MySqlConnection(_connectionString))
+            var response = new ApiResponseDTO();
+            try
             {
-                await conn.OpenAsync();
-                string query = "INSERT INTO syllabus_files (Batch, DepartmentCode, FileName, FileData) VALUES (@Batch, @Dept, @FileName, @FileData)";
-                using (var cmd = new MySqlCommand(query, conn))
+                using (var conn = new MySqlConnection(_connectionString))
                 {
-                    cmd.Parameters.AddWithValue("@Batch", file.Batch);
-                    cmd.Parameters.AddWithValue("@Dept", file.DepartmentCode);
-                    cmd.Parameters.AddWithValue("@FileName", file.FileName);
-                    cmd.Parameters.AddWithValue("@FileData", file.FileData);
-                    await cmd.ExecuteNonQueryAsync();
+                    await conn.OpenAsync();
+                    string query = "INSERT INTO syllabus_files (Batch, DepartmentCode, FileName, FileData) VALUES (@Batch, @Dept, @FileName, @FileData)";
+                    using (var cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Batch", file.Batch);
+                        cmd.Parameters.AddWithValue("@Dept", file.DepartmentCode);
+                        cmd.Parameters.AddWithValue("@FileName", file.FileName);
+                        cmd.Parameters.AddWithValue("@FileData", file.FileData);
+                        var rowsAffected = await cmd.ExecuteNonQueryAsync();
+                        response.success = rowsAffected > 0;
+                        response.message = rowsAffected > 0 ? "Syllabus uploaded successfully" : "No changes were made";
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                response.success = false;
+                response.message = $"Error uploading syllabus: {ex.Message}";
+            }
+            return response;
         }
 
-        public async Task<SyllabusFile?> GetFileAsync(string batch, string dept)
+        public async Task<ApiResponseDTO> GetFileAsync(string batch, string dept)
         {
-            using (var conn = new MySqlConnection(_connectionString))
+            var response = new ApiResponseDTO();
+            try
             {
-                await conn.OpenAsync();
-                string query = "SELECT Id, Batch, DepartmentCode, FileName, FileData FROM syllabus_files WHERE Batch=@Batch AND DepartmentCode=@Dept LIMIT 1";
-                using (var cmd = new MySqlCommand(query, conn))
+                using (var conn = new MySqlConnection(_connectionString))
                 {
-                    cmd.Parameters.AddWithValue("@Batch", batch);
-                    cmd.Parameters.AddWithValue("@Dept", dept);
-
-                    using (var reader = await cmd.ExecuteReaderAsync())
+                    await conn.OpenAsync();
+                    string query = "SELECT Id, Batch, DepartmentCode, FileName, FileData FROM syllabus_files WHERE Batch=@Batch AND DepartmentCode=@Dept LIMIT 1";
+                    using (var cmd = new MySqlCommand(query, conn))
                     {
-                        if (await reader.ReadAsync())
+                        cmd.Parameters.AddWithValue("@Batch", batch);
+                        cmd.Parameters.AddWithValue("@Dept", dept);
+
+                        using (var reader = await cmd.ExecuteReaderAsync())
                         {
-                            return new SyllabusFile
+                            if (await reader.ReadAsync())
                             {
-                                Id = reader.GetInt32(0),                  
-                                Batch = reader.GetString(1),             
-                                DepartmentCode = reader.GetString(2),     
-                                FileName = reader.GetString(3),            
-                                FileData = (byte[])reader[4]         
-                            };
+                                var syllabusFile = new SyllabusFile
+                                {
+                                    Id = reader.GetInt32(0),
+                                    Batch = reader.GetString(1),
+                                    DepartmentCode = reader.GetString(2),
+                                    FileName = reader.GetString(3),
+                                    FileData = (byte[])reader[4]
+                                };
+                                response.success = true;
+                                response.data = syllabusFile;
+                                response.message = "Syllabus file fetched successfully";
+                            }
+                            else
+                            {
+                                response.success = false;
+                                response.message = "Syllabus file not found";
+                            }
                         }
                     }
                 }
             }
-            return null;
+            catch (Exception ex)
+            {
+                response.success = false;
+                response.message = $"Error fetching syllabus file: {ex.Message}";
+            }
+            return response;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace KSI_Project.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return View(); // This will return Views/Syllabus/Index.cshtml
+            return View(); 
         }
         private readonly ISyllabusRepository _syllabusRepository;
 

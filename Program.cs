@@ -7,26 +7,18 @@ using KSI_Project.Repository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// ? Register EF Core + MySQL
 builder.Services.AddDbContext<kctDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("MySQLConnectionString"),
         new MySqlServerVersion(new Version(8, 0, 29))
     )
 );
-
-// ? Register Repositories
 builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
-
-// ? Add MVC
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
-
-// ? Configure HTTP pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

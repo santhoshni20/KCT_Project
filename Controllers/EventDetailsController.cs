@@ -16,13 +16,11 @@ namespace KSI_Project.Controllers
             _eventRepo = eventRepo;
         }
 
-        // Loads the Event Details page
         public IActionResult Index()
         {
             return View();
         }
 
-        // Save or Update Event
         [HttpPost]
         public async Task<IActionResult> SaveEvent([FromForm] EventDetailsDTO dto)
         {
@@ -31,21 +29,18 @@ namespace KSI_Project.Controllers
             return Json(new { success = result.success, message = result.message });
         }
 
-        // Delete Event
         [HttpPost]
         public async Task<ApiResponseDTO> DeleteEvent(int id, int updatedBy)
         {
             return await _eventRepo.DeleteEventAsync(id, updatedBy);
         }
 
-        // Get Today's Events
         [HttpGet]
         public async Task<ApiResponseDTO> GetTodaysEvents()
         {
             return await _eventRepo.GetTodaysEventsAsync();
         }
 
-        // Get Event By Id
         [HttpGet]
         public async Task<ApiResponseDTO> GetEventById(int id)
         {

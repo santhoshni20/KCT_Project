@@ -47,16 +47,11 @@ namespace KSI_Project.Repositories
                         {
                             return new SyllabusFile
                             {
-                                //Id = reader.GetInt32("Id"),
-                                //Batch = reader.GetString("Batch"),
-                                //DepartmentCode = reader.GetString("DepartmentCode"),
-                                //FileName = reader.GetString("FileName"),
-                                //FileData = (byte[])reader["FileData"]
-                                Id = reader.GetInt32(0),                    // 0 = first column
-                                Batch = reader.GetString(1),                // 1 = second column
-                                DepartmentCode = reader.GetString(2),       // 2 = third column
-                                FileName = reader.GetString(3),             // 3 = fourth column
-                                FileData = (byte[])reader[4]                // 5th column, use index or name
+                                Id = reader.GetInt32(0),                  
+                                Batch = reader.GetString(1),             
+                                DepartmentCode = reader.GetString(2),     
+                                FileName = reader.GetString(3),            
+                                FileData = (byte[])reader[4]         
                             };
                         }
                     }

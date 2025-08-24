@@ -27,7 +27,6 @@ namespace KSI_Project.Repository
 
             try
             {
-                // ✅ Handle file upload (if provided)
                 if (dto.BrochureFile != null && dto.BrochureFile.Length > 0)
                 {
                     var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
@@ -41,12 +40,9 @@ namespace KSI_Project.Repository
                     {
                         await dto.BrochureFile.CopyToAsync(stream);
                     }
-
-                    // Relative path for DB
                     imagePath = $"/uploads/{fileName}";
                 }
 
-                // ✅ Normalize date values — prevent DateTime.MinValue
                 DateTime? eventDate = (dto.EventDate.HasValue && dto.EventDate.Value.Year > 1900)
                     ? dto.EventDate
                     : null;
@@ -55,7 +51,7 @@ namespace KSI_Project.Repository
                     ? dto.DeadlineDate
                     : null;
 
-                if (dto.EventId == 0) // Insert
+                if (dto.EventId == 0) 
                 {
                     var newEvent = new EventDetails
                     {
@@ -68,14 +64,14 @@ namespace KSI_Project.Repository
                         ContactNumber = dto.ContactNumber?.Trim(),
                         Location = dto.Location?.Trim(),
                         CreatedBy = dto.CreatedBy,
-                        CreatedDate = DateTime.Now, // ✅ Always server-side
+                        CreatedDate = DateTime.Now, 
                         BrochureUrl = imagePath,
                         IsActive = true
                     };
 
                     await _context.EventDetails.AddAsync(newEvent);
                 }
-                else // Update
+                else 
                 {
                     var existingEvent = await _context.EventDetails
                         .FirstOrDefaultAsync(e => e.EventId == dto.EventId);
@@ -96,11 +92,10 @@ namespace KSI_Project.Repository
                     existingEvent.ContactNumber = dto.ContactNumber?.Trim();
                     existingEvent.Location = dto.Location?.Trim();
                     existingEvent.UpdatedBy = dto.UpdatedBy;
-                    existingEvent.UpdatedDate = DateTime.Now; // ✅ Always server-side
-                    if (imagePath != null) // Update image only if new file uploaded
+                    existingEvent.UpdatedDate = DateTime.Now;
+                    if (imagePath != null)
                         existingEvent.BrochureUrl = imagePath;
                 }
-
                 bool isSaved = await _context.SaveChangesAsync() > 0;
                 response.success = isSaved;
                 response.message = isSaved ? "Event saved successfully" : "No changes were made";
@@ -120,7 +115,6 @@ namespace KSI_Project.Repository
 
             return response;
         }
-
 
         public async Task<ApiResponseDTO> DeleteEventAsync(int id, int updatedBy)
         {
@@ -160,7 +154,6 @@ namespace KSI_Project.Repository
             {
                 var today = DateTime.Today;
 
-                // Get all events from today onwards (future events included)
                 var events = await _context.EventDetails
                     .Where(e => e.EventDate >= today)
                     .OrderBy(e => e.EventDate)
@@ -177,7 +170,6 @@ namespace KSI_Project.Repository
 
             return response;
         }
-
 
         public async Task<ApiResponseDTO> GetEventByIdAsync(int id)
         {

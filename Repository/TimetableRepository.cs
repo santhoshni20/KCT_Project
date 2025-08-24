@@ -15,7 +15,6 @@ namespace KCT_Project.Repositories
             _context = context;
         }
 
-        // Fetch timetable for given batch, department & day
         public ApiResponseDTO GetTimetable(string batch, string dept, string day)
         {
             var response = new ApiResponseDTO();
@@ -48,7 +47,6 @@ namespace KCT_Project.Repositories
             return response;
         }
 
-        // Add new timetable entry
         public ApiResponseDTO AddTimetable(Timetable timetable)
         {
             var response = new ApiResponseDTO();

@@ -1,12 +1,40 @@
-﻿using KSI_Project.Models;
-using KSI_Project.Models.Entity;
+﻿using KSI_Project.Interfaces;
 using KSI_Project.Models.DTOs;
-using KSI_Project.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using KSI_Project.Repository;
+using System;
+using System.Threading.Tasks;
 
-namespace KCT_Project.Controllers
+namespace KSI_Project.Controllers
 {
-    public class PlacementSupportController
+    public class PlacementSupportController : Controller
     {
+        private readonly IPlacementSupportRepository _PlacementSupportRepository;
+
+        public PlacementSupportController(IPlacementSupportRepository PlacementSupportRepository)
+        {
+            _PlacementSupportRepository = PlacementSupportRepository;
+        }
+
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
+        }
+        //[HttpPost]
+        //public IActionResult GetDetails(string RollNo)
+        //{
+
+        //    var user = _context.Users.FirstOrDefault(u => u.RollNo == RollNo);
+
+        //    if (user == null)
+        //    {
+        //        ViewBag.Message = "No details found for this Roll No.";
+        //        return View("FacultySupport");
+        //    }
+
+        //    return View("FacultySupport", user);
+        //}
+
     }
 }

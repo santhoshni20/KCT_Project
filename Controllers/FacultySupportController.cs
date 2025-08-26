@@ -3,16 +3,17 @@ using KSI_Project.Models;
 using KSI_Project.Models.Entity;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Repositories;
+using KSI_Project.Interfaces;
 
 namespace KSI_Project.Controllers
 {
     public class FacultySupportController : Controller
     {
-        private readonly ISyllabusRepository _syllabusRepository;
+        private readonly IFacultySupportRepository _FacultySupportRepository;
 
-        public FacultySupportController(ISyllabusRepository syllabusRepository)
+        public FacultySupportController(IFacultySupportRepository FacultySupportRepository)
         {
-            _syllabusRepository = syllabusRepository;
+            _FacultySupportRepository = FacultySupportRepository;
         }
 
         [HttpGet]

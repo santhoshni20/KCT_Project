@@ -4,22 +4,38 @@ using Microsoft.AspNetCore.Mvc;
 using KSI_Project.Repository;
 using System;
 using System.Threading.Tasks;
+using KCT_Project.Interfaces;
+using KCT_Project.Models.Entity;
 
-namespace KSI_Project.Controllers
+namespace KCT_Project.Controllers
 {
     public class PlacementSupportController : Controller
     {
-        private readonly IPlacementSupportRepository _PlacementSupportRepository;
+        private readonly IPlacementSupportRepository _repository;
 
-        public PlacementSupportController(IPlacementSupportRepository PlacementSupportRepository)
+        public PlacementSupportController(IPlacementSupportRepository repository)
         {
-            _PlacementSupportRepository = PlacementSupportRepository;
+            _repository = repository;
         }
 
         [HttpGet]
         public IActionResult Index()
         {
             return View();
+        }
+
+        [HttpPost]
+        public IActionResult GetDetails(string RollNo)
+        {
+            AlumniDetails details = _repository.GetAlumniDetailsByRollNo(RollNo);
+
+            if (details == null)
+            {
+                ViewBag.Message = "No record found for Roll No: " + RollNo;
+                return View("Index");
+            }
+
+            return View("Index", details);
         }
     }
 }

@@ -1,11 +1,11 @@
-﻿using KSI_Project.Models.DTOs;
+﻿using KCT_Project.Models.Entity;
+using KSI_Project.Models.DTOs;
 using System.Threading.Tasks;
 
-namespace KSI_Project.Interfaces
+namespace KCT_Project.Interfaces
 {
     public interface IPlacementSupportRepository
     {
-        // Define contract methods, e.g.:
-        Task<IEnumerable<string>> GetFacultyDetailsAsync();
+        AlumniDetails GetAlumniDetailsByRollNo(string rollNo);
     }
 }

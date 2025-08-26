@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace KSI_Project.Models
 {
@@ -12,3 +13,12 @@ namespace KSI_Project.Models
         public byte[] FileData { get; set; }
     }
 }
+
+//CREATE TABLE SyllabusFile (
+//    Id INT AUTO_INCREMENT PRIMARY KEY,
+//    Batch VARCHAR(50) NOT NULL,
+//    DepartmentCode VARCHAR(50) NOT NULL,
+//    FileName VARCHAR(255) NOT NULL,
+//    FileData LONGBLOB NOT NULL
+//);
+

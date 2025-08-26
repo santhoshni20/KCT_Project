@@ -11,5 +11,6 @@ namespace KSI_Project.Helpers.DbContexts
 
         public DbSet<EventDetails> EventDetails { get; set; }
         public DbSet<Timetable> Timetables { get; set; }
+        public DbSet<AlumniDetails> AlumniDetails { get; set; }
     }
 }

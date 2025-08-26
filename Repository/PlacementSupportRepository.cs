@@ -1,4 +1,6 @@
-﻿using KSI_Project.Helpers.DbContexts;
+﻿using KCT_Project.Interfaces;
+using KCT_Project.Models.Entity;
+using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
 using KSI_Project.Models;
 using KSI_Project.Models.DTOs;
@@ -9,13 +11,20 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KSI_Project.Repositories
+namespace KCT_Project.Repositories
 {
     public class PlacementSupportRepository : IPlacementSupportRepository
     {
-        public async Task<IEnumerable<string>> GetFacultyDetailsAsync()
+        private readonly kctDbContext _context;
+
+        public PlacementSupportRepository(kctDbContext context)
         {
-            return new List<string> { "Faculty1", "Faculty2" };
+            _context = context;
+        }
+
+        public AlumniDetails GetAlumniDetailsByRollNo(string rollNo)
+        {
+            return _context.AlumniDetails.FirstOrDefault(a => a.RollNo == rollNo);
         }
     }
 }

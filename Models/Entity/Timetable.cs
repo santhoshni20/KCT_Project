@@ -1,4 +1,6 @@
-﻿namespace KCT_Project.Models.Entity
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace KCT_Project.Models.Entity
 {
     public class Timetable
     {
@@ -10,3 +12,12 @@
         public string? Day { get; set; }
     }
 }
+
+//CREATE TABLE Timetable (
+//    Id INT AUTO_INCREMENT PRIMARY KEY,
+//    Batch VARCHAR(50) NULL,
+//    Department VARCHAR(100) NULL,
+//    HourNo INT NOT NULL,
+//    Subject VARCHAR(100) NULL,
+//    Day VARCHAR(20) NULL
+//);

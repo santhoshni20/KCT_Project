@@ -1,1 +1,74 @@
-﻿
+﻿@{
+    ViewData["Title"] = "Faculty Support";
+}
+
+<!-- Modal for Teacher Appointment -->
+<div class="modal fade" id="teacherModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-4">
+            <h4 class="mb-4">Book Teacher Appointment</h4>
+            <form id="teacherForm">
+                <div class="mb-3">
+                    <label>Teacher ID</label>
+                    <input type="text" class="form-control" name="teacherId" required />
+                </div>
+                <div class="mb-3">
+                    <label>Name</label>
+                    <input type="text" class="form-control" name="name" required />
+                </div>
+                <div class="mb-3">
+                    <label>Expertise</label>
+                    <input type="text" class="form-control" name="expertise" required />
+                </div>
+                <div class="mb-3">
+                    <label>Contact</label>
+                    <input type="text" class="form-control" name="contact" required />
+                </div>
+                <div class="mb-3">
+                    <label>Designation</label>
+                    <input type="text" class="form-control" name="designation" required />
+                </div>
+
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" id="bookAppointment" name="bookAppointment">
+                    <label class="form-check-label" for="bookAppointment">Book Appointment</label>
+                </div>
+
+                <button type="submit" class="btn btn-success">Save Appointment</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Handle submit
+        $('#teacherForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = {
+                TeacherId: $('[name="teacherId"]').val(),
+                Name: $('[name="name"]').val(),
+                Expertise: $('[name="expertise"]').val(),
+                Contact: $('[name="contact"]').val(),
+                Designation: $('[name="designation"]').val(),
+                BookAppointment: $('#bookAppointment').is(':checked')
+            };
+
+            $.ajax({
+                url: '/FacultySupport/SaveAppointment', // <-- adjust controller endpoint
+                type: 'POST',
+                data: formData,
+                success: function (res) {
+                    if (res.success) {
+                        $('#teacherModal').modal('hide');
+                        $('#teacherForm')[0].reset();
+                        alert("Appointment saved successfully!");
+                    } else {
+                        alert(res.message || "Failed to save appointment.");
+                    }
+                }
+            });
+        });
+    });
+</script>

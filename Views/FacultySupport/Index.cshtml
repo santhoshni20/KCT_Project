@@ -7,59 +7,53 @@
 <div class="container mt-5">
     <h2 class="mb-4">User Details Form</h2>
 
-    <form method="post" asp-action="SaveDetails">
-        <!-- Roll Number -->
+    <!-- Step 1: Enter Roll Number -->
+    <form method="post" asp-action="GetDetails">
         <div class="mb-3">
             <label for="RollNo" class="form-label">Roll No</label>
             <input type="text" class="form-control" id="RollNo" name="RollNo" placeholder="Enter Roll No" required />
         </div>
+        <button type="submit" class="btn btn-primary">Get Details</button>
+    </form>
 
+    @if (Model != null)
+    {
         <h4 class="mt-4">Details:</h4>
         <hr />
 
-        <!-- Name -->
         <div class="mb-3">
-            <label for="Name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="Name" name="Name" placeholder="Enter Name" required />
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" value="@Model.Name" readonly />
         </div>
 
-        <!-- Designation -->
         <div class="mb-3">
-            <label for="Designation" class="form-label">Designation</label>
-            <input type="text" class="form-control" id="Designation" name="Designation" placeholder="Enter Designation" required />
+            <label class="form-label">Designation</label>
+            <input type="text" class="form-control" value="@Model.Designation" readonly />
         </div>
 
-        <!-- Company -->
         <div class="mb-3">
-            <label for="Company" class="form-label">Company</label>
-            <input type="text" class="form-control" id="Company" name="Company" placeholder="Enter Company Name" required />
+            <label class="form-label">Company</label>
+            <input type="text" class="form-control" value="@Model.Company" readonly />
         </div>
 
-        <!-- Package -->
         <div class="mb-3">
-            <label for="Package" class="form-label">Package</label>
-            <input type="text" class="form-control" id="Package" name="Package" placeholder="Enter Package" />
+            <label class="form-label">Package</label>
+            <input type="text" class="form-control" value="@Model.Package" readonly />
         </div>
 
-        <!-- Expertise -->
         <div class="mb-3">
-            <label for="Expertise" class="form-label">Expertise</label>
-            <input type="text" class="form-control" id="Expertise" name="Expertise" placeholder="Enter Expertise" />
+            <label class="form-label">Expertise</label>
+            <input type="text" class="form-control" value="@Model.Expertise" readonly />
         </div>
 
-        <!-- Contact -->
         <div class="mb-3">
-            <label for="Contact" class="form-label">Contact</label>
-            <input type="text" class="form-control" id="Contact" name="Contact" placeholder="Enter Contact Number" />
+            <label class="form-label">Contact</label>
+            <input type="text" class="form-control" value="@Model.Contact" readonly />
         </div>
 
-        <!-- Personal Mail ID -->
         <div class="mb-3">
-            <label for="Email" class="form-label">Personal Mail ID</label>
-            <input type="email" class="form-control" id="Email" name="Email" placeholder="Enter Email" />
+            <label class="form-label">Personal Mail ID</label>
+            <input type="text" class="form-control" value="@Model.Email" readonly />
         </div>
-
-        <!-- Submit -->
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+    }
 </div>

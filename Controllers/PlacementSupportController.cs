@@ -21,20 +21,5 @@ namespace KSI_Project.Controllers
         {
             return View();
         }
-        //[HttpPost]
-        //public IActionResult GetDetails(string RollNo)
-        //{
-
-        //    var user = _context.Users.FirstOrDefault(u => u.RollNo == RollNo);
-
-        //    if (user == null)
-        //    {
-        //        ViewBag.Message = "No details found for this Roll No.";
-        //        return View("FacultySupport");
-        //    }
-
-        //    return View("FacultySupport", user);
-        //}
-
     }
 }

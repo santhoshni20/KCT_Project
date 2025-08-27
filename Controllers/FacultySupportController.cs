@@ -14,6 +14,12 @@ namespace KSI_Project.Controllers
             _repository = repository;
         }
 
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> SaveOrUpdateAppointment(FacultyDetails facultySupport)
         {

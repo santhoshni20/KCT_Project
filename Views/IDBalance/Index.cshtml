@@ -1,5 +1,116 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Student Details";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+
+<style>
+    .detail-card {
+        background: #2c2c2c;
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        margin-bottom: 20px;
+    }
+
+        .detail-card h5 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+    .balance-box {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #4caf50;
+    }
+
+    .bills-history {
+        max-height: 200px;
+        overflow-y: auto;
+        background: #1e1e1e;
+        border-radius: 10px;
+        padding: 10px;
+        border: 1px solid #444;
+    }
+
+        .bills-history li {
+            padding: 5px;
+            border-bottom: 1px solid #333;
+            font-size: 0.95rem;
+        }
+</style>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Student Details</h2>
+
+    <!-- Input for Roll Number -->
+    <div class="mb-3">
+        <label class="form-label">Enter Roll Number</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="rollNoInput" placeholder="Enter Roll No" />
+            <button class="btn btn-primary" id="fetchBtn"><i class="fas fa-search"></i> Fetch</button>
+        </div>
+    </div>
+
+    <!-- Display Section -->
+    <div id="studentDetailsContainer" style="display:none;">
+        <div class="detail-card">
+            <h5>Name</h5>
+            <p id="studentName">-</p>
+        </div>
+
+        <div class="detail-card">
+            <h5>Balance</h5>
+            <p class="balance-box">₹ <span id="studentBalance">0.00</span></p>
+        </div>
+
+        <div class="detail-card">
+            <h5>Bills History</h5>
+            <ul class="bills-history" id="billsHistoryList">
+                <!-- Bills will be listed here -->
+            </ul>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#fetchBtn').click(function () {
+                let rollNo = $('#rollNoInput').val().trim();
+                if (!rollNo) {
+                    alert("Please enter a Roll Number");
+                    return;
+                }
+
+                $.get('/Student/GetDetails?rollNo=' + rollNo, function (res) {
+                    if (res && res.success) {
+                        $('#studentName').text(res.data.name || "-");
+                        $('#studentBalance').text(res.data.balance.toFixed(2));
+
+                        let billsHtml = '';
+                        if (res.data.billsHistory && res.data.billsHistory.length > 0) {
+                            res.data.billsHistory.forEach(bill => {
+                                billsHtml += `<li>₹ ${bill.amount} - ${bill.date}</li>`;
+                            });
+                        } else {
+                            billsHtml = "<li>No bills found</li>";
+                        }
+                        $('#billsHistoryList').html(billsHtml);
+
+                        $('#studentDetailsContainer').show();
+                    } else {
+                        alert(res.message || "Student not found");
+                        $('#studentDetailsContainer').hide();
+                    }
+                });
+            });
+        });
+    </script>
 }

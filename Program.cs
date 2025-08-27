@@ -18,6 +18,7 @@ builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 builder.Services.AddScoped<IFacultySupportRepository, FacultySupportRepository>();
 builder.Services.AddScoped<IPlacementSupportRepository, PlacementSupportRepository>();
+builder.Services.AddScoped<IIDBalanceRepository, IDBalanceRepository>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

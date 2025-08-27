@@ -1,11 +1,7 @@
 ﻿using KSI_Project.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using KSI_Project.Repository;
-using System;
 using System.Threading.Tasks;
-using KSI_Project.Models;
 using KSI_Project.Models.Entity;
-
 
 namespace KSI_Project.Controllers
 {
@@ -19,19 +15,19 @@ namespace KSI_Project.Controllers
         }
 
         [HttpPost]
-        public async Task<bool> SaveAppointment(FacultyDetails facultySupport)
+        public async Task<IActionResult> SaveOrUpdateAppointment(FacultyDetails facultySupport)
         {
             if (!ModelState.IsValid)
             {
                 return Json(new { success = false, message = "Invalid input data." });
             }
 
-            bool result = await _repository.SaveAppointmentAsync(facultySupport);
+            bool result = await _repository.SaveOrUpdateAppointmentAsync(facultySupport);
 
             if (result)
-                return Json(new { success = true });
+                return Json(new { success = true, message = "Appointment saved successfully." });
             else
-                return Json(new { success = false, message = "Failed to save appointment." });
+                return Json(new { success = false, message = "Failed to save or update appointment." });
         }
 
         [HttpGet]
@@ -39,6 +35,13 @@ namespace KSI_Project.Controllers
         {
             var appointments = await _repository.GetAllAppointmentsAsync();
             return Json(new { success = true, data = appointments });
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAppointment(int id)
+        {
+            await _repository.DeleteAppointmentAsync(id);
+            return Json(new { success = true, message = "Appointment deleted successfully." });
         }
     }
 }

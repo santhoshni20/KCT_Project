@@ -8,11 +8,7 @@ namespace KSI_Project.Interfaces
     {
         Task<IEnumerable<FacultyDetails>> GetAllAppointmentsAsync();
         Task<FacultyDetails> GetAppointmentByIdAsync(int id);
-        Task AddAppointmentAsync(FacultyDetails faculty);
-        Task UpdateAppointmentAsync(FacultyDetails faculty);
+        Task<bool> SaveOrUpdateAppointmentAsync(FacultyDetails faculty);
         Task DeleteAppointmentAsync(int id);
-
-        // Changed to return Task<bool>
-        Task<bool> SaveAppointmentAsync(FacultyDetails facultySupport);
     }
 }

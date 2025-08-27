@@ -1,11 +1,8 @@
 ﻿using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
-using KSI_Project.Models;
-using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,16 +27,34 @@ namespace KSI_Project.Repository
             return await _context.FacultyDetails.FirstOrDefaultAsync(f => f.Id == id);
         }
 
-        public async Task AddAppointmentAsync(FacultyDetails faculty)
+        /// <summary>
+        /// Save new or update existing appointment
+        /// </summary>
+        public async Task<bool> SaveOrUpdateAppointmentAsync(FacultyDetails faculty)
         {
-            await _context.FacultyDetails.AddAsync(faculty);
-            await _context.SaveChangesAsync();
-        }
+            if (faculty == null) return false;
 
-        public async Task UpdateAppointmentAsync(FacultyDetails faculty)
-        {
-            _context.FacultyDetails.Update(faculty);
+            if (faculty.Id == 0) // New record
+            {
+                await _context.FacultyDetails.AddAsync(faculty);
+            }
+            else // Update existing
+            {
+                var existing = await _context.FacultyDetails.FirstOrDefaultAsync(f => f.Id == faculty.Id);
+                if (existing == null) return false;
+
+                // Update fields
+                existing.TeacherId = faculty.TeacherId;
+                existing.Name = faculty.Name;
+                existing.Expertise = faculty.Expertise;
+                existing.Contact = faculty.Contact;
+                existing.Designation = faculty.Designation;
+                existing.BookAppointment = faculty.BookAppointment;
+                // Add other properties as per your FacultyDetails model
+            }
+
             await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task DeleteAppointmentAsync(int id)

@@ -11,8 +11,8 @@ namespace KSI_Project.Interfaces
         Task AddAppointmentAsync(FacultyDetails faculty);
         Task UpdateAppointmentAsync(FacultyDetails faculty);
         Task DeleteAppointmentAsync(int id);
-        //Task SaveAppointmentAsync(FacultyDetails facultySupport);
-        Task<bool> SaveAppointmentAsync(FacultyDetails facultySupport);
 
+        // Changed to return Task<bool>
+        Task<bool> SaveAppointmentAsync(FacultyDetails facultySupport);
     }
 }

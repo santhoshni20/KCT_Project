@@ -89,7 +89,7 @@
                     return;
                 }
 
-                $.get('/Student/GetDetails?rollNo=' + rollNo, function (res) {
+                $.get('/IDBalance/GetDetails?rollNo=' + rollNo, function (res) {
                     if (res && res.success) {
                         $('#studentName').text(res.data.name || "-");
                         $('#studentBalance').text(res.data.balance.toFixed(2));

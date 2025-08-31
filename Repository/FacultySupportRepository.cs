@@ -17,54 +17,130 @@ namespace KSI_Project.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<FacultyDetails>> GetAllAppointmentsAsync()
+        public async Task<ApiResponseDTO> SaveOrUpdateFacultySupportAsync(FacultyDetails faculty)
         {
-            return await _context.FacultyDetails.ToListAsync();
-        }
+            var response = new ApiResponseDTO();
 
-        public async Task<FacultyDetails> GetAppointmentByIdAsync(int id)
-        {
-            return await _context.FacultyDetails.FirstOrDefaultAsync(f => f.Id == id);
-        }
-
-        /// <summary>
-        /// Save new or update existing appointment
-        /// </summary>
-        public async Task<bool> SaveOrUpdateAppointmentAsync(FacultyDetails faculty)
-        {
-            if (faculty == null) return false;
-
-            if (faculty.Id == 0) // New record
+            try
             {
-                await _context.FacultyDetails.AddAsync(faculty);
+                if (faculty == null)
+                {
+                    response.success = false;
+                    response.message = "Invalid input data";
+                    return response;
+                }
+
+                if (faculty.Id == 0) // New record
+                {
+                    await _context.FacultyDetails.AddAsync(faculty);
+                }
+                else // Update existing
+                {
+                    var existing = await _context.FacultyDetails.FirstOrDefaultAsync(f => f.Id == faculty.Id);
+                    if (existing == null)
+                    {
+                        response.success = false;
+                        response.message = "Faculty support record not found";
+                        return response;
+                    }
+
+                    // Update fields
+                    existing.TeacherId = faculty.TeacherId;
+                    existing.Name = faculty.Name?.Trim();
+                    existing.Expertise = faculty.Expertise?.Trim();
+                    existing.Contact = faculty.Contact?.Trim();
+                    existing.Designation = faculty.Designation?.Trim();
+                    existing.BookAppointment = faculty.BookAppointment;
+                }
+
+                bool isSaved = await _context.SaveChangesAsync() > 0;
+                response.success = isSaved;
+                response.message = isSaved ? "Faculty support saved successfully" : "No changes were made";
             }
-            else // Update existing
+            catch (Exception ex)
             {
-                var existing = await _context.FacultyDetails.FirstOrDefaultAsync(f => f.Id == faculty.Id);
-                if (existing == null) return false;
-
-                // Update fields
-                existing.TeacherId = faculty.TeacherId;
-                existing.Name = faculty.Name;
-                existing.Expertise = faculty.Expertise;
-                existing.Contact = faculty.Contact;
-                existing.Designation = faculty.Designation;
-                existing.BookAppointment = faculty.BookAppointment;
-                // Add other properties as per your FacultyDetails model
+                response.success = false;
+                response.message = $"Error saving faculty support: {ex.Message}";
             }
 
-            await _context.SaveChangesAsync();
-            return true;
+            return response;
         }
 
-        public async Task DeleteAppointmentAsync(int id)
+        public async Task<ApiResponseDTO> DeleteFacultySupportAsync(int id)
         {
-            var faculty = await _context.FacultyDetails.FirstOrDefaultAsync(f => f.Id == id);
-            if (faculty != null)
+            var response = new ApiResponseDTO();
+
+            try
             {
+                var faculty = await _context.FacultyDetails.FirstOrDefaultAsync(f => f.Id == id);
+
+                if (faculty == null)
+                {
+                    response.success = false;
+                    response.message = "Faculty support record not found";
+                    return response;
+                }
+
                 _context.FacultyDetails.Remove(faculty);
                 await _context.SaveChangesAsync();
+
+                response.success = true;
+                response.message = "Faculty support deleted successfully";
             }
+            catch (Exception ex)
+            {
+                response.success = false;
+                response.message = $"Error deleting faculty support: {ex.Message}";
+            }
+
+            return response;
+        }
+
+        public async Task<ApiResponseDTO> GetAllFacultySupportAsync()
+        {
+            var response = new ApiResponseDTO();
+
+            try
+            {
+                var facultyList = await _context.FacultyDetails.ToListAsync();
+                response.success = true;
+                response.data = facultyList;
+            }
+            catch (Exception ex)
+            {
+                response.success = false;
+                response.message = $"Error fetching faculty support: {ex.Message}";
+            }
+
+            return response;
+        }
+
+        public async Task<ApiResponseDTO> GetFacultySupportByIdAsync(int id)
+        {
+            var response = new ApiResponseDTO();
+
+            try
+            {
+                var faculty = await _context.FacultyDetails.FirstOrDefaultAsync(f => f.Id == id);
+
+                if (faculty == null)
+                {
+                    response.success = false;
+                    response.message = "Faculty support record not found";
+                }
+                else
+                {
+                    response.success = true;
+                    response.data = faculty;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.success = false;
+                response.message = $"Error fetching faculty support: {ex.Message}";
+            }
+
+            return response;
         }
     }
 }

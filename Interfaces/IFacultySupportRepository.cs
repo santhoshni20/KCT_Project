@@ -6,9 +6,9 @@ namespace KSI_Project.Interfaces
 {
     public interface IFacultySupportRepository
     {
-        Task<IEnumerable<FacultyDetails>> GetAllAppointmentsAsync();
-        Task<FacultyDetails> GetAppointmentByIdAsync(int id);
-        Task<bool> SaveOrUpdateAppointmentAsync(FacultyDetails faculty);
-        Task DeleteAppointmentAsync(int id);
+        Task<ApiResponseDTO> SaveOrUpdateFacultySupportAsync(FacultyDetails faculty);
+        Task<ApiResponseDTO> DeleteFacultySupportAsync(int id);
+        Task<ApiResponseDTO> GetAllFacultySupportAsync();
+        Task<ApiResponseDTO> GetFacultySupportByIdAsync(int id);
     }
 }

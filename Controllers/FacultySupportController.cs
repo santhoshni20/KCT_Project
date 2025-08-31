@@ -8,47 +8,41 @@ namespace KSI_Project.Controllers
 {
     public class FacultySupportController : Controller
     {
-        private readonly IFacultySupportRepository _repository;
+        private readonly IFacultySupportRepository _facultyRepo;
 
-        public FacultySupportController(IFacultySupportRepository repository)
+        public FacultySupportController(IFacultySupportRepository facultyRepo)
         {
-            _repository = repository;
+            _facultyRepo = facultyRepo;
         }
 
-        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveOrUpdateAppointment(FacultyDetails facultySupport)
+        public async Task<IActionResult> SaveFacultySupport([FromForm] FacultyDetails faculty)
         {
-            if (!ModelState.IsValid)
-            {
-                return Json(new { success = false, message = "Invalid input data." });
-            }
+            var result = await _facultyRepo.SaveOrUpdateFacultySupportAsync(faculty);
+            return Json(new { success = result.success, message = result.message });
+        }
 
-            bool result = await _repository.SaveOrUpdateAppointmentAsync(facultySupport);
-
-            if (result)
-                return Json(new { success = true, message = "Appointment saved successfully." });
-            else
-                return Json(new { success = false, message = "Failed to save or update appointment." });
+        [HttpPost]
+        public async Task<ApiResponseDTO> DeleteFacultySupport(int id)
+        {
+            return await _facultyRepo.DeleteFacultySupportAsync(id);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAppointments()
+        public async Task<ApiResponseDTO> GetAllFacultySupport()
         {
-            var appointments = await _repository.GetAllAppointmentsAsync();
-            return Json(new { success = true, data = appointments });
+            return await _facultyRepo.GetAllFacultySupportAsync();
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAppointment(int id)
+        [HttpGet]
+        public async Task<ApiResponseDTO> GetFacultySupportById(int id)
         {
-            await _repository.DeleteAppointmentAsync(id);
-            return Json(new { success = true, message = "Appointment deleted successfully." });
+            return await _facultyRepo.GetFacultySupportByIdAsync(id);
         }
     }
 }

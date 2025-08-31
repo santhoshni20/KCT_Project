@@ -16,6 +16,12 @@ namespace KSI_Project.Controllers
         }
 
         [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetDetails(string rollNo)
         {
             if (string.IsNullOrEmpty(rollNo))

@@ -1,5 +1,6 @@
-﻿using KSI_Project.Models.DTOs;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using KSI_Project.Models.Entity;
+using KSI_Project.Models.DTOs;
 
 namespace KSI_Project.Repositories
 {

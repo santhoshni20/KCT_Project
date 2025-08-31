@@ -1,4 +1,4 @@
-﻿namespace KCT_Project.Interfaces
+﻿namespace KSI_Project.Interfaces
 {
     public interface ICanteenDetailsRepository
     {

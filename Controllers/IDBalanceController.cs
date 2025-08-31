@@ -1,11 +1,11 @@
-﻿using KCT_Project.Interfaces;
-using KCT_Project.Models.DTOs;
+﻿using KSI_Project.Interfaces;
+using KSI_Project.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using KCT_Project.Repository;
+using KSI_Project.Repository;
 using System;
 using System.Threading.Tasks;
 
-namespace KCT_Project.Controllers
+namespace KSI_Project.Controllers
 {
     public class IDBalanceController : Controller
     {

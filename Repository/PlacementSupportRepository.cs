@@ -1,23 +1,23 @@
-﻿using KCT_Project.Interfaces;
-using KCT_Project.Models.Entity;
-using KCT_Project.Helpers.DbContexts;
-using KCT_Project.Interfaces;
-using KCT_Project.Models;
-using KCT_Project.Models.DTOs;
-using KCT_Project.Models.Entity;
+﻿using KSI_Project.Interfaces;
+using KSI_Project.Models.Entity;
+using KSI_Project.Helpers.DbContexts;
+using KSI_Project.Interfaces;
+using KSI_Project.Models;
+using KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KCT_Project.Repositories
+namespace KSI_Project.Repositories
 {
     public class PlacementSupportRepository : IPlacementSupportRepository
     {
-        private readonly kctDbContext _context;
+        private readonly ksiDbContext _context;
 
-        public PlacementSupportRepository(kctDbContext context)
+        public PlacementSupportRepository(ksiDbContext context)
         {
             _context = context;
         }

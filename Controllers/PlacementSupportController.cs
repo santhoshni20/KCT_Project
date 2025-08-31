@@ -4,10 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using KSI_Project.Repository;
 using System;
 using System.Threading.Tasks;
-using KCT_Project.Interfaces;
-using KCT_Project.Models.Entity;
+using KSI_Project.Models.Entity;
 
-namespace KCT_Project.Controllers
+namespace KSI_Project.Controllers
 {
     public class PlacementSupportController : Controller
     {

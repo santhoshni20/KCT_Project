@@ -1,13 +1,13 @@
 ﻿using KSI_Project.Helpers.DbContexts;
-using KCT_Project.Interfaces;
-using KCT_Project.Models.Entity;
+using KSI_Project.Interfaces;
+using KSI_Project.Models.Entity;
 using KSI_Project.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KCT_Project.Repositories
+namespace KSI_Project.Repositories
 {
     public class TimetableRepository : ITimetableRepository
     {

@@ -1,8 +1,8 @@
 ﻿using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
 using KSI_Project.Models;
-using KCT_Project.Models.DTOs;
-using KCT_Project.Models.Entity;
+using KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;

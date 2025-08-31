@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using KCT_Project.Models;
+using KSI_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KCT_Project.Controllers
+namespace KSI_Project.Controllers
 {
     public class HomeController : Controller
     {

@@ -1,4 +1,4 @@
-﻿using KCT_Project.Models.Entity;
+﻿using KSI_Project.Models.Entity;
 using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;

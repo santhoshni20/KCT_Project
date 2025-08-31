@@ -1,10 +1,10 @@
-﻿using KCT_Project.Interfaces;
-using KCT_Project.Models.Entity;
+﻿using KSI_Project.Interfaces;
+using KSI_Project.Models.Entity;
 using KSI_Project.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace KCT_Project.Controllers
+namespace KSI_Project.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

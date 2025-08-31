@@ -3,9 +3,6 @@ using KSI_Project.Models.Entity;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Repositories;
 using Microsoft.AspNetCore.Mvc;
-//using Microsoft.AspNetCore.Http;
-//using System.IO;
-//using System.Threading.Tasks;
 
 namespace KSI_Project.Controllers
 {

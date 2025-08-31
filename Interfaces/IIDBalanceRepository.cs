@@ -1,8 +1,8 @@
-﻿using KCT_Project.Models.DTOs;
-using KCT_Project.Models.Entity;
+﻿using KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
 using System.Threading.Tasks;
 
-namespace KCT_Project.Interfaces
+namespace KSI_Project.Interfaces
 {
     public interface IIDBalanceRepository
     {

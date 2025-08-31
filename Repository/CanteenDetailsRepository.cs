@@ -1,4 +1,4 @@
-﻿namespace KCT_Project.Repositories
+﻿namespace KSI_Project.Repositories
 {
     public class CanteenDetailsRepository
     {

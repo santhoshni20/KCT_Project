@@ -1,4 +1,4 @@
-namespace KCT_Project.Models
+namespace KSI_Project.Models
 {
     public class ErrorViewModel
     {

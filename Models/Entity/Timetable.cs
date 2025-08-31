@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace KCT_Project.Models.Entity
+namespace KSI_Project.Models.Entity
 {
     public class Timetable
     {

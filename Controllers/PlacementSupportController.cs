@@ -8,31 +8,22 @@ namespace KSI_Project.Controllers
 {
     public class PlacementSupportController : Controller
     {
-        private readonly IPlacementSupportRepository _repository;
+        private readonly IPlacementSupportRepository _placementRepo;
 
-        public PlacementSupportController(IPlacementSupportRepository repository)
+        public PlacementSupportController(IPlacementSupportRepository placementRepo)
         {
-            _repository = repository;
+            _placementRepo = placementRepo;
         }
 
-        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
-        [HttpPost]
-        public IActionResult GetDetails(string RollNo)
+        [HttpGet]
+        public async Task<ApiResponseDTO> GetAlumniDetails(string rollNo)
         {
-            AlumniDetails details = _repository.GetAlumniDetailsByRollNo(RollNo);
-
-            if (details == null)
-            {
-                ViewBag.Message = "No record found for Roll No: " + RollNo;
-                return View("Index");
-            }
-
-            return View("Index", details);
+            return await _placementRepo.GetAlumniDetailsByRollNoAsync(rollNo);
         }
     }
 }

@@ -6,7 +6,7 @@ using KSI_Project.Models.DTOs;
 using KSI_Project.Interfaces;
 using KSI_Project.Helpers.DbContexts;
 
-namespace KSI_Project.Repositories
+namespace KSI_Project.Repository
 {
     public class PlacementSupportRepository : IPlacementSupportRepository
     {
@@ -17,9 +17,32 @@ namespace KSI_Project.Repositories
             _context = context;
         }
 
-        public AlumniDetails GetAlumniDetailsByRollNo(string rollNo)
+        public async Task<ApiResponseDTO> GetAlumniDetailsByRollNoAsync(string rollNo)
         {
-            return _context.AlumniDetails.FirstOrDefault(a => a.RollNo == rollNo);
+            var response = new ApiResponseDTO();
+
+            try
+            {
+                var alumni = await _context.AlumniDetails.FirstOrDefaultAsync(a => a.RollNo == rollNo);
+
+                if (alumni == null)
+                {
+                    response.success = false;
+                    response.message = $"No record found for Roll No: {rollNo}";
+                }
+                else
+                {
+                    response.success = true;
+                    response.data = alumni;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.success = false;
+                response.message = $"Error fetching alumni details: {ex.Message}";
+            }
+
+            return response;
         }
     }
 }

@@ -6,6 +6,6 @@ namespace KSI_Project.Interfaces
 {
     public interface IPlacementSupportRepository
     {
-        AlumniDetails GetAlumniDetailsByRollNo(string rollNo);
+        Task<ApiResponseDTO> GetAlumniDetailsByRollNoAsync(string rollNo);
     }
 }

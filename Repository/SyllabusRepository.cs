@@ -7,7 +7,7 @@ using KSI_Project.Interfaces;
 using KSI_Project.Helpers.DbContexts;
 using MySql.Data.MySqlClient;
 
-namespace KSI_Project.Repositories
+namespace KSI_Project.Repository
 {
     public class SyllabusRepository : ISyllabusRepository
     {
@@ -26,16 +26,21 @@ namespace KSI_Project.Repositories
                 using (var conn = new MySqlConnection(_connectionString))
                 {
                     await conn.OpenAsync();
-                    string query = "INSERT INTO syllabus_files (Batch, DepartmentCode, FileName, FileData) VALUES (@Batch, @Dept, @FileName, @FileData)";
+                    string query = @"INSERT INTO syllabus_files 
+                                    (Batch, DepartmentCode, FileName, FileData) 
+                                    VALUES (@Batch, @Dept, @FileName, @FileData)";
                     using (var cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@Batch", file.Batch);
                         cmd.Parameters.AddWithValue("@Dept", file.DepartmentCode);
                         cmd.Parameters.AddWithValue("@FileName", file.FileName);
                         cmd.Parameters.AddWithValue("@FileData", file.FileData);
+
                         var rowsAffected = await cmd.ExecuteNonQueryAsync();
                         response.success = rowsAffected > 0;
-                        response.message = rowsAffected > 0 ? "Syllabus uploaded successfully" : "No changes were made";
+                        response.message = rowsAffected > 0
+                            ? "Syllabus uploaded successfully"
+                            : "No changes were made";
                     }
                 }
             }
@@ -55,7 +60,9 @@ namespace KSI_Project.Repositories
                 using (var conn = new MySqlConnection(_connectionString))
                 {
                     await conn.OpenAsync();
-                    string query = "SELECT Id, Batch, DepartmentCode, FileName, FileData FROM syllabus_files WHERE Batch=@Batch AND DepartmentCode=@Dept LIMIT 1";
+                    string query = @"SELECT Id, Batch, DepartmentCode, FileName, FileData 
+                                    FROM syllabus_files 
+                                    WHERE Batch=@Batch AND DepartmentCode=@Dept LIMIT 1";
                     using (var cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@Batch", batch);
@@ -73,6 +80,7 @@ namespace KSI_Project.Repositories
                                     FileName = reader.GetString(3),
                                     FileData = (byte[])reader[4]
                                 };
+
                                 response.success = true;
                                 response.data = syllabusFile;
                                 response.message = "Syllabus file fetched successfully";

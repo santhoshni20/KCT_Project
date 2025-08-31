@@ -4,6 +4,11 @@ using KSI_Project.Models.DTOs;
 using KSI_Project.Interfaces;
 using KSI_Project.Repositories;
 
+using Microsoft.AspNetCore.Mvc;
+using KSI_Project.Models.Entity;
+using KSI_Project.Models.DTOs;
+using KSI_Project.Interfaces;
+
 namespace KSI_Project.Controllers
 {
     public class SyllabusController : Controller
@@ -22,10 +27,16 @@ namespace KSI_Project.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file, string batch, string dept)
+        public async Task<ApiResponseDTO> UploadSyllabus(IFormFile file, string batch, string dept)
         {
             if (file == null || file.Length == 0)
-                return BadRequest("File is empty!");
+            {
+                return new ApiResponseDTO
+                {
+                    success = false,
+                    message = "File is empty!"
+                };
+            }
 
             using (var ms = new MemoryStream())
             {
@@ -38,25 +49,24 @@ namespace KSI_Project.Controllers
                     FileData = ms.ToArray()
                 };
 
-                ApiResponseDTO response = await _syllabusRepository.UploadAsync(syllabusFile);
-
-                if (!response.success)
-                    return StatusCode(StatusCodes.Status500InternalServerError, response.message);
+                return await _syllabusRepository.UploadAsync(syllabusFile);
             }
-
-            return Ok("File uploaded successfully!");
         }
 
         [HttpGet]
-        public async Task<IActionResult> Download(string batch, string dept)
+        public async Task<IActionResult> DownloadSyllabus(string batch, string dept)
         {
-            ApiResponseDTO response = await _syllabusRepository.GetFileAsync(batch, dept);
+            var response = await _syllabusRepository.GetFileAsync(batch, dept);
 
             if (!response.success || response.data == null)
+            {
                 return NotFound(response.message ?? "Syllabus not found for this selection.");
+            }
 
             if (response.data is not SyllabusFile syllabusFile)
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Invalid data received.");
+            }
 
             return File(syllabusFile.FileData, "application/pdf", syllabusFile.FileName);
         }

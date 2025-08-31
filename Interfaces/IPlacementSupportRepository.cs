@@ -1,5 +1,4 @@
-﻿using KSI_Project.Models.Entity;
-using KSI_Project.Models.DTOs;
+﻿using KSI_Project.Models.DTOs;
 using System.Threading.Tasks;
 
 namespace KSI_Project.Interfaces

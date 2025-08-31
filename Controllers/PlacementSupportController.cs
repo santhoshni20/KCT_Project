@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using KSI_Project.Repository;
 using System;
 using System.Threading.Tasks;
-using KSI_Project.Models.Entity;
 
 namespace KSI_Project.Controllers
 {

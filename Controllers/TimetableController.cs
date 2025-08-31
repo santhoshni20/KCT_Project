@@ -1,7 +1,8 @@
 ﻿using KSI_Project.Interfaces;
-using KSI_Project.Models.Entity;
 using KSI_Project.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using KSI_Project.Repository;
+using System;
 using System.Threading.Tasks;
 
 namespace KSI_Project.Controllers

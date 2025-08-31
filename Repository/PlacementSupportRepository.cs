@@ -1,6 +1,4 @@
-﻿using KSI_Project.Interfaces;
-using KSI_Project.Models.Entity;
-using KSI_Project.Helpers.DbContexts;
+﻿using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
 using KSI_Project.Models;
 using KSI_Project.Models.DTOs;

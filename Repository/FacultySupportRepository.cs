@@ -10,9 +10,9 @@ namespace KSI_Project.Repository
 {
     public class FacultySupportRepository : IFacultySupportRepository
     {
-        private readonly kctDbContext _context;
+        private readonly ksiDbContext _context;
 
-        public FacultySupportRepository(kctDbContext context)
+        public FacultySupportRepository(ksiDbContext context)
         {
             _context = context;
         }

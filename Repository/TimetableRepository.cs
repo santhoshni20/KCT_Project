@@ -11,9 +11,9 @@ namespace KCT_Project.Repositories
 {
     public class TimetableRepository : ITimetableRepository
     {
-        private readonly kctDbContext _context;
+        private readonly ksiDbContext _context;
 
-        public TimetableRepository(kctDbContext context)
+        public TimetableRepository(ksiDbContext context)
         {
             _context = context;
         }

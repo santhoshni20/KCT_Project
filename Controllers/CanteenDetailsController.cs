@@ -1,4 +1,4 @@
-﻿namespace KCT_Project.Controllers
+﻿namespace KSI_Project.Controllers
 {
     public class CanteenDetailsController
     {

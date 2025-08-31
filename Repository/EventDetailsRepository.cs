@@ -13,9 +13,9 @@ namespace KSI_Project.Repository
 {
     public class EventDetailsRepository : IEventDetailsRepository
     {
-        private readonly kctDbContext _context;
+        private readonly ksiDbContext _context;
 
-        public EventDetailsRepository(kctDbContext context)
+        public EventDetailsRepository(ksiDbContext context)
         {
             _context = context;
         }

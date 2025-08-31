@@ -7,7 +7,7 @@ using KSI_Project.Repository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<kctDbContext>(options =>
+builder.Services.AddDbContext<ksiDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("MySQLConnectionString"),
         new MySqlServerVersion(new Version(8, 0, 29))
@@ -18,7 +18,6 @@ builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 builder.Services.AddScoped<IFacultySupportRepository, FacultySupportRepository>();
 builder.Services.AddScoped<IPlacementSupportRepository, PlacementSupportRepository>();
-//builder.Services.AddScoped<IIDBalanceRepository, IDBalanceRepository>();
 builder.Services.AddScoped<IIDBalanceRepository, IDBalanceRepository>();
 builder.Services.AddControllersWithViews();
 

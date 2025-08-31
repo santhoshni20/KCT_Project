@@ -8,11 +8,11 @@ namespace KSI_Project.Controllers
 {
     public class IDBalanceController : Controller
     {
-        private readonly IIDBalanceRepository _repository;
+        private readonly IIDBalanceRepository _idBalanceRepository;
 
-        public IDBalanceController(IIDBalanceRepository repository)
+        public IDBalanceController(IIDBalanceRepository idBalanceRepository)
         {
-            _repository = repository;
+            _idBalanceRepository = idBalanceRepository;
         }
 
         [HttpGet]
@@ -29,7 +29,7 @@ namespace KSI_Project.Controllers
                 return Json(new { success = false, message = "Roll Number is required" });
             }
 
-            var student = await _repository.GetStudentByRollNoAsync(rollNo);
+            var student = await _idBalanceRepository.GetStudentByRollNoAsync(rollNo);
 
             if (student == null)
             {

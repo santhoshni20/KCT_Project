@@ -6,7 +6,6 @@ namespace KSI_Project.Interfaces
 {
     public interface IIDBalanceRepository
     {
-        Task <Student?> GetStudentByRollNoAsync(string rollNo);
+        Task<Student?> GetStudentByRollNoAsync(string rollNo);
     }
 }
- 

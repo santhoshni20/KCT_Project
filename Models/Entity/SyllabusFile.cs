@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http.HttpResults;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace KSI_Project.Models
+namespace KSI_Project.Models.Entity
 {
     public class SyllabusFile
     {

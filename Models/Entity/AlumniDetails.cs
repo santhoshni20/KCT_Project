@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using System.ComponentModel.DataAnnotations;    
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KSI_Project.Models.Entity
 {

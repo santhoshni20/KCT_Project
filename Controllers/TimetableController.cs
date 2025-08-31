@@ -6,44 +6,49 @@ using KSI_Project.Repositories;
 
 namespace KSI_Project.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
     public class TimetableController : Controller
     {
-        private readonly ITimetableRepository _repository;
+        private readonly ITimetableRepository _timetableRepository;
 
-        public TimetableController(ITimetableRepository repository)
+        public TimetableController(ITimetableRepository timetableRepository)
         {
-            _repository = repository;
+            _timetableRepository = timetableRepository;
         }
 
         [HttpGet]
-        [Route("")]
         public IActionResult Index()
         {
-            return View(); 
+            return View();
         }
 
-        [HttpGet("get")]
-        public async Task<IActionResult> Get(string batch, string dept, string day)
+        [HttpGet("GetByDay")]
+        public async Task<ApiResponseDTO> GetByDay(string batch, string dept, string day)
         {
-            var response = await _repository.GetTimetableAsync(batch, dept, day);
-
-            if (!response.success)
-                return BadRequest(response);
-
-            return Ok(response);
+            return await _timetableRepository.GetByDayAsync(batch, dept, day);
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> Add([FromBody] Timetable timetable)
+        [HttpPost("SaveOrUpdate")]
+        public async Task<ApiResponseDTO> SaveOrUpdate([FromBody] Timetable timetable)
         {
-            var response = await _repository.AddTimetableAsync(timetable);
+            return await _timetableRepository.SaveOrUpdateAsync(timetable);
+        }
 
-            if (!response.success)
-                return BadRequest(response);
+        [HttpDelete("Delete/{id}")]
+        public async Task<ApiResponseDTO> Delete(int id)
+        {
+            return await _timetableRepository.DeleteAsync(id);
+        }
 
-            return Ok(response);
+        [HttpGet("GetAll")]
+        public async Task<ApiResponseDTO> GetAll()
+        {
+            return await _timetableRepository.GetAllAsync();
+        }
+
+        [HttpGet("GetById/{id}")]
+        public async Task<ApiResponseDTO> GetById(int id)
+        {
+            return await _timetableRepository.GetByIdAsync(id);
         }
     }
 }

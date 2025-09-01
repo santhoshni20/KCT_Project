@@ -14,5 +14,6 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<AlumniDetails> AlumniDetails { get; set; }
         public DbSet<FacultyDetails> FacultyDetails { get; set; }
         public DbSet<Student> Students { get; set; }
+        public DbSet<SyllabusFile> SyllabusFiles { get; set; }
     }
 }

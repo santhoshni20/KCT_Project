@@ -16,7 +16,6 @@ namespace KSI_Project.Repository
         {
             _context = context;
         }
-
         public async Task<ApiResponseDTO> GetAlumniDetailsByRollNoAsync(string rollNo)
         {
             var response = new ApiResponseDTO();

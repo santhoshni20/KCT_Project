@@ -23,7 +23,8 @@ namespace KSI_Project.Repository
 
             try
             {
-                var alumni = await _context.AlumniDetails.FirstOrDefaultAsync(a => a.RollNo == rollNo);
+                var alumni = await _context.AlumniDetails
+                    .FirstOrDefaultAsync(a => a.RollNo.ToLower() == rollNo.ToLower());
 
                 if (alumni == null)
                 {
@@ -44,5 +45,6 @@ namespace KSI_Project.Repository
 
             return response;
         }
+
     }
 }

@@ -2,7 +2,7 @@
 using KSI_Project.Models.Entity;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Interfaces;
-using KSI_Project.Repositories;
+using KSI_Project.Repository;
 
 using Microsoft.AspNetCore.Mvc;
 using KSI_Project.Models.Entity;
@@ -27,30 +27,26 @@ namespace KSI_Project.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponseDTO> UploadSyllabus(IFormFile file, string batch, string dept)
+        public async Task<ApiResponseDTO> UploadSyllabus(string batch, string dept, string fileName, string fileUrl)
         {
-            if (file == null || file.Length == 0)
+            if (string.IsNullOrEmpty(fileUrl))
             {
                 return new ApiResponseDTO
                 {
                     success = false,
-                    message = "File is empty!"
+                    message = "File URL is empty!"
                 };
             }
 
-            using (var ms = new MemoryStream())
+            var syllabusFile = new SyllabusFile
             {
-                await file.CopyToAsync(ms);
-                var syllabusFile = new SyllabusFile
-                {
-                    Batch = batch,
-                    DepartmentCode = dept,
-                    FileName = file.FileName,
-                    FileData = ms.ToArray()
-                };
+                Batch = batch,
+                DepartmentCode = dept,
+                FileName = fileName,
+                FileURL = fileUrl
+            };
 
-                return await _syllabusRepository.UploadAsync(syllabusFile);
-            }
+            return await _syllabusRepository.UploadAsync(syllabusFile);
         }
 
         [HttpGet]
@@ -68,7 +64,8 @@ namespace KSI_Project.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Invalid data received.");
             }
 
-            return File(syllabusFile.FileData, "application/pdf", syllabusFile.FileName);
+            // Instead of returning a file, redirect to FileURL
+            return Redirect(syllabusFile.FileURL);
         }
     }
 }

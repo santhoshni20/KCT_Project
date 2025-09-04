@@ -6,10 +6,6 @@ namespace KSI_Project.Interfaces
 {
     public interface ITimetableRepository
     {
-        Task<ApiResponseDTO> SaveOrUpdateAsync(Timetable timetable);
-        Task<ApiResponseDTO> DeleteAsync(int id);
-        Task<ApiResponseDTO> GetAllAsync();
-        Task<ApiResponseDTO> GetByIdAsync(int id);
-        Task<ApiResponseDTO> GetByDayAsync(string batch, string dept, string day);
+        Task<ApiResponseDTO> GetTimetableByDayAsync(string batch, string dept, string day);
     }
 }

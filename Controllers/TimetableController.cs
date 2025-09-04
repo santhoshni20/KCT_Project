@@ -6,49 +6,20 @@ using KSI_Project.Repositories;
 
 namespace KSI_Project.Controllers
 {
+    [Route("[controller]")]
     public class TimetableController : Controller
     {
-        private readonly ITimetableRepository _timetableRepository;
+        private readonly ITimetableRepository _timetableRepo;
 
-        public TimetableController(ITimetableRepository timetableRepository)
+        public TimetableController(ITimetableRepository timetableRepo)
         {
-            _timetableRepository = timetableRepository;
-        }
-
-        [HttpGet]
-        public IActionResult Index()
-        {
-            return View();
+            _timetableRepo = timetableRepo;
         }
 
         [HttpGet("GetByDay")]
         public async Task<ApiResponseDTO> GetByDay(string batch, string dept, string day)
         {
-            return await _timetableRepository.GetByDayAsync(batch, dept, day);
-        }
-
-        [HttpPost("SaveOrUpdate")]
-        public async Task<ApiResponseDTO> SaveOrUpdate([FromBody] Timetable timetable)
-        {
-            return await _timetableRepository.SaveOrUpdateAsync(timetable);
-        }
-
-        [HttpDelete("Delete/{id}")]
-        public async Task<ApiResponseDTO> Delete(int id)
-        {
-            return await _timetableRepository.DeleteAsync(id);
-        }
-
-        [HttpGet("GetAll")]
-        public async Task<ApiResponseDTO> GetAll()
-        {
-            return await _timetableRepository.GetAllAsync();
-        }
-
-        [HttpGet("GetById/{id}")]
-        public async Task<ApiResponseDTO> GetById(int id)
-        {
-            return await _timetableRepository.GetByIdAsync(id);
+            return await _timetableRepo.GetTimetableByDayAsync(batch, dept, day);
         }
     }
 }

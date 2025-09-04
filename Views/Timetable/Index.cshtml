@@ -153,7 +153,7 @@
             const day = this.value;
 
             if (batch && dept && day) {
-                fetch(`/api/timetable/get?batch=${batch}&dept=${dept}&day=${day}`)
+                fetch(`/Timetable/GetByDay?batch=${batch}&dept=${dept}&day=${day}`)
                     .then(response => response.json())
                     .then(resp => {
                         timetableBody.innerHTML = "";

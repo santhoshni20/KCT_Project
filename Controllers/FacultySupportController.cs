@@ -1,48 +1,29 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using KSI_Project.Models.Entity;
+﻿using KSI_Project.Interfaces;
 using KSI_Project.Models.DTOs;
-using KSI_Project.Interfaces;
+using KSI_Project.Models.DTOs.KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
 using KSI_Project.Repositories;
+using KSI_Project.Repository.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace KSI_Project.Controllers
 {
     public class FacultySupportController : Controller
     {
-        private readonly IFacultySupportRepository _facultyRepo;
+        private readonly IFacultySupportRepository _facultySupportRepository;
 
-        public FacultySupportController(IFacultySupportRepository facultyRepo)
+        public FacultySupportController(IFacultySupportRepository facultySupportRepository)
         {
-            _facultyRepo = facultyRepo;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
+            _facultySupportRepository = facultySupportRepository;
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveFacultySupport([FromForm] FacultyDetails faculty)
+        public async Task<IActionResult> SaveAppointment(FacultyAppointmentDto dto)
         {
-            var result = await _facultyRepo.SaveOrUpdateFacultySupportAsync(faculty);
-            return Json(new { success = result.success, message = result.message });
+            var response = await _facultySupportRepository.SaveAppointmentAsync(dto);
+            return Json(response);  // frontend expects JSON
         }
 
-        [HttpPost]
-        public async Task<ApiResponseDTO> DeleteFacultySupport(int id)
-        {
-            return await _facultyRepo.DeleteFacultySupportAsync(id);
-        }
-
-        [HttpGet]
-        public async Task<ApiResponseDTO> GetAllFacultySupport()
-        {
-            return await _facultyRepo.GetAllFacultySupportAsync();
-        }
-
-        [HttpGet]
-        public async Task<ApiResponseDTO> GetFacultySupportById(int id)
-        {
-            return await _facultyRepo.GetFacultySupportByIdAsync(id);
-        }
+        // You can also add a GET action to fetch teachers/appointments
     }
 }

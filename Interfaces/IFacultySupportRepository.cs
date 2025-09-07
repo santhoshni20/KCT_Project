@@ -1,14 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using KSI_Project.Models.DTOs;
+using KSI_Project.Models.DTOs.KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
-using KSI_Project.Models.DTOs;
+using System.Threading.Tasks;
 
-namespace KSI_Project.Interfaces
+namespace KSI_Project.Repository.Interfaces
 {
     public interface IFacultySupportRepository
     {
-        Task<ApiResponseDTO> SaveOrUpdateFacultySupportAsync(FacultyDetails faculty);
-        Task<ApiResponseDTO> DeleteFacultySupportAsync(int id);
-        Task<ApiResponseDTO> GetAllFacultySupportAsync();
-        Task<ApiResponseDTO> GetFacultySupportByIdAsync(int id);
+        Task<ApiResponseDTO> SaveAppointmentAsync(FacultyAppointmentDto dto);
     }
 }

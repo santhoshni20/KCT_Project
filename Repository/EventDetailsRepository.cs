@@ -1,199 +1,114 @@
-﻿using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using KSI_Project.Models.Entity;
-using KSI_Project.Models.DTOs;
+﻿using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
-using KSI_Project.Helpers.DbContexts;
+using KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
+using KSI_Project.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace KSI_Project.Repository
+namespace KSI_Project.Repository.Implementations
 {
-    public class EventDetailsRepository : IEventDetailsRepository
+    public class EventRepository : IEventRepository
     {
         private readonly ksiDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public EventDetailsRepository(ksiDbContext context)
+        public EventRepository(ksiDbContext context, IWebHostEnvironment env)
         {
             _context = context;
-        }
-
-        public async Task<ApiResponseDTO> SaveOrUpdateEventAsync(EventDetailsDTO dto)
-        {
-            var response = new ApiResponseDTO();
-            string imagePath = null;
-
-            try
-            {
-                if (dto.BrochureFile != null && dto.BrochureFile.Length > 0)
-                {
-                    var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                    if (!Directory.Exists(folderPath))
-                        Directory.CreateDirectory(folderPath);
-
-                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.BrochureFile.FileName)}";
-                    var fullPath = Path.Combine(folderPath, fileName);
-
-                    using (var stream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        await dto.BrochureFile.CopyToAsync(stream);
-                    }
-                    imagePath = $"/uploads/{fileName}";
-                }
-
-                DateTime? eventDate = (dto.EventDate.HasValue && dto.EventDate.Value.Year > 1900)
-                    ? dto.EventDate
-                    : null;
-
-                DateTime? deadlineDate = (dto.DeadlineDate.HasValue && dto.DeadlineDate.Value.Year > 1900)
-                    ? dto.DeadlineDate
-                    : null;
-
-                if (dto.EventId == 0) 
-                {
-                    var newEvent = new EventDetails
-                    {
-                        EventName = dto.EventName?.Trim(),
-                        EventDate = eventDate,
-                        DeadlineDate = deadlineDate,
-                        Description = dto.Description?.Trim(),
-                        Eligibility = dto.Eligibility?.Trim(),
-                        Division = dto.Division?.Trim(),
-                        ContactNumber = dto.ContactNumber?.Trim(),
-                        Location = dto.Location?.Trim(),
-                        CreatedBy = dto.CreatedBy,
-                        CreatedDate = DateTime.Now, 
-                        BrochureUrl = imagePath,
-                        IsActive = true
-                    };
-
-                    await _context.EventDetails.AddAsync(newEvent);
-                }
-                else 
-                {
-                    var existingEvent = await _context.EventDetails
-                        .FirstOrDefaultAsync(e => e.EventId == dto.EventId);
-
-                    if (existingEvent == null)
-                    {
-                        response.success = false;
-                        response.message = "Event not found";
-                        return response;
-                    }
-
-                    existingEvent.EventName = dto.EventName?.Trim();
-                    existingEvent.EventDate = eventDate;
-                    existingEvent.DeadlineDate = deadlineDate;
-                    existingEvent.Description = dto.Description?.Trim();
-                    existingEvent.Eligibility = dto.Eligibility?.Trim();
-                    existingEvent.Division = dto.Division?.Trim();
-                    existingEvent.ContactNumber = dto.ContactNumber?.Trim();
-                    existingEvent.Location = dto.Location?.Trim();
-                    existingEvent.UpdatedBy = dto.UpdatedBy;
-                    existingEvent.UpdatedDate = DateTime.Now;
-                    if (imagePath != null)
-                        existingEvent.BrochureUrl = imagePath;
-                }
-                bool isSaved = await _context.SaveChangesAsync() > 0;
-                response.success = isSaved;
-                response.message = isSaved ? "Event saved successfully" : "No changes were made";
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                if (ex.InnerException != null)
-                {
-                    Console.WriteLine(ex.InnerException.Message);
-                    if (ex.InnerException.InnerException != null)
-                    {
-                        Console.WriteLine(ex.InnerException.InnerException.Message);
-                    }
-                }
-            }
-
-            return response;
-        }
-
-        public async Task<ApiResponseDTO> DeleteEventAsync(int id, int updatedBy)
-        {
-            var response = new ApiResponseDTO();
-
-            try
-            {
-                var eventData = await _context.EventDetails.FirstOrDefaultAsync(e => e.EventId == id);
-
-                if (eventData == null)
-                {
-                    response.success = false;
-                    response.message = "Event not found";
-                    return response;
-                }
-
-                _context.EventDetails.Remove(eventData);
-                await _context.SaveChangesAsync();
-
-                response.success = true;
-                response.message = "Event deleted successfully";
-            }
-            catch (Exception ex)
-            {
-                response.success = false;
-                response.message = $"Error deleting event: {ex.Message}";
-            }
-
-            return response;
+            _env = env;
         }
 
         public async Task<ApiResponseDTO> GetTodaysEventsAsync()
         {
-            var response = new ApiResponseDTO();
-
             try
             {
                 var today = DateTime.Today;
 
-                var events = await _context.EventDetails
-                    .Where(e => e.EventDate >= today)
-                    .OrderBy(e => e.EventDate)
+                var events = await _context.Events
+                    .Where(e => e.EventDate.HasValue && e.EventDate.Value.Date == today)
+                    .Select(e => new EventDto
+                    {
+                        EventId = e.EventId,
+                        EventName = e.EventName,
+                        ContactNumber = e.ContactNumber,
+                        DeadlineDate = e.DeadlineDate,
+                        EventDate = e.EventDate,
+                        Eligibility = e.Eligibility,
+                        Description = e.Description,
+                        Location = e.Location,
+                        Division = e.Division,
+                        BrochureUrl = string.IsNullOrEmpty(e.BrochurePath) ? null : "/uploads/" + e.BrochurePath
+                    })
                     .ToListAsync();
 
-                response.success = true;
-                response.data = events;
+                return new ApiResponseDTO
+                {
+                    success = true,
+                    data = events
+                };
             }
             catch (Exception ex)
             {
-                response.success = false;
-                response.message = $"Error fetching events: {ex.Message}";
+                return new ApiResponseDTO { success = false, message = ex.Message };
             }
-
-            return response;
         }
 
-        public async Task<ApiResponseDTO> GetEventByIdAsync(int id)
+        public async Task<ApiResponseDTO> SaveEventAsync(EventDto dto, IFormFile brochureFile)
         {
-            var response = new ApiResponseDTO();
-
             try
             {
-                var eventDto = await _context.EventDetails.FirstOrDefaultAsync(e => e.EventId == id);
+                string brochureFileName = null;
 
-                if (eventDto == null)
+                if (brochureFile != null && brochureFile.Length > 0)
                 {
-                    response.success = false;
-                    response.message = "Event not found";
+                    var uploadsPath = Path.Combine(_env.WebRootPath, "uploads");
+                    if (!Directory.Exists(uploadsPath))
+                        Directory.CreateDirectory(uploadsPath);
+
+                    brochureFileName = Guid.NewGuid() + Path.GetExtension(brochureFile.FileName);
+                    var filePath = Path.Combine(uploadsPath, brochureFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await brochureFile.CopyToAsync(stream);
+                    }
+                }
+
+                var entity = new Event
+                {
+                    EventId = dto.EventId,
+                    EventName = dto.EventName,
+                    ContactNumber = dto.ContactNumber,
+                    DeadlineDate = dto.DeadlineDate,
+                    EventDate = dto.EventDate,
+                    Eligibility = dto.Eligibility,
+                    Description = dto.Description,
+                    Location = dto.Location,
+                    Division = dto.Division,
+                    BrochurePath = brochureFileName,
+                    CreatedBy = dto.CreatedBy,
+                    CreatedAt = DateTime.Now
+                };
+
+                if (dto.EventId == 0)
+                {
+                    _context.Events.Add(entity);
                 }
                 else
                 {
-                    response.success = true;
-                    response.data = eventDto;
+                    _context.Events.Update(entity);
                 }
+
+                await _context.SaveChangesAsync();
+
+                return new ApiResponseDTO { success = true, message = "Event saved successfully." };
             }
             catch (Exception ex)
             {
-                response.success = false;
-                response.message = $"Error fetching event: {ex.Message}";
+                return new ApiResponseDTO { success = false, message = ex.Message };
             }
-
-            return response;
         }
     }
 }

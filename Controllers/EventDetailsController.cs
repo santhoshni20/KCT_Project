@@ -1,49 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using KSI_Project.Models.Entity;
+﻿using KSI_Project.Interfaces;
 using KSI_Project.Models.DTOs;
-using KSI_Project.Interfaces;
+using KSI_Project.Models.Entity;
 using KSI_Project.Repositories;
+using KSI_Project.Repository.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace KSI_Project.Controllers
 {
     public class EventDetailsController : Controller
     {
-        private readonly IEventDetailsRepository _eventRepo;
+        private readonly IEventRepository _eventRepository;
 
-        public EventDetailsController(IEventDetailsRepository eventRepo)
+        public EventDetailsController(IEventRepository eventRepository)
         {
-            _eventRepo = eventRepo;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> SaveEvent([FromForm] EventDetailsDTO dto)
-        {
-            var result = await _eventRepo.SaveOrUpdateEventAsync(dto);
-
-            return Json(new { success = result.success, message = result.message });
-        }
-
-        [HttpPost]
-        public async Task<ApiResponseDTO> DeleteEvent(int id, int updatedBy)
-        {
-            return await _eventRepo.DeleteEventAsync(id, updatedBy);
+            _eventRepository = eventRepository;
         }
 
         [HttpGet]
-        public async Task<ApiResponseDTO> GetTodaysEvents()
+        public async Task<JsonResult> GetTodaysEvents()
         {
-            return await _eventRepo.GetTodaysEventsAsync();
+            var result = await _eventRepository.GetTodaysEventsAsync();
+            return Json(result);
         }
 
-        [HttpGet]
-        public async Task<ApiResponseDTO> GetEventById(int id)
+        [HttpPost]
+        public async Task<JsonResult> SaveEvent([FromForm] EventDto dto, IFormFile? brochureFile)
         {
-            return await _eventRepo.GetEventByIdAsync(id);
+            var result = await _eventRepository.SaveEventAsync(dto, brochureFile);
+            return Json(result);
         }
     }
 }

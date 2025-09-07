@@ -1,39 +1,23 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using KSI_Project.Models.Entity;
 
-namespace KSI_Project.Models.Entity
+namespace ksiProject.Models
 {
+    // 1. Student Table
     public class Student
     {
-        [Key]
-        public int Id { get; set; }
+        public int RollNo { get; set; }
+        public string Name { get; set; }
+        public string DeptSec { get; set; }
+        public DateTime? Dob { get; set; }
+        public string Contact { get; set; }
+        public string Addr { get; set; }
+        public byte[] Photo { get; set; }
+        public string CgId { get; set; }
+        public string FatherName { get; set; }
+        public string MotherName { get; set; }
+        public int AdmnNo { get; set; }
 
-        [Required]
-        public string RollNo { get; set; } = string.Empty;
-
-        [Required]
-        public string Name { get; set; } = string.Empty;
-
-        [Column(TypeName = "decimal(10,2)")]
-        public decimal Balance { get; set; }
-
-        // Navigation property
-        public List<TransactionHistory> Transactions { get; set; } = new List<TransactionHistory>();
-    }
-
-    public class TransactionHistory
-    {
-        [Key]
-        public int Id { get; set; }
-
-        [ForeignKey("Student")]
-        public int StudentId { get; set; }
-
-        public decimal Amount { get; set; }
-
-        public DateTime Date { get; set; }
-
-        // Navigation back to student
-        public Student? Student { get; set; }
+        public ICollection<PlacementDetail> Placements { get; set; }
+        public ICollection<IdBalance> IdBalances { get; set; }
     }
 }

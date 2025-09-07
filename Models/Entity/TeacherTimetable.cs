@@ -2,12 +2,10 @@
 
 namespace KSI_Project.Models.Entity
 {
-    public class Timetable
+    public class TeacherTimetable
     {
-        public string AcadYear { get; set; }
+        public int TeacId { get; set; }
         public string Day { get; set; }
-        public int Year { get; set; }
-        public string Section { get; set; }
         public string Hr1 { get; set; }
         public string Hr2 { get; set; }
         public string Hr3 { get; set; }
@@ -16,5 +14,7 @@ namespace KSI_Project.Models.Entity
         public string Hr6 { get; set; }
         public string Hr7 { get; set; }
         public string TtName { get; set; }
+
+        public Teacher Teacher { get; set; }
     }
 }

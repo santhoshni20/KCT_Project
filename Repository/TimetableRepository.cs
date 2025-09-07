@@ -120,7 +120,7 @@ namespace KSI_Project.Repository
             return response;
         }
 
-        public async Task<ApiResponseDTO> GetByDayAsync(string batch, string dept, string day)
+        public async Task<ApiResponseDTO> GetTimetableByDayAsync(string batch, string dept, string day)
         {
             var response = new ApiResponseDTO();
             try

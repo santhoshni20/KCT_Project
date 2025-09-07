@@ -10,7 +10,7 @@ namespace KSI_Project.Helpers.DbContexts
         public ksiDbContext(DbContextOptions<ksiDbContext> options) : base(options) { }
 
         public DbSet<EventDetails> EventDetails { get; set; }
-        public DbSet<Timetable> Timetables { get; set; }
+        public DbSet<Timetable> Timetable { get; set; }
         public DbSet<AlumniDetails> AlumniDetails { get; set; }
         public DbSet<FacultyDetails> FacultyDetails { get; set; }
         public DbSet<Student> Students { get; set; }

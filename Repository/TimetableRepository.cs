@@ -31,11 +31,11 @@ namespace KSI_Project.Repository
 
                 if (timetable.Id > 0)
                 {
-                    _context.Timetables.Update(timetable);
+                    _context.Timetable.Update(timetable);
                 }
                 else
                 {
-                    await _context.Timetables.AddAsync(timetable);
+                    await _context.Timetable.AddAsync(timetable);
                 }
 
                 var saved = await _context.SaveChangesAsync() > 0;
@@ -57,7 +57,7 @@ namespace KSI_Project.Repository
             var response = new ApiResponseDTO();
             try
             {
-                var timetable = await _context.Timetables.FindAsync(id);
+                var timetable = await _context.Timetable.FindAsync(id);
                 if (timetable == null)
                 {
                     response.success = false;
@@ -65,7 +65,7 @@ namespace KSI_Project.Repository
                     return response;
                 }
 
-                _context.Timetables.Remove(timetable);
+                _context.Timetable.Remove(timetable);
                 var deleted = await _context.SaveChangesAsync() > 0;
                 response.success = deleted;
                 response.message = deleted ? "Timetable deleted successfully." : "Failed to delete timetable.";
@@ -83,14 +83,14 @@ namespace KSI_Project.Repository
             var response = new ApiResponseDTO();
             try
             {
-                var timetables = await _context.Timetables.OrderBy(t => t.Batch).ToListAsync();
+                var timetable = await _context.Timetable.OrderBy(t => t.Batch).ToListAsync();
                 response.success = true;
-                response.data = timetables;
+                response.data = timetable;
             }
             catch (Exception ex)
             {
                 response.success = false;
-                response.message = $"Error fetching timetables: {ex.Message}";
+                response.message = $"Error fetching timetable: {ex.Message}";
             }
             return response;
         }
@@ -100,7 +100,7 @@ namespace KSI_Project.Repository
             var response = new ApiResponseDTO();
             try
             {
-                var timetable = await _context.Timetables.FindAsync(id);
+                var timetable = await _context.Timetable.FindAsync(id);
                 if (timetable != null)
                 {
                     response.success = true;
@@ -132,7 +132,7 @@ namespace KSI_Project.Repository
                     return response;
                 }
 
-                var timetable = await _context.Timetables
+                var timetable = await _context.Timetable
                     .Where(t => t.Batch == batch && t.Department == dept && t.Day == day)
                     .OrderBy(t => t.HourNo)
                     .ToListAsync();

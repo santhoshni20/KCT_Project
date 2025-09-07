@@ -7,6 +7,7 @@ using KSI_Project.Repositories;
 namespace KSI_Project.Controllers
 {
     [Route("[controller]")]
+
     public class TimetableController : Controller
     {
         private readonly ITimetableRepository _timetableRepo;
@@ -14,6 +15,11 @@ namespace KSI_Project.Controllers
         public TimetableController(ITimetableRepository timetableRepo)
         {
             _timetableRepo = timetableRepo;
+        }
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
         }
 
         [HttpGet("GetByDay")]

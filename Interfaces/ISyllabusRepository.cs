@@ -6,6 +6,6 @@ namespace KSI_Project.Interfaces
 {
     public interface ISyllabusRepository
     {
-        SyllabusDTO getSyllabusByBatchAndDept(int batch, string dept);
+        Task<SyllabusDTO> getSyllabusByBatchAndDeptAsync(string batch, string dept);
     }
 }

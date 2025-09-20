@@ -5,8 +5,4 @@ using System.Threading.Tasks;
 
 namespace KSI_Project.Repository.Interfaces
 {
-    public interface IFacultySupportRepository
-    {
-        Task<ApiResponseDTO> SaveAppointmentAsync(FacultyAppointmentDto dto);
-    }
 }

@@ -19,18 +19,18 @@ namespace KSI_Project.Repository
             this.dbContext = dbContext;
         }
 
-        public SyllabusDTO getSyllabusByBatchAndDept(int batch, string dept)
+        public async Task<SyllabusDTO> getSyllabusByBatchAndDeptAsync(string batch, string dept)
         {
-            var syllabus = (from s in dbContext.Syllabus
-                            join d in dbContext.Department
-                            on s.DepartmentID equals d.DepartmentID
-                            where d.DeptCode == dept && s.IsActive == true
-                            select new SyllabusDTO
-                            {
-                                syllabusId = s.SyllabusID,
-                                departmentId = s.DepartmentID,
-                                link = s.Link
-                            }).FirstOrDefault();
+            // Optimize query with join to department
+            var syllabus = await dbContext.Syllabi
+                .Where(s => s.isActive && s.department.departmentName.Contains(dept))
+                .Select(s => new SyllabusDTO
+                {
+                    syllabusId = s.syllabusId,
+                    departmentId = s.departmentId,
+                    link = s.link
+                })
+                .FirstOrDefaultAsync();
 
             return syllabus;
         }

@@ -4,11 +4,6 @@ using KSI_Project.Models.DTOs;
 using KSI_Project.Interfaces;
 using KSI_Project.Repository;
 
-using Microsoft.AspNetCore.Mvc;
-using KSI_Project.Models.Entity;
-using KSI_Project.Models.DTOs;
-using KSI_Project.Interfaces;
-
 namespace KSI_Project.Controllers
 {
     public class SyllabusController : Controller
@@ -21,34 +16,40 @@ namespace KSI_Project.Controllers
         }
 
         [HttpGet]
-        public IActionResult DownloadSyllabus(int batch, string dept)
+        public async Task<IActionResult> DownloadSyllabus(string batch, string dept)
         {
             var response = new APIResponseDTO();
 
             try
             {
-                var syllabus = syllabusRepository.getSyllabusByBatchAndDept(batch, dept);
+                if (string.IsNullOrEmpty(batch) || string.IsNullOrEmpty(dept))
+                {
+                    response.StatusCode = 400;
+                    response.Message = "Batch and department are required.";
+                    return BadRequest(response);
+                }
+
+                var syllabus = await syllabusRepository.getSyllabusByBatchAndDeptAsync(batch, dept);
 
                 if (syllabus == null)
                 {
-                    response.statusCode = 404;
-                    response.message = "Syllabus not found for selected batch and department";
-                    response.data = null;
+                    response.StatusCode = 404;
+                    response.Message = "Syllabus not found.";
                     return NotFound(response);
                 }
 
-                response.statusCode = 200;
-                response.message = "Syllabus retrieved successfully";
-                response.data = syllabus;
+                response.StatusCode = 200;
+                response.Message = "Syllabus retrieved successfully.";
+                response.Data = syllabus;
 
-                // Redirect user to PDF link
+                // Redirect user to syllabus PDF link from DB
                 return Redirect(syllabus.link);
             }
             catch (Exception ex)
             {
-                response.statusCode = 500;
-                response.message = "An error occurred while retrieving syllabus";
-                response.errorDetails = ex.Message;
+                response.StatusCode = 500;
+                response.Message = "An error occurred while fetching syllabus.";
+                response.ErrorDetails = ex.Message;
                 return StatusCode(500, response);
             }
         }

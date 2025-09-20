@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using KSI_Project.Models.Entity;
-using KSI_Project.Models.DTOs;
+﻿using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
-using KSI_Project.Helpers.DbContexts;
+using KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
+using static KSI_Project.Models.DTOs.StudentTimetableDTO;
 
 namespace KSI_Project.Repository
 {
@@ -17,145 +18,72 @@ namespace KSI_Project.Repository
             _context = context;
         }
 
-        public async Task<ApiResponseDTO> SaveOrUpdateAsync(Timetable timetable)
+        public async Task<StudentTimetableResponseDTO> SaveAsync(StudentTimetableRequestDTO requestDto)
         {
-            var response = new ApiResponseDTO();
-            try
+            StudentTimetable entity;
+
+            if (requestDto.TimetableID == 0) // Insert
             {
-                if (timetable == null)
+                entity = new StudentTimetable
                 {
-                    response.success = false;
-                    response.message = "Invalid timetable data.";
-                    return response;
-                }
+                    DepartmentID = requestDto.DepartmentID,
+                    Section = requestDto.Section,
+                    Day = requestDto.Day,
+                    HourNumber = requestDto.HourNumber,
+                    Subject = requestDto.Subject,
+                    CreatedBy = requestDto.CreatedBy,
+                    CreatedDate = DateTime.UtcNow,
+                    IsActive = true
+                };
 
-                if (timetable.Id > 0)
-                {
-                    _context.Timetable.Update(timetable);
-                }
-                else
-                {
-                    await _context.Timetable.AddAsync(timetable);
-                }
-
-                var saved = await _context.SaveChangesAsync() > 0;
-                response.success = saved;
-                response.data = timetable;
-                response.message = saved ? "Timetable saved successfully." : "No changes made.";
+                _context.StudentTimetables.Add(entity);
             }
-            catch (Exception ex)
+            else // Update
             {
-                response.success = false;
-                response.message = $"Error saving timetable: {ex.Message}";
+                entity = await _context.StudentTimetables
+                    .FirstOrDefaultAsync(t => t.TimetableID == requestDto.TimetableID && t.IsActive);
+
+                if (entity == null) throw new Exception("Timetable entry not found.");
+
+                entity.DepartmentID = requestDto.DepartmentID;
+                entity.Section = requestDto.Section;
+                entity.Day = requestDto.Day;
+                entity.HourNumber = requestDto.HourNumber;
+                entity.Subject = requestDto.Subject;
+                entity.UpdatedBy = requestDto.CreatedBy;
+                entity.UpdatedDate = DateTime.UtcNow;
+
+                _context.StudentTimetables.Update(entity);
             }
 
-            return response;
+            await _context.SaveChangesAsync();
+
+            return new StudentTimetableResponseDTO
+            {
+                TimetableID = entity.TimetableID,
+                DepartmentID = entity.DepartmentID,
+                Section = entity.Section,
+                Day = entity.Day,
+                HourNumber = entity.HourNumber,
+                Subject = entity.Subject
+            };
         }
 
-        public async Task<ApiResponseDTO> DeleteAsync(int id)
+        public async Task<List<StudentTimetableResponseDTO>> GetByDayAsync(string batch, string dept, string section, string day)
         {
-            var response = new ApiResponseDTO();
-            try
-            {
-                var timetable = await _context.Timetable.FindAsync(id);
-                if (timetable == null)
+            return await _context.StudentTimetables
+                .Where(t => t.IsActive && t.Day == day && t.Section == section)
+                .Select(t => new StudentTimetableResponseDTO
                 {
-                    response.success = false;
-                    response.message = "Timetable entry not found.";
-                    return response;
-                }
-
-                _context.Timetable.Remove(timetable);
-                var deleted = await _context.SaveChangesAsync() > 0;
-                response.success = deleted;
-                response.message = deleted ? "Timetable deleted successfully." : "Failed to delete timetable.";
-            }
-            catch (Exception ex)
-            {
-                response.success = false;
-                response.message = $"Error deleting timetable: {ex.Message}";
-            }
-            return response;
-        }
-
-        public async Task<ApiResponseDTO> GetAllAsync()
-        {
-            var response = new ApiResponseDTO();
-            try
-            {
-                var timetable = await _context.Timetable.OrderBy(t => t.Batch).ToListAsync();
-                response.success = true;
-                response.data = timetable;
-            }
-            catch (Exception ex)
-            {
-                response.success = false;
-                response.message = $"Error fetching timetable: {ex.Message}";
-            }
-            return response;
-        }
-
-        public async Task<ApiResponseDTO> GetByIdAsync(int id)
-        {
-            var response = new ApiResponseDTO();
-            try
-            {
-                var timetable = await _context.Timetable.FindAsync(id);
-                if (timetable != null)
-                {
-                    response.success = true;
-                    response.data = timetable;
-                }
-                else
-                {
-                    response.success = false;
-                    response.message = "Timetable entry not found.";
-                }
-            }
-            catch (Exception ex)
-            {
-                response.success = false;
-                response.message = $"Error fetching timetable: {ex.Message}";
-            }
-            return response;
-        }
-
-        public async Task<ApiResponseDTO> GetTimetableByDayAsync(string batch, string dept, string day)
-        {
-            var response = new ApiResponseDTO();
-            try
-            {
-                if (string.IsNullOrEmpty(batch) || string.IsNullOrEmpty(dept) || string.IsNullOrEmpty(day))
-                {
-                    response.success = false;
-                    response.message = "Batch, Department, and Day are required.";
-                    return response;
-                }
-
-                var timetable = await _context.Timetable
-                    .Where(t => t.Batch == batch && t.Department == dept && t.Day == day)
-                    .OrderBy(t => t.HourNo)
-                    .ToListAsync();
-
-                if (!timetable.Any())
-                {
-                    response.success = false;
-                    response.message = "No timetable found for the selected day.";
-                }
-                else
-                {
-                    response.success = true;
-                    response.data = timetable;
-                    response.message = "Timetable fetched successfully.";
-                }
-            }
-            catch (Exception ex)
-            {
-                response.success = false;
-                response.message = $"Error fetching timetable: {ex.Message}";
-            }
-
-            return response;
+                    TimetableID = t.TimetableID,
+                    DepartmentID = t.DepartmentID,
+                    Section = t.Section,
+                    Day = t.Day,
+                    HourNumber = t.HourNumber,
+                    Subject = t.Subject
+                })
+                .OrderBy(t => t.HourNumber)
+                .ToListAsync();
         }
     }
 }

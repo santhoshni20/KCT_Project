@@ -1,10 +1,11 @@
 ﻿namespace KSI_Project.Models.DTOs
 {
-    public class ApiResponseDTO
+    public class APIResponseDTO
     {
-        public bool success { get; set; } = true;
-        public string message { get; set; } = "Success";
-        public object data { get; set; }
+        public int StatusCode { get; set; }
+        public string Message { get; set; }
+        public object Data { get; set; }
+        public string ErrorDetails { get; set; }
     }
 }
 

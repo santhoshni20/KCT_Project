@@ -6,5 +6,6 @@ namespace KSI_Project.Interfaces
 {
     public interface ICGPACalculationRepository
     {
+        CgpaResponseDTO CalculateSgpa(CgpaRequestDTO requestDto);
     }
 }

@@ -14,7 +14,10 @@ namespace KSI_Project.Controllers
     public class EventDetailsController : Controller
     {
         private readonly IEventDetailsRepository _eventDetailsRepository;
-
+        public IActionResult Index()
+        {
+            return View();
+        }
         public EventDetailsController(IEventDetailsRepository eventDetailsRepository)
         {
             _eventDetailsRepository = eventDetailsRepository;

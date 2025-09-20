@@ -14,7 +14,10 @@ namespace KSI_Project.Controllers
         {
             this.syllabusRepository = syllabusRepository;
         }
-
+        public IActionResult Index()
+        {
+            return View();
+        }
         [HttpGet]
         public async Task<IActionResult> DownloadSyllabus(string batch, string dept)
         {

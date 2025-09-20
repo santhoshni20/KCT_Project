@@ -5,6 +5,9 @@ using KSI_Project.Interfaces;
 using KSI_Project.Repositories;
 using KSI_Project.Repository;
 using Microsoft.EntityFrameworkCore;
+using KSI_Project.Repository.Interfaces;
+using KSI_Project.Repository.Implementations;
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ksiDbContext>(options =>
@@ -13,7 +16,8 @@ builder.Services.AddDbContext<ksiDbContext>(options =>
         new MySqlServerVersion(new Version(8, 0, 29))
     )
 );
-//builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
+builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
+builder.Services.AddScoped<ICGPACalculationRepository, CGPACalculationRepository>();
 builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 //builder.Services.AddScoped<IFacultySupportRepository, FacultySupportRepository>();

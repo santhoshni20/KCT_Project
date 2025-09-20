@@ -6,15 +6,19 @@ using KSI_Project.Repositories;
 
 namespace KSI_Project.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class CgpaController : ControllerBase
+    [Route("[controller]")]
+    public class CgpaController : Controller
     {
         private readonly ICGPACalculationRepository _cgpaRepository;
-
+        
         public CgpaController(ICGPACalculationRepository cgpaRepository)
         {
             _cgpaRepository = cgpaRepository;
+        }
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
         }
 
         [HttpPost("calculate")]

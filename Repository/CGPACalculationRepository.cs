@@ -9,7 +9,7 @@ using KSI_Project.Helpers;
 
 namespace KSI_Project.Repositories
 {
-    public class CGPACalculationRepository
+    public class CGPACalculationRepository : ICGPACalculationRepository
     {
         public CgpaResponseDTO CalculateSgpa(CgpaRequestDTO requestDto)
         {
@@ -17,7 +17,10 @@ namespace KSI_Project.Repositories
 
             if (requestDto.Courses != null && requestDto.Courses.Count > 0)
             {
-                var gradePoints = requestDto.Courses.Select(c => ConvertGradeToPoint(c.Grade)).ToList();
+                var gradePoints = requestDto.Courses
+                    .Select(c => ConvertGradeToPoint(c.Grade))
+                    .ToList();
+
                 sgpa = gradePoints.Average();
             }
 

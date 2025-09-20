@@ -17,7 +17,10 @@ namespace KSI_Project.Controllers
         {
             _timetableRepo = timetableRepo;
         }
-
+        public IActionResult Index()
+        {
+            return View();
+        }
         [HttpPost("Save")]
         public async Task<ActionResult<APIResponseDTO>> Save([FromForm] StudentTimetableRequestDTO requestDto)
         {

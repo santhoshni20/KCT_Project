@@ -7,11 +7,11 @@ using KSI_Project.Repositories;
 namespace KSI_Project.Controllers
 {
     [Route("[controller]")]
-    public class CgpaController : Controller
+    public class CGPACalculationController : Controller
     {
         private readonly ICGPACalculationRepository _cgpaRepository;
         
-        public CgpaController(ICGPACalculationRepository cgpaRepository)
+        public CGPACalculationController(ICGPACalculationRepository cgpaRepository)
         {
             _cgpaRepository = cgpaRepository;
         }

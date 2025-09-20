@@ -9,11 +9,11 @@ namespace KSI_Project.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class StudentTimetableController : Controller
+    public class TimetableController : Controller
     {
         private readonly ITimetableRepository _timetableRepo;
 
-        public StudentTimetableController(ITimetableRepository timetableRepo)
+        public TimetableController(ITimetableRepository timetableRepo)
         {
             _timetableRepo = timetableRepo;
         }

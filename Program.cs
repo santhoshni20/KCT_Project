@@ -1,8 +1,6 @@
 using KSI_Project.Interfaces;
 using KSI_Project.Repositories;
 using KSI_Project.Helpers.DbContexts;
-using KSI_Project.Interfaces;
-using KSI_Project.Repositories;
 using KSI_Project.Repository;
 using Microsoft.EntityFrameworkCore;
 using KSI_Project.Repository.Interfaces;

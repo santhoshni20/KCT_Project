@@ -1,72 +1,38 @@
-﻿using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using KSI_Project.Models.Entity;
-using KSI_Project.Models.DTOs;
+﻿using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
-using KSI_Project.Helpers.DbContexts;
+using KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
+using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace KSI_Project.Repository
 {
     public class SyllabusRepository : ISyllabusRepository
     {
-        private readonly ksiDbContext _context;
+        private readonly ksiDbContext dbContext;
 
-        public SyllabusRepository(ksiDbContext context)
+        public SyllabusRepository(ksiDbContext dbContext)
         {
-            _context = context;
+            this.dbContext = dbContext;
         }
 
-        public async Task<ApiResponseDTO> UploadAsync(SyllabusFile file)
+        public SyllabusDTO getSyllabusByBatchAndDept(int batch, string dept)
         {
-            var response = new ApiResponseDTO();
-            try
-            {
-                await _context.SyllabusFiles.AddAsync(file);
-                var rowsAffected = await _context.SaveChangesAsync();
+            var syllabus = (from s in dbContext.Syllabus
+                            join d in dbContext.Department
+                            on s.DepartmentID equals d.DepartmentID
+                            where d.DeptCode == dept && s.IsActive == true
+                            select new SyllabusDTO
+                            {
+                                syllabusId = s.SyllabusID,
+                                departmentId = s.DepartmentID,
+                                link = s.Link
+                            }).FirstOrDefault();
 
-                response.success = rowsAffected > 0;
-                response.message = rowsAffected > 0
-                    ? "Syllabus uploaded successfully"
-                    : "No changes were made";
-            }
-            catch (Exception ex)
-            {
-                response.success = false;
-                response.message = $"Error uploading syllabus: {ex.Message}";
-            }
-
-            return response;
-        }
-
-        public async Task<ApiResponseDTO> GetFileAsync(string batch, string dept)
-        {
-            var response = new ApiResponseDTO();
-            try
-            {
-                var syllabusFile = await _context.SyllabusFiles
-                    .FirstOrDefaultAsync(f => f.Batch == batch && f.DepartmentCode == dept);
-
-                if (syllabusFile != null)
-                {
-                    response.success = true;
-                    response.data = syllabusFile;
-                    response.message = "Syllabus file fetched successfully";
-                }
-                else
-                {
-                    response.success = false;
-                    response.message = "Syllabus file not found";
-                }
-            }
-            catch (Exception ex)
-            {
-                response.success = false;
-                response.message = $"Error fetching syllabus file: {ex.Message}";
-            }
-
-            return response;
+            return syllabus;
         }
     }
 }

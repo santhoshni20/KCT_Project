@@ -1,9 +1,9 @@
 ﻿namespace KSI_Project.Models.Entity
 {
-    public class Department
+    public class CanteenId
     {
-        public int departmentId { get; set; }
-        public string departmentName { get; set; }
+        public int canteenId { get; set; }
+        public string canteenName { get; set; }
 
         // Audit fields
         public bool isActive { get; set; }
@@ -15,9 +15,6 @@
         public string deletedBy { get; set; }
 
         // Navigation
-        public ICollection<Course> courses { get; set; }
-        public ICollection<Teacher> teachers { get; set; }
-        public ICollection<Syllabus> syllabi { get; set; }
-        public ICollection<StudentTimetable> studentTimetables { get; set; }
+        public ICollection<Canteen> canteenItems { get; set; }
     }
 }

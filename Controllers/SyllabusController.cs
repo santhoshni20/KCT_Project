@@ -13,59 +13,44 @@ namespace KSI_Project.Controllers
 {
     public class SyllabusController : Controller
     {
-        private readonly ISyllabusRepository _syllabusRepository;
+        private readonly ISyllabusRepository syllabusRepository;
 
         public SyllabusController(ISyllabusRepository syllabusRepository)
         {
-            _syllabusRepository = syllabusRepository;
+            this.syllabusRepository = syllabusRepository;
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult DownloadSyllabus(int batch, string dept)
         {
-            return View();
-        }
+            var response = new APIResponseDTO();
 
-        [HttpPost]
-        public async Task<ApiResponseDTO> UploadSyllabus(string batch, string dept, string fileName, string fileUrl)
-        {
-            if (string.IsNullOrEmpty(fileUrl))
+            try
             {
-                return new ApiResponseDTO
+                var syllabus = syllabusRepository.getSyllabusByBatchAndDept(batch, dept);
+
+                if (syllabus == null)
                 {
-                    success = false,
-                    message = "File URL is empty!"
-                };
+                    response.statusCode = 404;
+                    response.message = "Syllabus not found for selected batch and department";
+                    response.data = null;
+                    return NotFound(response);
+                }
+
+                response.statusCode = 200;
+                response.message = "Syllabus retrieved successfully";
+                response.data = syllabus;
+
+                // Redirect user to PDF link
+                return Redirect(syllabus.link);
             }
-
-            var syllabusFile = new SyllabusFile
+            catch (Exception ex)
             {
-                Batch = batch,
-                DepartmentCode = dept,
-                FileName = fileName,
-                FileURL = fileUrl
-            };
-
-            return await _syllabusRepository.UploadAsync(syllabusFile);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> DownloadSyllabus(string batch, string dept)
-        {
-            var response = await _syllabusRepository.GetFileAsync(batch, dept);
-
-            if (!response.success || response.data == null)
-            {
-                return NotFound(response.message ?? "Syllabus not found for this selection.");
+                response.statusCode = 500;
+                response.message = "An error occurred while retrieving syllabus";
+                response.errorDetails = ex.Message;
+                return StatusCode(500, response);
             }
-
-            if (response.data is not SyllabusFile syllabusFile)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Invalid data received.");
-            }
-
-            // Instead of returning a file, redirect to FileURL
-            return Redirect(syllabusFile.FileURL);
         }
     }
 }

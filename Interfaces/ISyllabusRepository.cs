@@ -6,7 +6,6 @@ namespace KSI_Project.Interfaces
 {
     public interface ISyllabusRepository
     {
-        Task<ApiResponseDTO> UploadAsync(SyllabusFile file);
-        Task<ApiResponseDTO> GetFileAsync(string batch, string dept);
+        SyllabusDTO getSyllabusByBatchAndDept(int batch, string dept);
     }
 }

@@ -1,17 +1,23 @@
-﻿using KSI_Project.Models.Entity;
-
-namespace KSI_Project.Models.Entity
+﻿namespace KSI_Project.Models.Entity
 {
     public class Teacher
     {
-        public int TeacId { get; set; }
-        public string Name { get; set; }
-        public string Expertise { get; set; }
-        public string Contact { get; set; }
-        public string Designation { get; set; }
-        public int DeptId { get; set; }
+        public int teacherId { get; set; }
+        public string name { get; set; }
+        public string expertiseDomain { get; set; }
+        public string contactNumber { get; set; }
+        public int departmentId { get; set; }
 
-        public Department Department { get; set; }
-        public ICollection<TeacherTimetable> TeacherTimetables { get; set; }
+        // Audit fields
+        public bool isActive { get; set; }
+        public DateTime createdDate { get; set; }
+        public string createdBy { get; set; }
+        public DateTime? updatedDate { get; set; }
+        public string updatedBy { get; set; }
+        public DateTime? deletedDate { get; set; }
+        public string deletedBy { get; set; }
+
+        // Navigation
+        public Department department { get; set; }
     }
 }

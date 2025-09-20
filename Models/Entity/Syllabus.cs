@@ -1,9 +1,10 @@
 ﻿namespace KSI_Project.Models.Entity
 {
-    public class Department
+    public class Syllabus
     {
+        public int syllabusId { get; set; }
         public int departmentId { get; set; }
-        public string departmentName { get; set; }
+        public string link { get; set; }
 
         // Audit fields
         public bool isActive { get; set; }
@@ -15,9 +16,6 @@
         public string deletedBy { get; set; }
 
         // Navigation
-        public ICollection<Course> courses { get; set; }
-        public ICollection<Teacher> teachers { get; set; }
-        public ICollection<Syllabus> syllabi { get; set; }
-        public ICollection<StudentTimetable> studentTimetables { get; set; }
+        public Department department { get; set; }
     }
 }

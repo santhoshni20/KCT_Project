@@ -18,6 +18,7 @@ builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 builder.Services.AddScoped<ICGPACalculationRepository, CGPACalculationRepository>();
 builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 //builder.Services.AddScoped<IFacultySupportRepository, FacultySupportRepository>();
 //builder.Services.AddScoped<IPlacementSupportRepository, PlacementSupportRepository>();
 //builder.Services.AddScoped<IIDBalanceRepository, IDBalanceRepository>();

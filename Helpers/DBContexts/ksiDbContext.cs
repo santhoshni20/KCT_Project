@@ -12,6 +12,7 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<StudentTimetable> StudentTimetables { get; set; }
         public DbSet<Syllabus> Syllabi { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<Student> Student { get; set; }
 
     }
 }

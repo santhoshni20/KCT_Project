@@ -1,0 +1,191 @@
+﻿@model KSI_Project.Models.DTOs.StudentDTO
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<style>
+    .profile-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f8f8f8;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .photo-preview {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0;
+    }
+
+        .photo-preview img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+        }
+
+    button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+    }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    .alert {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 6px;
+        display: none;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+
+<div class="profile-container">
+    <h2>Student Profile</h2>
+    <form id="profileForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Roll Number</label>
+            <input type="number" name="RollNumber" required />
+        </div>
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" name="Name" required />
+        </div>
+        <div class="form-group">
+            <label>Department</label>
+            <input type="text" name="DepartmentName" />
+        </div>
+        <div class="form-group">
+            <label>Section</label>
+            <input type="text" name="Section" />
+        </div>
+        <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" name="DOB" />
+        </div>
+        <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" name="ContactNumber" />
+        </div>
+        <div class="form-group">
+            <label>Address</label>
+            <textarea name="Address"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Photo</label>
+            <input type="file" name="photo" id="photoInput" accept="image/*" />
+            <div class="photo-preview">
+                <img id="photoPreview" src="/images/default-profile.png" alt="Profile Photo" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Father Name</label>
+            <input type="text" name="FatherName" />
+        </div>
+        <div class="form-group">
+            <label>Mother Name</label>
+            <input type="text" name="MotherName" />
+        </div>
+        <div class="form-group">
+            <label>Got Placed</label>
+            <select name="GotPlaced">
+                <option value="Yes">Yes</option>
+                <option value="No" selected>No</option>
+            </select>
+        </div>
+
+        <button type="submit">Save Profile</button>
+
+        <div class="alert alert-success" id="successMessage">Profile saved successfully!</div>
+        <div class="alert alert-error" id="errorMessage">Error saving profile. Please try again.</div>
+    </form>
+</div>
+
+<script>
+    // Preview photo before upload
+    document.getElementById('photoInput').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('photoPreview').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle form submit with AJAX
+    document.getElementById('profileForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch('/Profile/save', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.statusCode === 200) {
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('errorMessage').style.display = 'none';
+            } else {
+                document.getElementById('errorMessage').textContent = result.message;
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('successMessage').style.display = 'none';
+            }
+        } catch (err) {
+            document.getElementById('errorMessage').textContent = 'An unexpected error occurred.';
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+    });
+</script>

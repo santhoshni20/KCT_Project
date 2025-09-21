@@ -57,7 +57,7 @@ namespace KSI_Project.Repository
                     Photo = s.photo,
                     FatherName = s.fatherName,
                     MotherName = s.motherName,
-                    GotPlaced = s.gotPlaced
+                    GotPlaced = s.gotPlaced,
                 })
                 .FirstOrDefaultAsync();
 

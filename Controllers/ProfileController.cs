@@ -55,9 +55,8 @@ namespace KSI_Project.Controllers
             {
                 response.StatusCode = 500;
                 response.Message = "An error occurred while saving student details.";
-                response.ErrorDetails = ex.Message;
+                response.ErrorDetails = ex.InnerException?.Message ?? ex.Message;
             }
-
             return Json(response);
         }
 

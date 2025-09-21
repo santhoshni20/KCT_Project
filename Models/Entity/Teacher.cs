@@ -1,7 +1,10 @@
-﻿namespace KSI_Project.Models.Entity
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace KSI_Project.Models.Entity
 {
     public class Teacher
     {
+        [Key]
         public int teacherId { get; set; }
         public string name { get; set; }
         public string expertiseDomain { get; set; }

@@ -1,7 +1,10 @@
-﻿namespace KSI_Project.Models.Entity
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace KSI_Project.Models.Entity
 {
     public class Student
     {
+        [Key]
         public int rollNumber { get; set; }
         public string name { get; set; }
         public string departmentName { get; set; }
@@ -16,7 +19,7 @@
 
         // Audit fields
         public bool isActive { get; set; }
-        public DateTime createdDate { get; set; }
+        public DateTime? createdDate { get; set; }
         public string createdBy { get; set; }
         public DateTime? updatedDate { get; set; }
         public string updatedBy { get; set; }

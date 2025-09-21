@@ -13,5 +13,6 @@
         public string FatherName { get; set; }
         public string MotherName { get; set; }
         public string GotPlaced { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }

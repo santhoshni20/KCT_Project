@@ -1,7 +1,10 @@
-﻿namespace KSI_Project.Models.Entity
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace KSI_Project.Models.Entity
 {
     public class EventDetails
     {
+        [Key]
         public int EventId { get; set; }
         public string EventName { get; set; }
         public DateTime? DeadlineDate { get; set; }

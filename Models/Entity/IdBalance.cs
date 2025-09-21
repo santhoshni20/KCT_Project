@@ -1,7 +1,10 @@
-﻿namespace KSI_Project.Models.Entity
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace KSI_Project.Models.Entity
 {
     public class IdBalance
     {
+        [Key]
         public int balanceId { get; set; }
         public int rollNumber { get; set; }
         public decimal balanceAmount { get; set; }

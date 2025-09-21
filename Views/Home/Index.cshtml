@@ -38,25 +38,40 @@
         width: 100%;
     }
 
-    .profile-icon {
+    .profile-round-btn {
         position: absolute;
         top: 15px;
         right: 20px;
+        width: 44px;
+        height: 44px;
+        background: #007bff;
+        border-radius: 50%;
+        border: none;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
         cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        z-index: 1000;
     }
 
-        .profile-icon img {
-            width: 40px;
-            height: 40px;
+        .profile-round-btn:hover {
+            background: #0056b3;
+        }
+
+        .profile-round-btn::before {
+            content: '';
+            display: block;
+            width: 16px;
+            height: 16px;
+            background: white;
             border-radius: 50%;
         }
 </style>
 
-<div class="profile-icon">
-    <a href="/Profile">
-        <img src="/images/profile-icon.png" alt="Profile">
-    </a>
-</div>
+<a href="/Profile" class="profile-round-btn" title="Go to Profile"></a>
 
 <div class="background">
     <div class="content">

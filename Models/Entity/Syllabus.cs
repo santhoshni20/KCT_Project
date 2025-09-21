@@ -1,7 +1,10 @@
-﻿namespace KSI_Project.Models.Entity
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace KSI_Project.Models.Entity
 {
     public class Syllabus
     {
+        [Key]
         public int syllabusId { get; set; }
         public int departmentId { get; set; }
         public string link { get; set; }

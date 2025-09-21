@@ -1,7 +1,10 @@
-﻿namespace KSI_Project.Models.Entity
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace KSI_Project.Models.Entity
 {
     public class StudentTimetable
     {
+        [Key]
         public int TimetableID { get; set; }
         public int DepartmentID { get; set; }
         public string Section { get; set; }

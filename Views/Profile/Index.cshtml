@@ -139,6 +139,8 @@
                 <option value="No" selected>No</option>
             </select>
         </div>
+       
+
 
         <button type="submit">Save Profile</button>
 
@@ -177,8 +179,9 @@
             if (result.statusCode === 200) {
                 document.getElementById('successMessage').style.display = 'block';
                 document.getElementById('errorMessage').style.display = 'none';
-            } else {
-                document.getElementById('errorMessage').textContent = result.message;
+            }
+            else {
+                document.getElementById('errorMessage').textContent = result.message + " " + (result.errorDetails || "");
                 document.getElementById('errorMessage').style.display = 'block';
                 document.getElementById('successMessage').style.display = 'none';
             }

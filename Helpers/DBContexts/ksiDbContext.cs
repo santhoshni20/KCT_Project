@@ -13,6 +13,7 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<Syllabus> Syllabi { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Student> Student { get; set; }
+        public DbSet<User> Users { get; set; }
 
     }
 }

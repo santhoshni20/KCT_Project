@@ -1,7 +1,4 @@
-﻿@{
-    Layout = null;
-}
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -50,51 +47,66 @@
             text-align: center;
         }
 
+        /* When sidebar is hidden (like in Login page) */
+        .no-sidebar .main-layout {
+            margin-left: 0 !important;
+        }
     </style>
 </head>
-<body>
+<body class="@(ViewData["NoSidebar"] != null ? "no-sidebar" : "")">
     <div class="wrapper d-flex flex-column min-vh-100">
-        <!-- Sidebar stays outside flex layout -->
-        <nav class="sidebar">
-            <div class="sidebar-sticky">
-                <h5 class="text-center text-light">KSI Services</h5>
-                <ul class="nav flex-column mt-4">
-                    <li><a class="nav-link" asp-controller="CGPACalculation" asp-action="Index"><i class="fas fa-calculator"></i> CGPA Calculation</a></li>
-                    <li><a class="nav-link" asp-controller="PlacementSupport" asp-action="Index"><i class="fas fa-briefcase"></i> Placement Support</a></li>
-                    <li><a class="nav-link" asp-controller="Syllabus" asp-action="Index"><i class="fas fa-calendar-alt"></i> Syllabus</a></li>
-                    <li><a class="nav-link" asp-controller="EventDetails" asp-action="Index"><i class="fas fa-calendar-plus"></i> Event Details</a></li>
-                    <li><a class="nav-link" asp-controller="Canteen" asp-action="Index"><i class="fas fa-utensils"></i> Canteen Details</a></li>
-                    <li><a class="nav-link" asp-controller="FacultySupport" asp-action="Index"><i class="fas fa-users"></i> Faculty Support</a></li>
-                    <li><a class="nav-link" asp-controller="Timetable" asp-action="Index"><i class="fas fa-table"></i> Timetable</a></li>
-                    <li><a class="nav-link" asp-controller="IDBalance" asp-action="Index"><i class="fas fa-id-card"></i> ID Balance</a></li>
-                </ul>
-            </div>
-        </nav>
+
+        <!-- Sidebar -->
+        @if (ViewData["NoSidebar"] == null)
+        {
+            @* Hide sidebar for Login *@
+            <nav class="sidebar">
+                <div class="sidebar-sticky">
+                    <h5 class="text-center text-light">KSI Services</h5>
+                    <ul class="nav flex-column mt-4">
+                        <li><a class="nav-link" asp-controller="Login" asp-action="Index"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                        <li><a class="nav-link" asp-controller="CGPACalculation" asp-action="Index"><i class="fas fa-calculator"></i> CGPA Calculation</a></li>
+                        <li><a class="nav-link" asp-controller="PlacementSupport" asp-action="Index"><i class="fas fa-briefcase"></i> Placement Support</a></li>
+                        <li><a class="nav-link" asp-controller="Syllabus" asp-action="Index"><i class="fas fa-calendar-alt"></i> Syllabus</a></li>
+                        <li><a class="nav-link" asp-controller="EventDetails" asp-action="Index"><i class="fas fa-calendar-plus"></i> Event Details</a></li>
+                        <li><a class="nav-link" asp-controller="Canteen" asp-action="Index"><i class="fas fa-utensils"></i> Canteen Details</a></li>
+                        <li><a class="nav-link" asp-controller="FacultySupport" asp-action="Index"><i class="fas fa-users"></i> Faculty Support</a></li>
+                        <li><a class="nav-link" asp-controller="Timetable" asp-action="Index"><i class="fas fa-table"></i> Timetable</a></li>
+                        <li><a class="nav-link" asp-controller="IDBalance" asp-action="Index"><i class="fas fa-id-card"></i> ID Balance</a></li>
+                    </ul>
+                </div>
+            </nav>
+        }
 
         <!-- Main Layout Column -->
-        <div class="main-layout flex-grow-1 d-flex flex-column" style="margin-left: 240px;">
+        <div class="main-layout flex-grow-1 d-flex flex-column">
+
             <!-- Header -->
-            <header>
-                <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow">
-                    <div class="container-fluid">
-                        <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">KSI_Project</a>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
-                            <ul class="navbar-nav">
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                                </li>
-                            </ul>
+            @if (ViewData["NoSidebar"] == null)
+            {
+                @* Hide header for Login *@
+                <header>
+                    <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow">
+                        <div class="container-fluid">
+                            <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">KSI_Project</a>
+                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+                            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                </nav>
-            </header>
+                    </nav>
+                </header>
+            }
 
             <!-- Main Content -->
             <div class="main-content pt-5 flex-grow-1">
@@ -104,9 +116,13 @@
             </div>
 
             <!-- Footer -->
-            <footer class="footer mt-auto">
-                &copy; 2025 - KSI_Project - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-            </footer>
+            @if (ViewData["NoSidebar"] == null)
+            {
+                @* Hide footer for Login *@
+                <footer class="footer mt-auto">
+                    &copy; 2025 - KSI_Project - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                </footer>
+            }
         </div>
     </div>
 
@@ -116,6 +132,4 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-
-
 </html>

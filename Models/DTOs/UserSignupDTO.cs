@@ -1,12 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace KSI_Project.Models.Entity
+﻿namespace KSI_Project.Models.DTOs
 {
-    [Table("users")]
-    public class User
+    public class UserSignupDTO
     {
-        public int Id { get; set; }
         public string studentName { get; set; }
         public string rollNumber { get; set; }
         public string password { get; set; }
@@ -14,4 +9,3 @@ namespace KSI_Project.Models.Entity
         public string mobileNumber { get; set; }
     }
 }
-

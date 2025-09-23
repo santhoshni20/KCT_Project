@@ -11,26 +11,94 @@ namespace KSI_Project.Repository.Implementations
 {
     public class UserRepository : IUserRepository
     {
-        private readonly ksiDbContext _dbContext;
+        private readonly ksiDbContext _db;
 
-        public UserRepository(ksiDbContext dbContext)
+        public UserRepository(ksiDbContext db)
         {
-            _dbContext = dbContext;
+            _db = db;
         }
 
-        public UserDTO ValidateUser(string username, string password)
+        public APIResponseDTO registerUser(UserSignupDTO signupDTO)
         {
-            var user = _dbContext.Users
-                .Where(u => u.Username == username && u.Password == password)
-                .Select(u => new UserDTO
-                {
-                    UserId = u.UserId,
-                    Username = u.Username,
-                    Role = u.Role
-                })
-                .FirstOrDefault();
+            try
+            {
+                // Check if roll number or email already exists
+                var existingUser = _db.Users
+                    .FirstOrDefault(u => u.rollNumber == signupDTO.rollNumber || u.collegeMailId == signupDTO.collegeMailId);
 
-            return user;
+                if (existingUser != null)
+                {
+                    return new APIResponseDTO
+                    {
+                        StatusCode = 400,
+                        Message = "User already exists with this Roll Number or Email"
+                    };
+                }
+
+                var user = new User
+                {
+                    studentName = signupDTO.studentName,
+                    rollNumber = signupDTO.rollNumber,
+                    password = signupDTO.password, // ⚠️ You should hash passwords in real apps
+                    collegeMailId = signupDTO.collegeMailId,
+                    mobileNumber = signupDTO.mobileNumber
+                };
+
+                _db.Users.Add(user);
+                _db.SaveChanges();
+
+                return new APIResponseDTO
+                {
+                    StatusCode = 200,
+                    Message = "Signup successful",
+                    Data = signupDTO
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponseDTO
+                {
+                    StatusCode = 500,
+                    Message = "An error occurred during signup",
+                    ErrorDetails = ex.Message
+                };
+            }
+        }
+
+        public APIResponseDTO loginUser(UserLoginDTO loginDTO)
+        {
+            try
+            {
+                var user = _db.Users
+                    .FirstOrDefault(u =>
+                        (u.rollNumber == loginDTO.rollOrMail || u.collegeMailId == loginDTO.rollOrMail)
+                        && u.password == loginDTO.password);
+
+                if (user == null)
+                {
+                    return new APIResponseDTO
+                    {
+                        StatusCode = 401,
+                        Message = "Invalid credentials"
+                    };
+                }
+
+                return new APIResponseDTO
+                {
+                    StatusCode = 200,
+                    Message = "Login successful",
+                    Data = new { user.studentName, user.rollNumber, user.collegeMailId }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIResponseDTO
+                {
+                    StatusCode = 500,
+                    Message = "An error occurred during login",
+                    ErrorDetails = ex.Message
+                };
+            }
         }
     }
 }

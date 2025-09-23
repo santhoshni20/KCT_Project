@@ -7,7 +7,8 @@ namespace KSI_Project.Repository.Interfaces
 {
     public interface IUserRepository
     {
-        UserDTO ValidateUser(string username, string password);
+        APIResponseDTO registerUser(UserSignupDTO signupDTO);
+        APIResponseDTO loginUser(UserLoginDTO loginDTO);
     }
 }
 

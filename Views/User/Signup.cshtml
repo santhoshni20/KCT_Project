@@ -1,0 +1,39 @@
+﻿@model KSI_Project.Models.DTOs.UserSignupDTO
+@{
+    ViewData["Title"] = "Signup";
+    ViewData["NoSidebar"] = true;
+}
+
+<div class="container mt-5">
+    <h2>Student Signup</h2>
+    <form asp-action="Signup" method="post">
+        <div class="mb-3">
+            <label>Student Name</label>
+            <input asp-for="studentName" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label>Roll Number</label>
+            <input asp-for="rollNumber" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label>Password</label>
+            <input asp-for="password" type="password" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label>College Mail ID</label>
+            <input asp-for="collegeMailId" type="email" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label>Mobile Number</label>
+            <input asp-for="mobileNumber" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Signup</button>
+    </form>
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger mt-3">@ViewBag.ErrorMessage</div>
+    }
+
+    <p class="mt-3">Already have an account? <a asp-action="Login">Login here</a></p>
+</div>

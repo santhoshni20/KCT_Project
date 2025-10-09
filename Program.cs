@@ -19,7 +19,7 @@ builder.Services.AddScoped<ICGPACalculationRepository, CGPACalculationRepository
 builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+//builder.Services.AddScoped<IUserRepository, UserRepository>();
 //builder.Services.AddScoped<IFacultySupportRepository, FacultySupportRepository>();
 //builder.Services.AddScoped<IPlacementSupportRepository, PlacementSupportRepository>();
 //builder.Services.AddScoped<IIDBalanceRepository, IDBalanceRepository>();
@@ -42,6 +42,6 @@ app.UseAuthorization();
 //    pattern: "{controller=User}/{action=Index}/{id?}");
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=User}/{action=Signup}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

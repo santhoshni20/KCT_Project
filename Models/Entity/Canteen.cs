@@ -1,26 +1,30 @@
-﻿namespace KSI_Project.Models.Entity
+﻿using KSI_Project.Models.Entity;
+
+namespace KSI_Project.Models.Entity
 {
     public class Canteen
     {
-        public int itemId { get; set; }
-        public int canteenId { get; set; }
-        public string dishName { get; set; }
-        public string availability { get; set; }
-        public decimal price { get; set; }
-        public bool morning { get; set; }
-        public bool afternoon { get; set; }
-        public bool evening { get; set; }
+        public int ItemID { get; set; }
+        public int CanteenID { get; set; }
+        public string DishName { get; set; }
+        public string Availability { get; set; }
+        public decimal Price { get; set; }
+
+        public bool Morning { get; set; }
+        public bool Afternoon { get; set; }
+        public bool Evening { get; set; }
+        public bool Snacks { get; set; }
 
         // Audit fields
-        public bool isActive { get; set; }
-        public DateTime createdDate { get; set; }
-        public string createdBy { get; set; }
-        public DateTime? updatedDate { get; set; }
-        public string updatedBy { get; set; }
-        public DateTime? deletedDate { get; set; }
-        public string deletedBy { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public string CreatedBy { get; set; } = "Admin";
+        public DateTime? UpdatedDate { get; set; }
+        public string? UpdatedBy { get; set; }
+        public DateTime? DeletedDate { get; set; }
+        public string? DeletedBy { get; set; }
 
         // Navigation
-        public CanteenId canteen { get; set; }
+        public CanteenId CanteenDetails { get; set; } // Renamed property to avoid conflict with class name
     }
 }

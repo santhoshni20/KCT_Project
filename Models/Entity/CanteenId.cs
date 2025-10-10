@@ -2,19 +2,17 @@
 {
     public class CanteenId
     {
-        public int canteenId { get; set; }
-        public string canteenName { get; set; }
+        public int CanteenID { get; set; }
+        public string CanteenName { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public string CreatedBy { get; set; } = "Admin";
+        public DateTime? UpdatedDate { get; set; }
+        public string? UpdatedBy { get; set; }
+        public DateTime? DeletedDate { get; set; }
+        public string? DeletedBy { get; set; }
 
-        // Audit fields
-        public bool isActive { get; set; }
-        public DateTime createdDate { get; set; }
-        public string createdBy { get; set; }
-        public DateTime? updatedDate { get; set; }
-        public string updatedBy { get; set; }
-        public DateTime? deletedDate { get; set; }
-        public string deletedBy { get; set; }
-
-        // Navigation
-        public ICollection<Canteen> canteenItems { get; set; }
+        // Navigation property
+        public ICollection<Canteen> Canteens { get; set; }
     }
 }

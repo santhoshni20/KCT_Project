@@ -1,0 +1,288 @@
+﻿@model IEnumerable<KSI_Project.Models.DTOs.CanteenMenuDto>
+@{
+    ViewData["Title"] = ViewBag.CanteenName + " Menu";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .menu-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .menu-header {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        text-align: center;
+    }
+
+        .menu-header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .btn-custom {
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-add {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        background-color: #667eea;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-custom:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        color: white;
+    }
+
+    .menu-table-container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        overflow-x: auto;
+    }
+
+    .menu-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .menu-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .menu-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .menu-table td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .menu-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+    .availability-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .available {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .unavailable {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .time-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        margin: 2px;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        background: #e7e7ff;
+        color: #5a5aff;
+    }
+
+    .price {
+        font-weight: 600;
+        color: #28a745;
+        font-size: 1.1rem;
+    }
+
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .no-items {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+</style>
+
+<div class="menu-container">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-error">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="menu-header">
+        <h1>@ViewBag.CanteenName Menu</h1>
+        <div class="action-buttons">
+            <a href="@Url.Action("Index", "Canteen")" class="btn-custom btn-back">
+                ← Back to Canteens
+            </a>
+            <a href="@Url.Action("AddDish", "Canteen", new { canteenId = ViewBag.CanteenId })"
+               class="btn-custom btn-add">
+                + Add New Dish
+            </a>
+        </div>
+    </div>
+    <div class="text-center mb-4">
+        <input type="text" id="searchInput" placeholder="Search dishes..."
+               class="form-control" style="max-width:400px; margin:0 auto; border-radius:25px; padding:10px;">
+    </div>
+
+
+    <div class="menu-table-container">
+        @if (Model.Any())
+        {
+            <table class="menu-table">
+                <thead>
+                    <tr>
+                        <th>Dish Name</th>
+                        <th>Price</th>
+                        <th>Availability</th>
+                        <th>Time Slots</th>
+                        <th>Actions</th> <!-- ✅ Added -->
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.DishName</strong></td>
+                            <td class="price">₹@item.Price.ToString("F2")</td>
+                            <td>
+                                <span class="availability-badge @(item.Availability == "Yes" ? "available" : "unavailable")">
+                                    @item.Availability
+                                </span>
+                            </td>
+                            <td>
+                                @if (item.Morning)
+                                {
+                                    <span class="time-badge">🌅 Morning</span>
+                                }
+                                @if (item.Afternoon)
+                                {
+                                    <span class="time-badge">☀️ Afternoon</span>
+                                }
+                                @if (item.Evening)
+                                {
+                                    <span class="time-badge">🌆 Evening</span>
+                                }
+                                @if (item.Snacks)
+                                {
+                                    <span class="time-badge">🍿 Snacks</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="@Url.Action("EditDish", "Canteen", new { itemId = item.ItemID })"
+                                   class="btn btn-primary btn-sm">Edit</a>
+
+                                <form asp-action="DeleteDish" asp-controller="Canteen" method="post"
+                                      style="display:inline;" onsubmit="return confirm('Are you sure to delete this dish?');">
+                                    <input type="hidden" name="itemId" value="@item.ItemID" />
+                                    <input type="hidden" name="canteenId" value="@ViewBag.CanteenId" />
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="no-items">
+                <h3>No dishes available yet</h3>
+                <p>Click the "Add New Dish" button to add items to the menu</p>
+            </div>
+        }
+    </div>
+</div>
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('.menu-table tbody tr');
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>

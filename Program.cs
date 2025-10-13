@@ -40,6 +40,6 @@ app.UseAuthorization();
 // ✅ Default route (Canteen Index)
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Canteen}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

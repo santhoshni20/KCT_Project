@@ -109,5 +109,9 @@ namespace KSI_Project.Helpers.DbContexts
                 }
             );
         }
+        public DbSet<Faculty> Faculties { get; set; }
+
+
+
     }
 }

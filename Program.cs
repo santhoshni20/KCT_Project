@@ -20,6 +20,8 @@ builder.Services.AddScoped<ICGPACalculationRepository, CGPACalculationRepository
 builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IFacultySupportRepository, FacultySupportRepository>();
+
 
 builder.Services.AddControllersWithViews();
 
@@ -36,10 +38,16 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
-
+/*
 // ✅ Default route (Canteen Index)
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");*/
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.MapControllers();
+
 app.Run();
+

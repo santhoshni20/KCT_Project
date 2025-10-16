@@ -1,0 +1,139 @@
+﻿@model KSI_Project.Models.DTOs.AddFacultyDto
+@{
+    var dept = ViewBag.Department as string ?? Model?.Department;
+    ViewData["Title"] = $"Add Faculty - {dept}";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Add Faculty - @dept Department</h2>
+
+    @* Success Message *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* Error Message *@
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form method="post" enctype="multipart/form-data" id="addFacultyForm">
+        <input type="hidden" asp-for="Department" value="@dept" />
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Name <span class="text-danger">*</span></label>
+                <input asp-for="FacultyName" class="form-control" required />
+                <span asp-validation-for="FacultyName" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">DOB</label>
+                <input asp-for="DOB" type="date" class="form-control" />
+                <span asp-validation-for="DOB" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Contact Number</label>
+                <input asp-for="ContactNumber" class="form-control" placeholder="e.g., 9876543210" />
+                <span asp-validation-for="ContactNumber" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">College Email</label>
+                <input asp-for="CollegeMail" type="email" class="form-control" placeholder="e.g., faculty@college.edu" />
+                <span asp-validation-for="CollegeMail" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Domain of Expertise</label>
+                <input asp-for="ExpertiseDomain" class="form-control" placeholder="e.g., Machine Learning, AI" />
+                <span asp-validation-for="ExpertiseDomain" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Designation</label>
+                <input asp-for="Designation" class="form-control" placeholder="e.g., Assistant Professor" />
+                <span asp-validation-for="Designation" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Photo (upload)</label>
+            <input type="file" name="PhotoFile" id="PhotoFile" class="form-control" accept="image/*" />
+            <small class="form-text text-muted">
+                Accepted formats: JPG, PNG, GIF (Max: 5MB). If left blank, default image will be used.
+            </small>
+            <div id="imagePreview" class="mt-2" style="display:none;">
+                <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;" />
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary" id="saveBtn">
+                <i class="fas fa-save"></i> Save Faculty
+            </button>
+            <a href="@Url.Action("Department", new { dept = dept })" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Image preview functionality
+        document.getElementById('PhotoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file size
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    this.value = '';
+                    document.getElementById('imagePreview').style.display = 'none';
+                    return;
+                }
+
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Only image files (JPG, PNG, GIF) are allowed');
+                    this.value = '';
+                    document.getElementById('imagePreview').style.display = 'none';
+                    return;
+                }
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('imagePreview').style.display = 'none';
+            }
+        });
+
+        // Form submission with loading state
+        document.getElementById('addFacultyForm').addEventListener('submit', function() {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            saveBtn.disabled = true;
+        });
+    </script>
+}

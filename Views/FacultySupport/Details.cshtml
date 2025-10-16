@@ -1,0 +1,16 @@
+﻿@model KSI_Project.Models.DTOs.FacultyDto
+
+<div class="container py-4">
+    <div class="card mx-auto shadow-sm" style="max-width:600px;">
+        <img src="@Model.PhotoPath" class="card-img-top" alt="@Model.FacultyName" style="object-fit:cover;height:300px;">
+        <div class="card-body">
+            <h3>@Model.FacultyName</h3>
+            <p><strong>Department:</strong> @Model.Department</p>
+            <p><strong>Designation:</strong> @Model.Designation</p>
+            <p><strong>Domain:</strong> @Model.ExpertiseDomain</p>
+            <p><strong>Email:</strong> @Model.CollegeMail</p>
+            <p><strong>Contact:</strong> @Model.ContactNumber</p>
+            <p><strong>DOB:</strong> @Model.Dob</p>
+        </div>
+    </div>
+</div>

@@ -1,62 +1,76 @@
-﻿
-@{
-    ViewData["Title"] = "User Details Form";
+﻿@{
+    ViewData["Title"] = "Placement Support";
 }
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <style>
-    /* General body styling */
     body {
+        background-color: #f8f9fa;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    .placement-container {
         display: flex;
         flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
         min-height: 100vh;
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background-color: #f8f9fa;
+        padding-top: 50px;
     }
 
-    /* Sidebar (KSI Services menu) */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 220px;
-        height: 100%;
-        background-color: #1f2937; /* dark theme */
-        color: #fff;
-        padding-top: 20px;
-    }
-
-        .sidebar a {
-            display: block;
-            color: #3b82f6; /* bootstrap blue */
-            padding: 10px 15px;
-            text-decoration: none;
-            font-size: 15px;
-        }
-
-            .sidebar a:hover {
-                background-color: #374151;
-                border-radius: 6px;
-            }
-
-    /* Main content area */
-    .container {
-        margin-left: 240px; /* space for sidebar */
-        padding: 20px;
-        flex: 1;
-        padding-bottom: 100px; /* Prevent footer overlap */
-    }
-
-    /* Card-like style for user details */
-    .user-details {
+    .placement-card {
         background: #fff;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        padding: 20px;
+        padding: 30px;
+        width: 70%;
+        max-width: 900px;
     }
 
-    /* Footer styling */
+    h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+
+    label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .form-select {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        display: block;
+    }
+
+    table {
+        width: 100%;
+        margin-top: 25px;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        text-align: center;
+        padding: 10px;
+    }
+
+    th {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
     footer {
         position: fixed;
         bottom: 0;
@@ -66,73 +80,91 @@
         padding: 10px 0;
         border-top: 1px solid #ddd;
         font-size: 14px;
-        z-index: 1000;
-    }
-
-    /* Adjust content to not hide behind footer */
-    body {
-        margin-bottom: 60px; /* height of footer */
+        color: #333;
     }
 </style>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<div class="placement-container">
+    <div class="placement-card">
+        <h2>Placement Support</h2>
 
-<div class="container mt-5">
-    <h2 class="mb-4">User Details Form</h2>
-
-    <!-- Step 1: Enter Roll Number -->
-    <form method="post" asp-action="GetDetails">
-        <div class="mb-3">
-            <label for="RollNo" class="form-label">Roll No</label>
-            <input type="text" class="form-control" id="RollNo" name="RollNo" placeholder="Enter Roll No" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Get Details</button>
-    </form>
-
-    <!-- Display message if no record found -->
-    @if (ViewBag.Message != null)
-    {
-        <div class="alert alert-danger mt-3">@ViewBag.Message</div>
-    }
-
-    @if (Model != null)
-    {
-        <h4 class="mt-4">Details:</h4>
-        <hr />
-
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input type="text" class="form-control" value="@Model.Name" readonly />
+        <!-- Dropdown -->
+        <div class="mb-3 text-center">
+            <label for="domainSelect" class="form-label">Select Domain</label>
+            <select id="domainSelect" class="form-select" required>
+                <option value="">-- Choose Domain --</option>
+                <option value="AI">Artificial Intelligence</option>
+                <option value="ML">Machine Learning</option>
+                <option value="WebDev">Web Development</option>
+                <option value="DataScience">Data Science</option>
+                <option value="CyberSecurity">Cyber Security</option>
+            </select>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Designation</label>
-            <input type="text" class="form-control" value="@Model.Designation" readonly />
+        <!-- Data Table -->
+        <div class="table-responsive">
+            <table id="placementTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Mobile Number</th>
+                        <th>Email ID</th>
+                        <th>Company Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4" class="text-center text-muted">Select a domain to view details</td></tr>
+                </tbody>
+            </table>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Company</label>
-            <input type="text" class="form-control" value="@Model.Company" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Package</label>
-            <input type="text" class="form-control" value="@Model.Package" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Expertise</label>
-            <input type="text" class="form-control" value="@Model.Expertise" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Contact</label>
-            <input type="text" class="form-control" value="@Model.Contact" readonly />
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Personal Mail ID</label>
-            <input type="text" class="form-control" value="@Model.Email" readonly />
-        </div>
-    }
+    </div>
 </div>
+
+<footer>
+    © 2025 - KSI_Project | Placement Support
+</footer>
+
+<script>
+    const domainData = {
+        "AI": [
+            { name: "Ananya Sharma", mobile: "9876543210", email: "ananya.ai@gmail.com", company: "Google" },
+            { name: "Ravi Kumar", mobile: "9876501234", email: "ravi.ai@tcs.com", company: "TCS" }
+        ],
+        "ML": [
+            { name: "Priya Raj", mobile: "8765432109", email: "priya.ml@infosys.com", company: "Infosys" },
+            { name: "Manoj Verma", mobile: "9998887776", email: "manoj.ml@wipro.com", company: "Wipro" }
+        ],
+        "WebDev": [
+            { name: "Sanjay N", mobile: "9988776655", email: "sanjay.webdev@gmail.com", company: "Zoho" },
+            { name: "Kavya D", mobile: "9786543210", email: "kavya.web@accenture.com", company: "Accenture" }
+        ],
+        "DataScience": [
+            { name: "Amit Sharma", mobile: "9876123450", email: "amit.ds@cognizant.com", company: "Cognizant" },
+            { name: "Deepa R", mobile: "9123456789", email: "deepa.ds@gmail.com", company: "Deloitte" }
+        ],
+        "CyberSecurity": [
+            { name: "Rahul Singh", mobile: "9234567890", email: "rahul.cyber@ibm.com", company: "IBM" },
+            { name: "Sneha Joshi", mobile: "9345678901", email: "sneha.cyber@gmail.com", company: "Microsoft" }
+        ]
+    };
+
+    $("#domainSelect").on("change", function () {
+        const selectedDomain = $(this).val();
+        const tbody = $("#placementTable tbody");
+        tbody.empty();
+
+        if (selectedDomain && domainData[selectedDomain]) {
+            domainData[selectedDomain].forEach(item => {
+                const row = `<tr>
+                    <td>${item.name}</td>
+                    <td>${item.mobile}</td>
+                    <td>${item.email}</td>
+                    <td>${item.company}</td>
+                </tr>`;
+                tbody.append(row);
+            });
+        } else {
+            tbody.append(`<tr><td colspan="4" class="text-center text-muted">No data available for the selected domain</td></tr>`);
+        }
+    });
+</script>

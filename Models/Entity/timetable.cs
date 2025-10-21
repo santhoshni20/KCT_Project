@@ -4,14 +4,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ksi.Models.Entity
 {
-    [Table("syllabus")]
-    public class syllabus
+    [Table("timetable")]
+    public class timetable
     {
         [Key]
-        public int syllabusId { get; set; }
+        public int timetableId { get; set; }
         public string batch { get; set; }
         public string department { get; set; }
-        public string syllabusLink { get; set; }
+        public string section { get; set; }
+        public string dayOfWeek { get; set; }
+        public int hour { get; set; }
+        public string subjectName { get; set; }
         public bool isActive { get; set; }
         public DateTime createdDate { get; set; }
         public string? createdBy { get; set; }
@@ -19,5 +22,7 @@ namespace ksi.Models.Entity
         public string? updatedBy { get; set; }
         public DateTime? deletedDate { get; set; }
         public string? deletedBy { get; set; }
+
+
     }
 }

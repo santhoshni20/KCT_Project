@@ -1,20 +1,32 @@
-﻿using KSI_Project.Interfaces;
-using KSI_Project.Models.DTOs;
-using KSI_Project.Models.Entity;
-using KSI_Project.Repositories;
-using KSI_Project.Repository.Interfaces;
+﻿//using ksi.Helpers;
+using ksi_project.Interfaces;
+using ksi_project.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
-namespace KSI_Project.Controllers
+namespace ksi_project.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
-    public class PlacementSupportController : Controller
+    public class PlacementSupportController : ControllerBase
     {
         private readonly IPlacementSupportRepository _placementSupportRepository;
-        public IActionResult Index()
+
+        public PlacementSupportController(IPlacementSupportRepository placementSupportRepository)
         {
-            return View();
+            _placementSupportRepository = placementSupportRepository;
+        }
+
+        [HttpGet("GetDomains")]
+        public async Task<ApiResponseDTO> GetDomains()
+        {
+            return await _placementSupportRepository.GetAllDomainsAsync();
+        }
+
+        [HttpGet("GetStudentsByDomain/{domainName}")]
+        public async Task<ApiResponseDTO> GetStudentsByDomain(string domainName)
+        {
+            return await _placementSupportRepository.GetPlacedStudentsByDomainAsync(domainName);
         }
     }
 }

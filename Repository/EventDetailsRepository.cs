@@ -1,109 +1,87 @@
-﻿using KSI_Project.Helpers.DbContexts;
-using KSI_Project.Models.DTOs;
-using KSI_Project.Models.Entity;
-using KSI_Project.Repository.Interfaces;
+﻿//using ksi_project.Helpers.DbContexts;
+using ksi_project.Models.DTOs;
+using ksi_project.Models.Entity;
+using ksi_project.Repository.Interface;
+using KSI_Project.Helpers.DbContexts;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using static KSI_Project.Models.DTOs.EventDetailsDTO;
 
-namespace KSI_Project.Repository.Implementations
+namespace ksi_project.Repository.Implementation
 {
     public class EventDetailsRepository : IEventDetailsRepository
     {
-        private readonly ksiDbContext _context;
+        private readonly ksiDbContext _dbContext;
+        private readonly IWebHostEnvironment _env;
 
-        public EventDetailsRepository(ksiDbContext context)
+        public EventDetailsRepository(ksiDbContext dbContext, IWebHostEnvironment env)
         {
-            _context = context;
+            _dbContext = dbContext;
+            _env = env;
         }
 
-        public async Task<EventDetailsResponseDTO> SaveEventAsync(EventDetailsRequestDTO requestDto)
+        public async Task<ApiResponseDTO> saveEventAsync(EventDTO eventDTO)
         {
-            EventDetails entity;
-
-            if (requestDto.EventId == 0) // Insert
+            try
             {
-                entity = new EventDetails
+                var entity = new events
                 {
-                    EventName = requestDto.EventName,
-                    DeadlineDate = requestDto.DeadlineDate,
-                    EventDate = requestDto.EventDate,
-                    Eligibility = requestDto.Eligibility,
-                    Division = requestDto.Division,
-                    ContactNumber = requestDto.ContactNumber,
-                    Location = requestDto.Location,
-                    Description = requestDto.Description,
-                    BrochureUrl = requestDto.BrochureUrl,
-                    CreatedBy = requestDto.CreatedBy,
-                    CreatedDate = DateTime.UtcNow,
-                    IsActive = true
+                    eventName = eventDTO.eventName,
+                    contactNumber = eventDTO.contactNumber,
+                    deadlineDate = eventDTO.deadlineDate,
+                    eventDate = eventDTO.eventDate,
+                    eligibility = eventDTO.eligibility,
+                    description = eventDTO.description,
+                    location = eventDTO.location,
+                    division = eventDTO.division,
+                    brochureImage = eventDTO.brochureUrl,
+                    createdBy = eventDTO.createdBy
                 };
 
-                _context.EventDetails.Add(entity);
+                _dbContext.events.Add(entity);
+                await _dbContext.SaveChangesAsync();
+
+                return ApiResponseDTO.Success(entity.eventId, "Event saved successfully.");
             }
-            else // Update
+            catch (Exception ex)
             {
-                entity = await _context.EventDetails
-                    .FirstOrDefaultAsync(e => e.EventId == requestDto.EventId && e.IsActive);
-
-                if (entity == null)
-                {
-                    throw new Exception("Event not found.");
-                }
-
-                entity.EventName = requestDto.EventName;
-                entity.DeadlineDate = requestDto.DeadlineDate;
-                entity.EventDate = requestDto.EventDate;
-                entity.Eligibility = requestDto.Eligibility;
-                entity.Division = requestDto.Division;
-                entity.ContactNumber = requestDto.ContactNumber;
-                entity.Location = requestDto.Location;
-                entity.Description = requestDto.Description;
-                entity.BrochureUrl = requestDto.BrochureUrl;
-                entity.UpdatedBy = requestDto.CreatedBy;
-                entity.UpdatedDate = DateTime.UtcNow;
-
-                _context.EventDetails.Update(entity);
+                return ApiResponseDTO.Failure("Failed to save event.", ex.Message);
             }
-
-            await _context.SaveChangesAsync();
-
-            return new EventDetailsResponseDTO
-            {
-                EventId = entity.EventId,
-                EventName = entity.EventName,
-                DeadlineDate = entity.DeadlineDate,
-                EventDate = entity.EventDate,
-                Eligibility = entity.Eligibility,
-                Division = entity.Division,
-                ContactNumber = entity.ContactNumber,
-                Location = entity.Location,
-                Description = entity.Description,
-                BrochureUrl = entity.BrochureUrl
-            };
         }
 
-        public async Task<List<EventDetailsResponseDTO>> GetTodaysEventsAsync()
+        public async Task<ApiResponseDTO> getTodaysEventsAsync()
         {
-            var today = DateTime.UtcNow.Date;
+            try
+            {
+                var today = DateTime.Now.Date;
+                var events = await _dbContext.events
+                    .Where(e => e.isActive && e.eventDate >= today)
+                    .Select(e => new EventDTO
+                    {
+                        eventId = e.eventId,
+                        eventName = e.eventName,
+                        contactNumber = e.contactNumber,
+                        deadlineDate = e.deadlineDate,
+                        eventDate = e.eventDate,
+                        eligibility = e.eligibility,
+                        description = e.description,
+                        location = e.location,
+                        division = e.division,
+                        brochureUrl = e.brochureImage
+                    })
+                    .OrderBy(e => e.eventDate)
+                    .ToListAsync();
 
-            return await _context.EventDetails
-                .Where(e => e.IsActive && e.EventDate.HasValue && e.EventDate.Value.Date == today)
-                .Select(e => new EventDetailsResponseDTO
-                {
-                    EventId = e.EventId,
-                    EventName = e.EventName,
-                    DeadlineDate = e.DeadlineDate,
-                    EventDate = e.EventDate,
-                    Eligibility = e.Eligibility,
-                    Division = e.Division,
-                    ContactNumber = e.ContactNumber,
-                    Location = e.Location,
-                    Description = e.Description,
-                    BrochureUrl = e.BrochureUrl
-                })
-                .ToListAsync();
+                return ApiResponseDTO.Success(events);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseDTO.Failure("Error while fetching today's events.", ex.Message);
+            }
         }
     }
 }

@@ -1,54 +1,39 @@
-﻿using KSI_Project.Interfaces;
-using KSI_Project.Models.DTOs;
-using KSI_Project.Models.Entity;
-using KSI_Project.Repositories;
-using Microsoft.AspNetCore.Mvc;
-using static KSI_Project.Models.DTOs.StudentTimetableDTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
+using ksi_project.Interfaces;
+using ksi_project.Models.DTOs;
 
-namespace KSI_Project.Controllers
+namespace ksi_project.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
     public class TimetableController : Controller
     {
-        private readonly ITimetableRepository _timetableRepo;
+        private readonly ITimetableRepository _timetableRepository;
 
-        public TimetableController(ITimetableRepository timetableRepo)
+        public TimetableController(ITimetableRepository timetableRepository)
         {
-            _timetableRepo = timetableRepo;
-        }
-        public IActionResult Index()
-        {
-            return View();
-        }
-        [HttpPost("Save")]
-        public async Task<ActionResult<APIResponseDTO>> Save([FromForm] StudentTimetableRequestDTO requestDto)
-        {
-            try
-            {
-                var result = await _timetableRepo.SaveAsync(requestDto);
-                return Ok(new APIResponseDTO { StatusCode = 200, Message = "Saved successfully", Data = result });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new APIResponseDTO { StatusCode = 500, Message = "Error saving", ErrorDetails = ex.Message });
-            }
+            _timetableRepository = timetableRepository;
         }
 
         [HttpGet("GetByDay")]
-        public async Task<ActionResult<APIResponseDTO>> GetByDay(string batch, string dept, string section, string day)
+        public async Task<IActionResult> GetByDay(string batch, string dept, string section, string day)
         {
             try
             {
-                var result = await _timetableRepo.GetByDayAsync(batch, dept, section, day);
-                if (result.Count == 0)
-                    return Ok(new APIResponseDTO { StatusCode = 404, Message = "No timetable found", Data = result });
+                if (string.IsNullOrEmpty(batch) || string.IsNullOrEmpty(dept) || string.IsNullOrEmpty(section) || string.IsNullOrEmpty(day))
+                    return Json(ApiResponseDTO.Failure("All dropdown values are required."));
 
-                return Ok(new APIResponseDTO { StatusCode = 200, Message = "Success", Data = result });
+                var timetableData = await _timetableRepository.GetTimetableByDayAsync(batch, dept, section, day);
+
+                if (timetableData == null || timetableData.Count == 0)
+                    return Json(ApiResponseDTO.Failure("No timetable found for the selected criteria."));
+
+                return Json(ApiResponseDTO.Success(timetableData, "Timetable fetched successfully."));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new APIResponseDTO { StatusCode = 500, Message = "Error fetching", ErrorDetails = ex.Message });
+                return Json(ApiResponseDTO.Failure("An error occurred while fetching timetable.", ex.Message));
             }
         }
     }

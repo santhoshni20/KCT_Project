@@ -1,13 +1,11 @@
-﻿using KSI_Project.Models.DTOs;
-using KSI_Project.Models.Entity;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using static KSI_Project.Models.DTOs.StudentTimetableDTO;
+using ksi_project.Models.DTOs;
 
-namespace KSI_Project.Interfaces
+namespace ksi_project.Interfaces
 {
     public interface ITimetableRepository
     {
-        Task<StudentTimetableResponseDTO> SaveAsync(StudentTimetableRequestDTO requestDto);
-        Task<List<StudentTimetableResponseDTO>> GetByDayAsync(string batch, string dept, string section, string day);
+        Task<List<TimetableDTO>> GetTimetableByDayAsync(string batch, string dept, string section, string day);
     }
 }

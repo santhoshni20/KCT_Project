@@ -1,10 +1,13 @@
-﻿namespace KSI_Project.Models.DTOs
+﻿namespace ksi_project.Models.DTOs
 {
-    public class TimetableDto
+    public class TimetableDTO
     {
-        public string Day { get; set; }
-        public string Section { get; set; }
-        public string[] Hours { get; set; } // cleaner than Hr1, Hr2, Hr3
+        public int timetableId { get; set; }
+        public string batch { get; set; }
+        public string department { get; set; }
+        public string section { get; set; }
+        public string dayOfWeek { get; set; }
+        public int hourNo { get; set; }
+        public string subject { get; set; }
     }
-
 }

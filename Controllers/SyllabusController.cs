@@ -1,60 +1,64 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using KSI_Project.Models.Entity;
-using KSI_Project.Models.DTOs;
-using KSI_Project.Interfaces;
-using KSI_Project.Repository;
+﻿//using ksi_project.Helpers;
+using ksi_project.Interfaces;
+using ksi_project.Models.DTOs;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
-namespace KSI_Project.Controllers
+namespace ksi_project.Controllers
 {
     public class SyllabusController : Controller
     {
-        private readonly ISyllabusRepository syllabusRepository;
+        private readonly ISyllabusRepository _syllabusRepository;
 
         public SyllabusController(ISyllabusRepository syllabusRepository)
         {
-            this.syllabusRepository = syllabusRepository;
+            _syllabusRepository = syllabusRepository;
         }
+
+        [HttpGet]
         public IActionResult Index()
         {
-            return View();
+            return View(); // syllabus.cshtml frontend page
         }
-        [HttpGet]
+
+        [HttpGet("Syllabus/DownloadSyllabus")]
         public async Task<IActionResult> DownloadSyllabus(string batch, string dept)
         {
-            var response = new APIResponseDTO();
-
-            try
+            if (string.IsNullOrEmpty(batch) || string.IsNullOrEmpty(dept))
             {
-                if (string.IsNullOrEmpty(batch) || string.IsNullOrEmpty(dept))
+                return Json(new ApiResponseDTO
                 {
-                    response.StatusCode = 400;
-                    response.Message = "Batch and department are required.";
-                    return BadRequest(response);
-                }
-
-                var syllabus = await syllabusRepository.getSyllabusByBatchAndDeptAsync(batch, dept);
-
-                if (syllabus == null)
-                {
-                    response.StatusCode = 404;
-                    response.Message = "Syllabus not found.";
-                    return NotFound(response);
-                }
-
-                response.StatusCode = 200;
-                response.Message = "Syllabus retrieved successfully.";
-                response.Data = syllabus;
-
-                // Redirect user to syllabus PDF link from DB
-                return Redirect(syllabus.link);
+                    statusCode = 400,
+                    message = "Batch and Department are required."
+                });
             }
-            catch (Exception ex)
+
+            // Normalize department name
+            switch (dept.Trim().ToUpper())
             {
-                response.StatusCode = 500;
-                response.Message = "An error occurred while fetching syllabus.";
-                response.ErrorDetails = ex.Message;
-                return StatusCode(500, response);
+                case "AIDS":
+                case "AI&DS":
+                case "AI_AND_DS":
+                case "AI_DS":
+                    dept = "AI & DS"; // must match DB
+                    break;
+                default:
+                    dept = dept.Trim();
+                    break;
             }
+
+            var response = await _syllabusRepository.GetSyllabusByBatchAndDepartmentAsync(batch.Trim(), dept);
+
+            // ✅ If syllabus found, redirect to the file link
+            if (response.statusCode == 200 && response.data is SyllabusDTO syllabus && !string.IsNullOrEmpty(syllabus.syllabusLink))
+            {
+                // If syllabusLink is a Drive or file URL, open directly
+                return Redirect(syllabus.syllabusLink);
+            }
+
+            // Otherwise return JSON error
+            return Json(response);
         }
+
     }
 }

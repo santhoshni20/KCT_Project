@@ -1,14 +1,11 @@
-﻿using KSI_Project.Models.DTOs;
-using KSI_Project.Models.Entity;
-using System.Threading.Tasks;
-using static KSI_Project.Models.DTOs.EventDetailsDTO;
+﻿using System.Threading.Tasks;
+using ksi_project.Models.DTOs;
 
-namespace KSI_Project.Repository.Interfaces
+namespace ksi_project.Repository.Interface
 {
     public interface IEventDetailsRepository
     {
-        Task<EventDetailsResponseDTO> SaveEventAsync(EventDetailsRequestDTO requestDto);
-        Task<List<EventDetailsResponseDTO>> GetTodaysEventsAsync();
+        Task<ApiResponseDTO> SaveEventAsync(EventDTO eventDTO);
+        Task<ApiResponseDTO> GetTodaysEventsAsync();
     }
 }
-

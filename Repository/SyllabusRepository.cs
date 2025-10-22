@@ -1,38 +1,72 @@
-﻿using KSI_Project.Helpers.DbContexts;
-using KSI_Project.Interfaces;
-using KSI_Project.Models.DTOs;
-using KSI_Project.Models.Entity;
+﻿//using ksi_project.Helpers;
+using ksi_project.Interfaces;
+using ksi_project.Models.DTOs;
+using ksi_project.Models.Entity;
+using KSI_Project.Helpers.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using MySql.Data.MySqlClient;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KSI_Project.Repository
+namespace ksi_project.Repositories
 {
     public class SyllabusRepository : ISyllabusRepository
     {
-        private readonly ksiDbContext dbContext;
+        private readonly ksiDbContext _context;
 
-        public SyllabusRepository(ksiDbContext dbContext)
+        public SyllabusRepository(ksiDbContext context)
         {
-            this.dbContext = dbContext;
+            _context = context;
         }
 
-        public async Task<SyllabusDTO> getSyllabusByBatchAndDeptAsync(string batch, string dept)
+        public async Task<ApiResponseDTO> GetSyllabusByBatchAndDepartmentAsync(string batch, string department)
         {
-            // Optimize query with join to department
-            var syllabus = await dbContext.Syllabi
-                .Where(s => s.isActive && s.department.departmentName.Contains(dept))
-                .Select(s => new SyllabusDTO
-                {
-                    syllabusId = s.syllabusId,
-                    departmentId = s.departmentId,
-                    link = s.link
-                })
-                .FirstOrDefaultAsync();
+            try
+            {
+                var syllabus = await _context.syllabus
+                    //.Where(s => s.isActive == true
+                    //            && s.batch.ToLower() == batch.ToLower()
+                    //            && s.department.ToLower() == department.ToLower())
+                    .Where(s => s.isActive == true
+                                && s.batch.Trim().ToLower() == batch.Trim().ToLower()
+                                && s.department.Trim().ToLower() == department.Trim().ToLower())
 
-            return syllabus;
+                    .Select(s => new SyllabusDTO
+                    {
+                        syllabusId = s.syllabusId,
+                        batch = s.batch,
+                        department = s.department,
+                        syllabusLink = s.syllabusLink,
+                        isActive = s.isActive
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (syllabus == null)
+                {
+                    return new ApiResponseDTO
+                    {
+                        statusCode = 404,
+                        message = "Syllabus not found for the selected batch and department.",
+                        data = null
+                    };
+                }
+
+                return new ApiResponseDTO
+                {
+                    statusCode = 200,
+                    message = "Syllabus fetched successfully.",
+                    data = syllabus
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponseDTO
+                {
+                    statusCode = 500,
+                    message = "Error fetching syllabus.",
+                    errorDetails = ex.Message
+                };
+            }
         }
     }
 }

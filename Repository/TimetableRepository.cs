@@ -1,13 +1,13 @@
-﻿using KSI_Project.Helpers.DbContexts;
-using KSI_Project.Interfaces;
-using KSI_Project.Models.DTOs;
-using KSI_Project.Models.Entity;
+﻿//using ksi_project.Helpers.DbContexts;
+using ksi_project.Interfaces;
+using ksi_project.Models.DTOs;
+using KSI_Project.Helpers.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static KSI_Project.Models.DTOs.StudentTimetableDTO;
 
-namespace KSI_Project.Repository
+namespace ksi_project.Repositories
 {
     public class TimetableRepository : ITimetableRepository
     {
@@ -18,72 +18,28 @@ namespace KSI_Project.Repository
             _context = context;
         }
 
-        public async Task<StudentTimetableResponseDTO> SaveAsync(StudentTimetableRequestDTO requestDto)
+        public async Task<List<TimetableDTO>> GetTimetableByDayAsync(string batch, string dept, string section, string day)
         {
-            StudentTimetable entity;
-
-            if (requestDto.TimetableID == 0) // Insert
-            {
-                entity = new StudentTimetable
+            var timetableList = await _context.timetable
+                .Where(t => t.isActive == true &&
+                            t.batch == batch &&
+                            t.department == dept &&
+                            t.section == section &&
+                            t.dayOfWeek.ToLower() == day.ToLower())
+                .OrderBy(t => t.hour)
+                .Select(t => new TimetableDTO
                 {
-                    DepartmentID = requestDto.DepartmentID,
-                    Section = requestDto.Section,
-                    Day = requestDto.Day,
-                    HourNumber = requestDto.HourNumber,
-                    Subject = requestDto.Subject,
-                    CreatedBy = requestDto.CreatedBy,
-                    CreatedDate = DateTime.UtcNow,
-                    IsActive = true
-                };
-
-                _context.StudentTimetables.Add(entity);
-            }
-            else // Update
-            {
-                entity = await _context.StudentTimetables
-                    .FirstOrDefaultAsync(t => t.TimetableID == requestDto.TimetableID && t.IsActive);
-
-                if (entity == null) throw new Exception("Timetable entry not found.");
-
-                entity.DepartmentID = requestDto.DepartmentID;
-                entity.Section = requestDto.Section;
-                entity.Day = requestDto.Day;
-                entity.HourNumber = requestDto.HourNumber;
-                entity.Subject = requestDto.Subject;
-                entity.UpdatedBy = requestDto.CreatedBy;
-                entity.UpdatedDate = DateTime.UtcNow;
-
-                _context.StudentTimetables.Update(entity);
-            }
-
-            await _context.SaveChangesAsync();
-
-            return new StudentTimetableResponseDTO
-            {
-                TimetableID = entity.TimetableID,
-                DepartmentID = entity.DepartmentID,
-                Section = entity.Section,
-                Day = entity.Day,
-                HourNumber = entity.HourNumber,
-                Subject = entity.Subject
-            };
-        }
-
-        public async Task<List<StudentTimetableResponseDTO>> GetByDayAsync(string batch, string dept, string section, string day)
-        {
-            return await _context.StudentTimetables
-                .Where(t => t.IsActive && t.Day == day && t.Section == section)
-                .Select(t => new StudentTimetableResponseDTO
-                {
-                    TimetableID = t.TimetableID,
-                    DepartmentID = t.DepartmentID,
-                    Section = t.Section,
-                    Day = t.Day,
-                    HourNumber = t.HourNumber,
-                    Subject = t.Subject
+                    timetableId = t.timetableId,
+                    batch = t.batch,
+                    department = t.department,
+                    section = t.section,
+                    dayOfWeek = t.dayOfWeek,
+                    hourNo = t.hour,
+                    subject = t.subjectName
                 })
-                .OrderBy(t => t.HourNumber)
                 .ToListAsync();
+
+            return timetableList;
         }
     }
 }

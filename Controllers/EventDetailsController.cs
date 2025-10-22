@@ -1,76 +1,83 @@
-﻿using KSI_Project.Interfaces;
-using KSI_Project.Models.DTOs;
-using KSI_Project.Models.Entity;
-using KSI_Project.Repositories;
-using KSI_Project.Repository.Implementations;
-using KSI_Project.Repository.Interfaces;
+﻿using ksi_project.Models.DTOs;
+using ksi_project.Repository.Interface;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static KSI_Project.Models.DTOs.EventDetailsDTO;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
-namespace KSI_Project.Controllers
+namespace ksi_project.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
     public class EventDetailsController : Controller
     {
-        private readonly IEventDetailsRepository _eventDetailsRepository;
+        private readonly IEventDetailsRepository _eventRepository;
+        private readonly IWebHostEnvironment _env;
+
+        public EventDetailsController(IEventDetailsRepository eventRepository, IWebHostEnvironment env)
+        {
+            _eventRepository = eventRepository;
+            _env = env;
+        }
+
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
-        public EventDetailsController(IEventDetailsRepository eventDetailsRepository)
-        {
-            _eventDetailsRepository = eventDetailsRepository;
-        }
 
-        [HttpPost("SaveEvent")]
-        public async Task<ActionResult<APIResponseDTO>> SaveEvent([FromForm] EventDetailsRequestDTO requestDto)
+        [HttpPost]
+        public async Task<IActionResult> SaveEvent(IFormCollection form)
         {
             try
             {
-                var result = await _eventDetailsRepository.SaveEventAsync(requestDto);
+                string brochureUrl = null;
+                var file = form.Files["BrochureFile"];
 
-                return Ok(new APIResponseDTO
+                if (file != null && file.Length > 0)
                 {
-                    StatusCode = 200,
-                    Message = "Event saved successfully.",
-                    Data = result
-                });
+                    string uploadDir = Path.Combine(_env.WebRootPath, "uploads", "brochures");
+                    if (!Directory.Exists(uploadDir))
+                        Directory.CreateDirectory(uploadDir);
+
+                    string fileName = $"{Guid.NewGuid()}_{file.FileName}";
+                    string filePath = Path.Combine(uploadDir, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                        await file.CopyToAsync(stream);
+
+                    brochureUrl = $"/uploads/brochures/{fileName}";
+                }
+
+                var eventDTO = new EventDTO
+                {
+                    eventName = form["EventName"],
+                    contactNumber = form["ContactNumber"],
+                    deadlineDate = DateTime.TryParse(form["DeadlineDate"], out var dd) ? dd : null,
+                    eventDate = DateTime.TryParse(form["EventDate"], out var ed) ? ed : null,
+                    eligibility = form["Eligibility"],
+                    description = form["Description"],
+                    location = form["Location"],
+                    division = form["Division"],
+                    brochureUrl = brochureUrl,
+                    createdBy = form["CreatedBy"].ToString()  // always string
+                };
+
+                var response = await _eventRepository.SaveEventAsync(eventDTO);
+                return Json(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new APIResponseDTO
-                {
-                    StatusCode = 500,
-                    Message = "An error occurred while saving event.",
-                    ErrorDetails = ex.Message
-                });
+                Console.WriteLine(ex.ToString());
+                return Json(ApiResponseDTO.Failure("Error while saving event.", ex.Message));
             }
         }
 
-        [HttpGet("GetTodaysEvents")]
-        public async Task<ActionResult<APIResponseDTO>> GetTodaysEvents()
+        [HttpGet]
+        public async Task<IActionResult> GetTodaysEvents()
         {
-            try
-            {
-                var result = await _eventDetailsRepository.GetTodaysEventsAsync();
-
-                return Ok(new APIResponseDTO
-                {
-                    StatusCode = 200,
-                    Message = "Events retrieved successfully.",
-                    Data = result
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new APIResponseDTO
-                {
-                    StatusCode = 500,
-                    Message = "An error occurred while fetching events.",
-                    ErrorDetails = ex.Message
-                });
-            }
+            var response = await _eventRepository.GetTodaysEventsAsync();
+            return Json(response);
         }
     }
 }

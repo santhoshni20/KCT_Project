@@ -1,30 +1,32 @@
-﻿using KSI_Project.Models.Entity;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace KSI_Project.Models.Entity
+namespace ksi.Models.Entity
 {
-    public class Canteen
+    [Table("canteen")]
+    public class canteen
     {
-        public int ItemID { get; set; }
-        public int CanteenID { get; set; }
-        public string DishName { get; set; }
-        public string Availability { get; set; }
-        public decimal Price { get; set; }
+        [Key]
+        public int item_id { get; set; }
 
-        public bool Morning { get; set; }
-        public bool Afternoon { get; set; }
-        public bool Evening { get; set; }
-        public bool Snacks { get; set; }
+        [ForeignKey("canteen_id")]
+        public int canteen_id { get; set; }
 
-        // Audit fields
-        public bool IsActive { get; set; } = true;
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
-        public string CreatedBy { get; set; } = "Admin";
-        public DateTime? UpdatedDate { get; set; }
-        public string? UpdatedBy { get; set; }
-        public DateTime? DeletedDate { get; set; }
-        public string? DeletedBy { get; set; }
+        public string dish_name { get; set; }
+        public string availability { get; set; }
+        public decimal price { get; set; }
+        public bool morning { get; set; }
+        public bool afternoon { get; set; }
+        public bool evening { get; set; }
+        public bool snacks { get; set; }
 
-        // Navigation
-        public CanteenId CanteenDetails { get; set; } // Renamed property to avoid conflict with class name
+        public bool is_active { get; set; }
+        public DateTime created_date { get; set; }
+        public string? created_by { get; set; }
+        public DateTime? updated_date { get; set; }
+        public string? updated_by { get; set; }
+        public DateTime? deleted_date { get; set; }
+        public string? deleted_by { get; set; }
     }
 }

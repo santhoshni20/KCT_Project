@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
-using KSI_Project.Models.Entity;
-using KSI_Project.Models.DTOs;
+﻿//using ksi_project.Helpers;
+using ksi_project.Models.DTOs;
+using System.Threading.Tasks;
 
-namespace KSI_Project.Interfaces
+namespace ksi_project.Interfaces
 {
     public interface ISyllabusRepository
     {
-        Task<SyllabusDTO> getSyllabusByBatchAndDeptAsync(string batch, string dept);
+        Task<ApiResponseDTO> GetSyllabusByBatchAndDepartmentAsync(string batch, string department);
     }
 }

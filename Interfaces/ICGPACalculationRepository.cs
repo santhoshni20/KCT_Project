@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
-using KSI_Project.Models.Entity;
-using KSI_Project.Models.DTOs;
+﻿//using System.Threading.Tasks;
+////using KSI_Project.Models.Entity;
+//using KSI_Project.Models.DTOs;
 
-namespace KSI_Project.Interfaces
-{
-    public interface ICGPACalculationRepository
-    {
-        CgpaResponseDTO CalculateSgpa(CgpaRequestDTO requestDto);
-    }
-}
+//namespace KSI_Project.Interfaces
+//{
+//    public interface ICGPACalculationRepository
+//    {
+//        CgpaResponseDTO CalculateSgpa(CgpaRequestDTO requestDto);
+//    }
+//}

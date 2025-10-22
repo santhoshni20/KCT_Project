@@ -149,17 +149,18 @@
 
         dayDropdown.addEventListener("change", function () {
             const batch = batchDropdown.value;
-            const dept = deptDropdown.value;
+            const dept = deptDropdown.value; // "AIDS-A"
             const day = this.value;
 
             if (batch && dept && day) {
-                fetch(`/Timetable/GetByDay?batch=${batch}&dept=${dept}&day=${day}`)
+                const [department, section] = dept.split('-');
+
+                fetch(`/Timetable/GetByDay?batch=${batch}&dept=${department}&section=${section}&day=${day.toLowerCase()}`)
                     .then(response => response.json())
                     .then(resp => {
                         timetableBody.innerHTML = "";
 
-                        if (resp.success) {
-                            console.log('resp.data', resp.data);
+                        if (resp.statusCode === 200 && resp.data.length > 0) {
                             for (let hour = 1; hour <= 7; hour++) {
                                 const rowData = resp.data.find(r => parseInt(r.hourNo) === hour);
                                 const tr = document.createElement("tr");
@@ -179,5 +180,6 @@
                     });
             }
         });
+
     </script>
 }

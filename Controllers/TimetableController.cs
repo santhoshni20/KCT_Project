@@ -15,7 +15,11 @@ namespace ksi_project.Controllers
         {
             _timetableRepository = timetableRepository;
         }
-
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
+        }
         [HttpGet("GetByDay")]
         public async Task<IActionResult> GetByDay(string batch, string dept, string section, string day)
         {

@@ -33,25 +33,32 @@ namespace ksi_project.Controllers
                 });
             }
 
-            var response = await _syllabusRepository.GetSyllabusByBatchAndDepartmentAsync(batch, dept);
-
-            if (response.statusCode != 200)
+            // Normalize department name
+            switch (dept.Trim().ToUpper())
             {
-                return Json(response);
+                case "AIDS":
+                case "AI&DS":
+                case "AI_AND_DS":
+                case "AI_DS":
+                    dept = "AI & DS"; // must match DB
+                    break;
+                default:
+                    dept = dept.Trim();
+                    break;
             }
 
-            var syllabusData = response.data as ksi_project.Models.DTOs.SyllabusDTO;
-            if (syllabusData == null || string.IsNullOrEmpty(syllabusData.syllabusLink))
+            var response = await _syllabusRepository.GetSyllabusByBatchAndDepartmentAsync(batch.Trim(), dept);
+
+            // ✅ If syllabus found, redirect to the file link
+            if (response.statusCode == 200 && response.data is SyllabusDTO syllabus && !string.IsNullOrEmpty(syllabus.syllabusLink))
             {
-                return Json(new ApiResponseDTO
-                {
-                    statusCode = 404,
-                    message = "Syllabus link not found."
-                });
+                // If syllabusLink is a Drive or file URL, open directly
+                return Redirect(syllabus.syllabusLink);
             }
 
-            // Redirect to PDF or external link (Google Drive or file URL)
-            return Redirect(syllabusData.syllabusLink);
+            // Otherwise return JSON error
+            return Json(response);
         }
+
     }
 }

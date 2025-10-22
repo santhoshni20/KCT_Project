@@ -24,9 +24,13 @@ namespace ksi_project.Repositories
             try
             {
                 var syllabus = await _context.syllabus
+                    //.Where(s => s.isActive == true
+                    //            && s.batch.ToLower() == batch.ToLower()
+                    //            && s.department.ToLower() == department.ToLower())
                     .Where(s => s.isActive == true
-                                && s.batch.ToLower() == batch.ToLower()
-                                && s.department.ToLower() == department.ToLower())
+                                && s.batch.Trim().ToLower() == batch.Trim().ToLower()
+                                && s.department.Trim().ToLower() == department.Trim().ToLower())
+
                     .Select(s => new SyllabusDTO
                     {
                         syllabusId = s.syllabusId,

@@ -46,10 +46,10 @@
         <label class="batch-label">Batch</label>
         <select class="form-select w-auto" id="batchDropdown">
             <option value="">-- Select Batch --</option>
-            <option value="2022">2022 - 2026</option>
-            <option value="2023">2023 - 2027</option>
-            <option value="2024">2024 - 2028</option>
-            <option value="2025">2025 - 2029</option>
+            <option value="2022-2026">2022 - 2026</option>
+            <option value="2023-2027">2023 - 2027</option>
+            <option value="2024-2028">2024 - 2028</option>
+            <option value="2025-2029">2025 - 2029</option>
         </select>
     </div>
 
@@ -74,12 +74,12 @@
 
     <script>
         const deptOptions = [
-            { value: "AIDS", text: "Artificial Intelligence and Data Science" },
+            { value: "AI_DS", text: "Artificial Intelligence and Data Science" },
             { value: "CSE", text: "Computer Science and Engineering" },
             { value: "IT", text: "Information Technology" }
         ];
 
-        document.getElementById("batchDropdown").addEventListener("change", function () {
+          document.getElementById("batchDropdown").addEventListener("change", function () {
             var batch = this.value;
             var deptDropdown = document.getElementById("deptDropdown");
             deptDropdown.innerHTML = "<option value=''>-- Select Department --</option>";
@@ -111,7 +111,26 @@
             }
 
             // Call backend syllabus controller
-            window.location.href = "/Syllabus/DownloadSyllabus?batch=" + batch + "&dept=" + dept;
+            //window.location.href = "/Syllabus/DownloadSyllabus?batch=" + batch + "&dept=" + dept;
+            // window.open("/Syllabus/DownloadSyllabus?batch=" + batch + "&dept=" + dept, "_blank");
+            fetch(`/Syllabus/DownloadSyllabus?batch=${batch}&dept=${dept}`)
+            .then(response => {
+                // If controller redirected, open that URL
+                if (response.redirected) {
+                    window.open(response.url, "_blank");
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data && data.statusCode !== 200) {
+                    alert(data.message || "Syllabus not found!");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error downloading syllabus.");
+            });
         });
     </script>
 }

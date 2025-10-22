@@ -8,7 +8,7 @@ namespace ksi_project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlacementSupportController : ControllerBase
+    public class PlacementSupportController : Controller
     {
         private readonly IPlacementSupportRepository _placementSupportRepository;
 
@@ -16,7 +16,11 @@ namespace ksi_project.Controllers
         {
             _placementSupportRepository = placementSupportRepository;
         }
-
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
+        }
         [HttpGet("GetDomains")]
         public async Task<ApiResponseDTO> GetDomains()
         {

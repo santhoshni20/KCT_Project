@@ -37,7 +37,7 @@ namespace ksi_project.Controllers
             }
             catch (Exception ex)
             {
-                return Json(ApiResponseDTO.Failure("An error occurred while fetching timetable.", ex.Message));
+                return Json(new { statusCode = 500, message = ex.Message, stackTrace = ex.StackTrace });
             }
         }
     }

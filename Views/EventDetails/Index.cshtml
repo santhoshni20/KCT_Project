@@ -71,15 +71,14 @@
             transition: background 0.3s;
         }
 
-        .event-card .btn-view:hover {
-            background-color: #e63e3e;
-        }
-
+            .event-card .btn-view:hover {
+                background-color: #e63e3e;
+            }
 </style>
 
 <div class="container mt-5">
     <h2 class="mb-4">Event Details</h2>
-    <button class="btn btn-primary float-end mb-3" data-bs-toggle="modal" data-bs-target="#eventModal">
+    <button id="btnAddEvent" class="btn btn-primary float-end mb-3">
         <i class="fas fa-plus"></i> Add Event
     </button>
 
@@ -166,16 +165,25 @@
 
     <script>
         $(document).ready(function () {
-            loadEvents();
+            // Bootstrap 5 modal instances
+            var eventModal = new bootstrap.Modal(document.getElementById('eventModal'), { backdrop: 'static', keyboard: false });
+            var eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'), { backdrop: 'static', keyboard: false });
 
+            // Open Add Event modal
+            $('#btnAddEvent').click(function () {
+                $('#eventForm')[0].reset();
+                eventModal.show();
+            });
+
+            // Handle form submit
             $('#eventForm').submit(function (e) {
                 e.preventDefault();
 
                 var formData = new FormData();
                 formData.append("EventName", $('[name="eventName"]').val());
                 formData.append("DeadlineDate", $('[name="deadlineDate"]').val());
-                formData.append("EventId", 0); // or existing id for update
-                formData.append("CreatedBy", 1); // replace with logged-in user id
+                formData.append("EventId", 0);
+                formData.append("CreatedBy", 1);
                 formData.append("EventDate", $('[name="eventDate"]').val());
                 formData.append("Eligibility", $('[name="eligibility"]').val());
                 formData.append("Division", $('[name="division"]').val());
@@ -195,9 +203,9 @@
                     contentType: false,
                     success: function (res) {
                         if (res.success) {
-                            $('#eventModal').modal('hide');
-                            $('#eventForm')[0].reset();
-                            loadEvents();
+                            eventModal.hide();             // close modal
+                            $('#eventForm')[0].reset();    // reset form
+                            loadEvents();                  // reload events
                         } else {
                             alert(res.message || "Failed to save event.");
                         }
@@ -205,11 +213,11 @@
                 });
             });
 
+            // Load events
             function loadEvents() {
                 $.get('/EventDetails/GetTodaysEvents', function (res) {
                     if (!res || !res.data) return;
                     let grouped = {};
-
                     res.data.forEach(e => {
                         let dateKey = e.eventDate ? formatDate(e.eventDate) : 'Unknown Date';
                         if (!grouped[dateKey]) grouped[dateKey] = [];
@@ -221,16 +229,13 @@
                         html += `<div class="event-section">
                                     <h4>${date}</h4>
                                     <div class="event-slider">`;
-                       
-
                         grouped[date].forEach(ev => {
-                           
                             html += `<div class="event-card">
-                                <img src="${ev.brochureUrl || 'https://via.placeholder.com/100'}" alt="${ev.eventName}">
-                                <h5>${ev.eventName}</h5>
-                                <p>${ev.location || ''}</p>
-                                <button class="btn-view" onclick='showDetails(${JSON.stringify(ev)})'>View Details</button>
-                             </div>`;
+                                        <img src="${ev.brochureUrl || 'https://via.placeholder.com/100'}" alt="${ev.eventName}">
+                                        <h5>${ev.eventName}</h5>
+                                        <p>${ev.location || ''}</p>
+                                        <button class="btn-view" onclick='showDetails(${JSON.stringify(ev)})'>View Details</button>
+                                     </div>`;
                         });
                         html += `</div></div>`;
                     }
@@ -238,9 +243,9 @@
                 });
             }
 
+            // Show event details modal
             window.showDetails = function (ev) {
                 $('#eventDetailsTitle').text(ev.eventName);
-               
                 $('#eventDetailsDate').text(formatDate(ev.eventDate));
                 $('#eventDetailsDeadline').text(formatDate(ev.deadlineDate));
                 $('#eventDetailsEligibility').text(ev.eligibility || '');
@@ -249,18 +254,20 @@
                 $('#eventDetailsLocation').text(ev.location || '');
                 $('#eventDetailsDescription').text(ev.description || '');
                 $('#eventDetailsBrochure').html(ev.brochureUrl ? `<a href="${ev.brochureUrl}" target="_blank">📄 View Brochure</a>` : '');
-                $('#eventDetailsModal').modal('show');
+                eventDetailsModal.show();
             }
+
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                let dateObj = new Date(dateStr);
+                let dd = String(dateObj.getDate()).padStart(2, '0');
+                let mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                let yy = String(dateObj.getFullYear()).slice(-2);
+                return `${dd}/${mm}/${yy}`;
+            }
+
+            // Initial load
+            loadEvents();
         });
-
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
-            let dateObj = new Date(dateStr);
-            let dd = String(dateObj.getDate()).padStart(2, '0');
-            let mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-            let yy = String(dateObj.getFullYear()).slice(-2);
-            return `${dd}/${mm}/${yy}`;
-        }
-
     </script>
 }

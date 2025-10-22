@@ -13,7 +13,7 @@ namespace ksi_project.Models.DTOs
         public string description { get; set; }
         public string location { get; set; }
         public string division { get; set; }
-        public string brochureUrl { get; set; }
+        public string brochureUrl { get; set; }  // maps to brochure_image in DB
         public string createdBy { get; set; }
     }
 }

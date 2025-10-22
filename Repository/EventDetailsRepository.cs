@@ -1,13 +1,10 @@
-﻿//using ksi_project.Helpers.DbContexts;
-using ksi_project.Models.DTOs;
+﻿using ksi_project.Models.DTOs;
 using ksi_project.Models.Entity;
 using ksi_project.Repository.Interface;
 using KSI_Project.Helpers.DbContexts;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,7 +21,7 @@ namespace ksi_project.Repository.Implementation
             _env = env;
         }
 
-        public async Task<ApiResponseDTO> saveEventAsync(EventDTO eventDTO)
+        public async Task<ApiResponseDTO> SaveEventAsync(EventDTO eventDTO)
         {
             try
             {
@@ -49,16 +46,18 @@ namespace ksi_project.Repository.Implementation
             }
             catch (Exception ex)
             {
+                // Log exception in console for debugging
+                Console.WriteLine(ex.ToString());
                 return ApiResponseDTO.Failure("Failed to save event.", ex.Message);
             }
         }
 
-        public async Task<ApiResponseDTO> getTodaysEventsAsync()
+        public async Task<ApiResponseDTO> GetTodaysEventsAsync()
         {
             try
             {
                 var today = DateTime.Now.Date;
-                var events = await _dbContext.events
+                var eventsList = await _dbContext.events
                     .Where(e => e.isActive && e.eventDate >= today)
                     .Select(e => new EventDTO
                     {
@@ -76,11 +75,12 @@ namespace ksi_project.Repository.Implementation
                     .OrderBy(e => e.eventDate)
                     .ToListAsync();
 
-                return ApiResponseDTO.Success(events);
+                return ApiResponseDTO.Success(eventsList);
             }
             catch (Exception ex)
             {
-                return ApiResponseDTO.Failure("Error while fetching today's events.", ex.Message);
+                Console.WriteLine(ex.ToString());
+                return ApiResponseDTO.Failure("Error fetching today's events.", ex.Message);
             }
         }
     }

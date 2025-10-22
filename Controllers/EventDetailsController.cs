@@ -20,6 +20,12 @@ namespace ksi_project.Controllers
             _env = env;
         }
 
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> SaveEvent(IFormCollection form)
         {
@@ -54,14 +60,15 @@ namespace ksi_project.Controllers
                     location = form["Location"],
                     division = form["Division"],
                     brochureUrl = brochureUrl,
-                    createdBy = form["CreatedBy"]
+                    createdBy = form["CreatedBy"].ToString()  // always string
                 };
 
-                var response = await _eventRepository.saveEventAsync(eventDTO);
+                var response = await _eventRepository.SaveEventAsync(eventDTO);
                 return Json(response);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 return Json(ApiResponseDTO.Failure("Error while saving event.", ex.Message));
             }
         }
@@ -69,7 +76,7 @@ namespace ksi_project.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTodaysEvents()
         {
-            var response = await _eventRepository.getTodaysEventsAsync();
+            var response = await _eventRepository.GetTodaysEventsAsync();
             return Json(response);
         }
     }

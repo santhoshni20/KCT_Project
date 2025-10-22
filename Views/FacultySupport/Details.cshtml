@@ -1,16 +1,75 @@
 ﻿@model KSI_Project.Models.DTOs.FacultyDto
 
 <div class="container py-4">
-    <div class="card mx-auto shadow-sm" style="max-width:600px;">
-        <img src="@Model.PhotoPath" class="card-img-top" alt="@Model.FacultyName" style="object-fit:cover;height:300px;">
-        <div class="card-body">
-            <h3>@Model.FacultyName</h3>
-            <p><strong>Department:</strong> @Model.Department</p>
-            <p><strong>Designation:</strong> @Model.Designation</p>
-            <p><strong>Domain:</strong> @Model.ExpertiseDomain</p>
-            <p><strong>Email:</strong> @Model.CollegeMail</p>
-            <p><strong>Contact:</strong> @Model.ContactNumber</p>
-            <p><strong>DOB:</strong> @Model.Dob</p>
+    <div class="card mx-auto shadow-sm" style="max-width:700px;">
+        <div class="row g-0">
+            <div class="col-md-5">
+                <img src="@Model.PhotoPath" class="img-fluid" alt="@Model.FacultyName"
+                     style="object-fit:cover;height:100%;width:100%;min-height:300px;"
+                     onerror="this.src='/images/faculty/default.jpg'">
+            </div>
+            <div class="col-md-7">
+                <div class="card-body">
+                    <h3 class="card-title mb-3">@Model.FacultyName</h3>
+
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <td><strong><i class="bi bi-building"></i> Department:</strong></td>
+                                <td>@Model.Department</td>
+                            </tr>
+                            <tr>
+                                <td><strong><i class="bi bi-award"></i> Designation:</strong></td>
+                                <td>@(string.IsNullOrEmpty(Model.Designation) ? "N/A" : Model.Designation)</td>
+                            </tr>
+                            <tr>
+                                <td><strong><i class="bi bi-lightbulb"></i> Expertise:</strong></td>
+                                <td>@(string.IsNullOrEmpty(Model.ExpertiseDomain) ? "N/A" : Model.ExpertiseDomain)</td>
+                            </tr>
+                            <tr>
+                                <td><strong><i class="bi bi-envelope"></i> Email:</strong></td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(Model.CollegeMail))
+                                    {
+                                        <a href="mailto:@Model.CollegeMail">@Model.CollegeMail</a>
+                                    }
+                                    else
+                                    {
+                                        <text>N/A</text>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong><i class="bi bi-telephone"></i> Contact:</strong></td>
+                                <td>@(string.IsNullOrEmpty(Model.ContactNumber) ? "N/A" : Model.ContactNumber)</td>
+                            </tr>
+                            <tr>
+                                <td><strong><i class="bi bi-calendar"></i> DOB:</strong></td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(Model.Dob))
+                                    {
+                                        @DateTime.Parse(Model.Dob).ToString("dd MMM yyyy")
+                                    }
+                                    else
+                                    {
+                                        <text>N/A</text>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <a href="@Url.Action("Edit", "FacultySupport", new { id = Model.FacultyID })"
+                           class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <a href="@Url.Action("Index", "FacultySupport")" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

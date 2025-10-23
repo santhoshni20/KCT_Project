@@ -3,37 +3,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KSI_Project.Models.Entity
 {
-    [Table("canteen")]  // ✅ Add this
-    public class Canteen
+    [Table("canteen_id")]  // ✅ Add this - tells EF the exact table name
+    public class CanteenId
     {
         [Key]
-        [Column("item_id")]
-        public int ItemID { get; set; }
-
-        [ForeignKey("CanteenDetails")]
-        [Column("canteen_id")]
+        [Column("canteen_id")]  // ✅ Map to exact column name
         public int CanteenID { get; set; }
 
-        [Column("dish_name")]
-        public string DishName { get; set; }
-
-        [Column("availability")]
-        public string Availability { get; set; }
-
-        [Column("price")]
-        public decimal Price { get; set; }
-
-        [Column("morning")]
-        public bool Morning { get; set; }
-
-        [Column("afternoon")]
-        public bool Afternoon { get; set; }
-
-        [Column("evening")]
-        public bool Evening { get; set; }
-
-        [Column("snacks")]
-        public bool Snacks { get; set; }
+        [Column("canteen_name")]
+        public string CanteenName { get; set; }
 
         [Column("is_active")]
         public bool IsActive { get; set; }
@@ -56,6 +34,6 @@ namespace KSI_Project.Models.Entity
         [Column("deleted_by")]
         public string? DeletedBy { get; set; }
 
-        public CanteenId CanteenDetails { get; set; }
+        public ICollection<Canteen> Canteens { get; set; }
     }
 }

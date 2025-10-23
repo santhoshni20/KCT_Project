@@ -4,7 +4,7 @@ using ksi_project.Repository.Implementation;
 using ksi_project.Repository.Interface;
 using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
-//using KSI_Project.Repository;
+using KSI_Project.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -16,7 +16,7 @@ builder.Services.AddDbContext<ksiDbContext>(options =>
         new MySqlServerVersion(new Version(8, 0, 36))
     )
 );
-//builder.Services.AddScoped<ICanteenRepository, CanteenRepository>();
+builder.Services.AddScoped<ICanteenRepository, CanteenRepository>();
 //builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 //builder.Services.AddScoped<ICGPACalculationRepository, CGPACalculationRepository>();
 //builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();

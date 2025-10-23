@@ -5,6 +5,8 @@ using ksi_project.Repository.Interface;
 using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Interfaces;
 using KSI_Project.Repositories;
+using KsiProject.Interfaces;
+using KsiProject.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -27,6 +29,7 @@ builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 //builder.Services.AddScoped<ICGPARepository, CGPARepository>();
 builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();
+builder.Services.AddScoped<IPlacementSupportRepository, PlacementSupportRepository>();
 
 
 

@@ -1,13 +1,12 @@
-﻿using ksi_project.Models.DTOs;
-//using ksi.Helpers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using KsiProject.DTOs;
 
-namespace ksi_project.Interfaces
+namespace KsiProject.Interfaces
 {
     public interface IPlacementSupportRepository
     {
-        Task<ApiResponseDTO> GetPlacedStudentsByDomainAsync(string domainName);
-        Task<ApiResponseDTO> GetAllDomainsAsync();
+        Task<List<string>> getDistinctDomainsAsync();
+        Task<List<studentPlacementDto>> getStudentsByDomainAsync(string domain);
     }
 }

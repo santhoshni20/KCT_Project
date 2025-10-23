@@ -1,6 +1,7 @@
 ﻿using ksi.Models.Entity;
 using ksi_project.Models.Entity;
 using KSI_Project.Models.Entity;
+using KsiProject.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace KSI_Project.Helpers.DbContexts
@@ -9,7 +10,7 @@ namespace KSI_Project.Helpers.DbContexts
     {
         public ksiDbContext(DbContextOptions<ksiDbContext> options) : base(options) { }
 
-        public DbSet<student_profile> student_profile { get; set; }
+        public DbSet<StudentProfile> student_profile { get; set; }
         public DbSet<syllabus> syllabus { get; set; }
         public DbSet<events> events { get; set; }
         public DbSet<timetable> timetable { get; set; }

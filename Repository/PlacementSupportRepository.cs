@@ -1,94 +1,62 @@
-﻿//using ksi_project.Helpers;
-using ksi_project.Interfaces;
-using ksi_project.Models.DTOs;
-using ksi_project.Models.Entity;
-using KSI_Project.Helpers.DbContexts;
+﻿using KSI_Project.Helpers.DbContexts;
+using KsiProject.DTOs;
+using KsiProject.Entities;
+using KsiProject.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ksi_project.Repositories
+namespace KsiProject.Repositories
 {
     public class PlacementSupportRepository : IPlacementSupportRepository
     {
-        private readonly ksiDbContext _context;
+        private readonly ksiDbContext _dbContext;
 
-        public PlacementSupportRepository(ksiDbContext context)
+        public PlacementSupportRepository(ksiDbContext dbContext)
         {
-            _context = context;
+            _dbContext = dbContext;
         }
 
-        public async Task<ApiResponseDTO> GetPlacedStudentsByDomainAsync(string domainName)
+        // Get distinct non-null, trimmed domains for dropdown. Single DB call.
+        public async Task<List<string>> getDistinctDomainsAsync()
         {
-            try
-            {
-                var students = await _context.student_profile
-                    .Where(s => s.isPlaced == true && s.domain.ToLower() == domainName.ToLower())
-                    .Select(s => new PlacementStudentDTO
-                    {
-                        studentId = s.studentId,
-                        studentName = s.name,
-                        //email = s.email,
-                        domain = s.domain,
-                        companyName = s.companyName,
-                        isPlaced = s.isPlaced
-                    })
-                    .ToListAsync();
-
-                if (students == null || students.Count == 0)
-                {
-                    return new ApiResponseDTO
-                    {
-                        statusCode = 404,
-                        message = "No students found for the selected domain",
-                        data = null
-                    };
-                }
-
-                return new ApiResponseDTO
-                {
-                    statusCode = 200,
-                    message = "Students fetched successfully",
-                    data = students
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponseDTO
-                {
-                    statusCode = 500,
-                    message = "Error fetching student data",
-                    errorDetails = ex.Message
-                };
-            }
+            return await _dbContext.Set<StudentProfile>()
+                .AsNoTracking()
+                .Where(s => !string.IsNullOrEmpty(s.domain))
+                .Select(s => s.domain.Trim())
+                .Distinct()
+                .OrderBy(d => d)
+                .ToListAsync();
         }
 
-        public async Task<ApiResponseDTO> GetAllDomainsAsync()
+        // Return students for a domain who are marked as got_placed='yes' (projection to DTO)
+        public async Task<List<studentPlacementDto>> getStudentsByDomainAsync(string domain)
         {
-            try
-            {
-                var domains = await _context.student_profile
-                    .Where(s => s.isPlaced == true && s.domain != null)
-                    .Select(s => s.domain)
-                    .Distinct()
-                    .ToListAsync();
+            if (string.IsNullOrWhiteSpace(domain))
+                return new List<studentPlacementDto>();
 
-                return new ApiResponseDTO
+            var domainTrim = domain.Trim();
+
+            return await _dbContext.Set<StudentProfile>()
+                .AsNoTracking()
+                .Where(s => s.domain != null
+                            && s.domain.Trim().ToLower() == domainTrim.ToLower()
+                            && s.got_placed != null
+                            && s.got_placed.Trim().ToLower() == "yes"
+                            && (s.is_active == null || s.is_active == true))
+                .Select(s => new studentPlacementDto
                 {
-                    statusCode = 200,
-                    message = "Domains fetched successfully",
-                    data = domains
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponseDTO
-                {
-                    statusCode = 500,
-                    message = "Error fetching domains",
-                    errorDetails = ex.Message
-                };
-            }
+                    name = s.name,
+                    contactNumber = s.contact_number,
+                    email = s.email,
+                    companyName = s.company_name,
+                    rollNumber = s.roll_number,
+                    department = s.department,
+                    section = s.section
+                })
+                .OrderBy(s => s.name)
+                .ToListAsync();
         }
     }
 }

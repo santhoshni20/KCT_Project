@@ -12,7 +12,7 @@ namespace KsiProject.Entities
         public int student_id { get; set; }
 
         [Column("name")]
-        public string name { get; set; }
+        public string? name { get; set; }
 
         [Column("roll_number")]
         public string roll_number { get; set; }
@@ -30,7 +30,7 @@ namespace KsiProject.Entities
         public DateTime? dob { get; set; }
 
         [Column("contact_number")]
-        public string contact_number { get; set; }
+        public string? contact_number { get; set; }
 
         [Column("address")]
         public string address { get; set; }
@@ -51,7 +51,7 @@ namespace KsiProject.Entities
         public string domain { get; set; }
 
         [Column("email")]
-        public string email { get; set; }
+        public string? email { get; set; }
 
         [Column("is_active")]
         public bool? is_active { get; set; }

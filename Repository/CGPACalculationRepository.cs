@@ -1,49 +1,57 @@
-﻿//using System.Threading.Tasks;
-//using System.Linq;
-//using Microsoft.EntityFrameworkCore;
-//using KSI_Project.Models.Entity;
-//using KSI_Project.Models.DTOs;
-//using KSI_Project.Interfaces;
-//using KSI_Project.Helpers.DbContexts;
-//using KSI_Project.Helpers;
+﻿//using KSI.Helpers;
+using KSI.Interfaces;
+using KSI.Models.DTOs;
+using KSI.Models.Entity;
+using KSI_Project.Helpers.DbContexts;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using static KSI.Models.DTOs.CGPACalculationDTO;
 
-//namespace KSI_Project.Repositories
-//{
-//    public class CGPACalculationRepository : ICGPACalculationRepository
-//    {
-//        public CgpaResponseDTO CalculateSgpa(CgpaRequestDTO requestDto)
-//        {
-//            double sgpa = 0.0;
+namespace KSI.Repositories
+{
+    public class CGPACalculationRepository : ICGPACalculationRepository
+    {
+        private readonly ksiDbContext _context;
 
-//            if (requestDto.Courses != null && requestDto.Courses.Count > 0)
-//            {
-//                var gradePoints = requestDto.Courses
-//                    .Select(c => ConvertGradeToPoint(c.Grade))
-//                    .ToList();
+        public CGPACalculationRepository(ksiDbContext context)
+        {
+            _context = context;
+        }
 
-//                sgpa = gradePoints.Average();
-//            }
+        // 🔹 Get Courses Based on Department, Batch, and Semester
+        public async Task<List<CourseDTO>> GetCoursesAsync(string department, string batch, int semester)
+        {
+            var courses = await _context.Courses
+                .Where(c => c.Department == department && c.Batch == batch && c.Semester == semester)
+                .Select(c => new CourseDTO
+                {
+                    CourseCode = c.CourseCode,
+                    CourseName = c.CourseName,
+                    Credits = c.Credits
+                })
+                .ToListAsync();
 
-//            return new CgpaResponseDTO
-//            {
-//                RollNo = requestDto.RollNo,
-//                Semester = requestDto.Semester,
-//                Sgpa = Math.Round(sgpa, 2)
-//            };
-//        }
+            return courses;
+        }
 
-//        private double ConvertGradeToPoint(string grade)
-//        {
-//            return grade?.ToUpper() switch
-//            {
-//                "O" => 10,
-//                "A+" => 9,
-//                "A" => 8,
-//                "B+" => 7,
-//                "B" => 6,
-//                "C" => 5,
-//                _ => 0
-//            };
-//        }
-//    }
-//}
+        // 🔹 Calculate SGPA
+        public async Task<SGPAResultDTO> CalculateSgpaAsync(CalculateSGPARequestDTO request)
+        {
+            if (request.Courses == null || request.Courses.Count == 0)
+                return new SGPAResultDTO { Sgpa = 0 };
+
+            decimal totalCredits = request.Courses.Sum(c => c.Credits);
+            decimal weightedGradePoints = request.Courses.Sum(c => c.Credits * c.GradePoint);
+
+            decimal sgpa = totalCredits > 0 ? weightedGradePoints / totalCredits : 0;
+
+            return await Task.FromResult(new SGPAResultDTO
+            {
+                Sgpa = Math.Round(sgpa, 2)
+            });
+        }
+    }
+}

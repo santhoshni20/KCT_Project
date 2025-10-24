@@ -1,4 +1,6 @@
-﻿using ksi_project.Interfaces;
+﻿using KSI.Interfaces;
+using KSI.Repositories;
+using ksi_project.Interfaces;
 using ksi_project.Repositories;
 using ksi_project.Repository.Implementation;
 using ksi_project.Repository.Interface;
@@ -19,6 +21,7 @@ builder.Services.AddDbContext<ksiDbContext>(options =>
     )
 );
 builder.Services.AddScoped<ICanteenRepository, CanteenRepository>();
+builder.Services.AddScoped<ICGPACalculationRepository, CGPACalculationRepository>();
 //builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 //builder.Services.AddScoped<ICGPACalculationRepository, CGPACalculationRepository>();
 //builder.Services.AddScoped<ISyllabusRepository, SyllabusRepository>();

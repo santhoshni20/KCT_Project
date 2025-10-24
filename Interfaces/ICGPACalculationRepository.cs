@@ -1,11 +1,13 @@
-﻿//using System.Threading.Tasks;
-////using KSI_Project.Models.Entity;
-//using KSI_Project.Models.DTOs;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using KSI.Models.DTOs;
+using static KSI.Models.DTOs.CGPACalculationDTO;
 
-//namespace KSI_Project.Interfaces
-//{
-//    public interface ICGPACalculationRepository
-//    {
-//        CgpaResponseDTO CalculateSgpa(CgpaRequestDTO requestDto);
-//    }
-//}
+namespace KSI.Interfaces
+{
+    public interface ICGPACalculationRepository
+    {
+        Task<List<CourseDTO>> GetCoursesAsync(string department, string batch, int semester);
+        Task<SGPAResultDTO> CalculateSgpaAsync(CalculateSGPARequestDTO request);
+    }
+}

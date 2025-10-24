@@ -2,86 +2,169 @@
     ViewData["Title"] = "CGPA Calculation";
 }
 
-<style>
-    .cgpa-container {
-        max-width: 800px;
-        margin: 60px auto;
-        padding: 30px;
-        background-color: #f8f9fa;
-        border-radius: 12px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+<h2 class="text-center mb-4">SGPA / CGPA Calculator</h2>
 
-    .cgpa-header {
-        margin-bottom: 20px;
-    }
-
-    .table th, .table td {
-        vertical-align: middle;
-        text-align: center;
-    }
-
-    .result-box {
-        font-size: 18px;
-        font-weight: bold;
-        margin-top: 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-        .result-box input {
-            width: 100px;
-            text-align: center;
-            font-weight: bold;
-            border-radius: 6px;
-            border: 1px solid #ced4da;
-            padding: 5px;
-        }
-</style>
-
-<div class="cgpa-container">
-    <h2 class="text-center cgpa-header">CGPA Calculation</h2>
-
-    <form>
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <label for="rollNo" class="form-label">Roll No:</label>
-                <input type="text" class="form-control" id="rollNo" name="rollNo" />
+<div class="container mt-4">
+    <div class="card p-4 shadow-sm">
+        <div class="row mb-3">
+            <!-- Department Dropdown -->
+            <div class="col-md-4">
+                <label>Department:</label>
+                <select id="department" class="form-select">
+                    <option value="">-- Select Department --</option>
+                    <option value="CSE">CSE</option>
+                    <option value="IT">IT</option>
+                    <option value="AIDS">AIDS</option>
+                </select>
             </div>
-            <div class="col-md-6">
-                <label for="semester" class="form-label">Semester:</label>
-                <input type="number" class="form-control" id="semester" name="semester" min="1" max="10" />
+
+            <!-- Batch Dropdown -->
+            <div class="col-md-4">
+                <label>Batch:</label>
+                <select id="batch" class="form-select">
+                    <option value="">-- Select Batch --</option>
+                    <option value="2022-2026">2022-2026</option>
+                    <option value="2023-2027">2023-2027</option>
+                    <option value="2024-2028">2024-2028</option>
+                    <option value="2025-2029">2025-2029</option>
+                </select>
+            </div>
+
+            <!-- Semester Dropdown -->
+            <div class="col-md-4">
+                <label>Semester:</label>
+                <select id="semester" class="form-select">
+                    <option value="">-- Select Semester --</option>
+                    @for (int i = 1; i <= 8; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
             </div>
         </div>
 
-        <table class="table table-bordered">
-            <thead class="table-light">
-                <tr>
-                    <th>Courses</th>
-                    <th>Gained Grade</th>
-                    <th>CAT - I</th>
-                    <th>CAT - II</th>
-                    <th>Assignment</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < 5; i++) // you can increase row count as needed
-                {
+        <div class="text-center mb-4">
+            <button class="btn btn-primary" id="fetchCoursesBtn">Fetch Courses</button>
+        </div>
+
+        <div id="courseSection" style="display:none;">
+            <h4>Courses List</h4>
+            <table class="table table-bordered mt-3" id="courseTable">
+                <thead class="table-light">
                     <tr>
-                        <td><input type="text" class="form-control" name="courseName" /></td>
-                        <td><input type="text" class="form-control" name="grade" /></td>
-                        <td><input type="number" class="form-control" name="cat1" /></td>
-                        <td><input type="number" class="form-control" name="cat2" /></td>
-                        <td><input type="number" class="form-control" name="assignment" /></td>
+                        <th>Course Code</th>
+                        <th>Course Name</th>
+                        <th>Credits</th>
+                        <th>Grade Point</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody></tbody>
+            </table>
 
-        <div class="result-box">
-            <label for="sgpa">Your SGPA:</label>
-            <input type="text" id="sgpa" name="sgpa" readonly />
+            <div class="text-center mt-3">
+                <button class="btn btn-success" id="calculateBtn">Calculate SGPA</button>
+            </div>
         </div>
-    </form>
+
+        <div id="resultSection" class="alert alert-info mt-4 text-center" style="display:none;">
+            <h5>SGPA Result</h5>
+            <p><strong>SGPA:</strong> <span id="sgpaValue"></span></p>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Fetch Courses Button
+        document.getElementById("fetchCoursesBtn").addEventListener("click", async () => {
+            const department = document.getElementById("department").value;
+            const batch = document.getElementById("batch").value;
+            const semester = parseInt(document.getElementById("semester").value);
+
+            if (!department || !batch || !semester) {
+                alert("Please select all fields.");
+                return;
+            }
+
+            const payload = { department, batch, semester };
+
+            const response = await fetch("/CGPACalculation/getCourses", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.statusCode === 200 && result.data.length > 0) {
+                const tbody = document.querySelector("#courseTable tbody");
+                tbody.innerHTML = "";
+
+                result.data.forEach(course => {
+                    const row = `
+                        <tr>
+                            <td>${course.courseCode}</td>
+                            <td>${course.courseName}</td>
+                            <td>${course.credits}</td>
+                            <td><input type="number" class="form-control gradeInput" min="0" max="10" step="0.1" placeholder="Enter Grade Point" /></td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+
+                document.getElementById("courseSection").style.display = "block";
+            } else {
+                alert("No courses found for this selection.");
+            }
+        });
+
+        // Calculate SGPA Button
+        document.getElementById("calculateBtn").addEventListener("click", async () => {
+            const department = document.getElementById("department").value;
+            const batch = document.getElementById("batch").value;
+            const semester = parseInt(document.getElementById("semester").value);
+
+            const rows = document.querySelectorAll("#courseTable tbody tr");
+            const courses = [];
+
+            rows.forEach(row => {
+                const courseCode = row.children[0].innerText;
+                const credits = parseFloat(row.children[2].innerText);
+                const gradeInput = row.querySelector(".gradeInput");
+                const gradePoint = parseFloat(gradeInput.value);
+
+                if (!isNaN(gradePoint)) {
+                    courses.push({ courseCode, credits, gradePoint });
+                }
+            });
+
+            if (courses.length === 0) {
+                alert("Please enter grade points for at least one course.");
+                return;
+            }
+
+            const payload = {
+                rollNo: "TEMP001", // optional field
+                department,
+                batch,
+                semester,
+                courses
+            };
+
+            const response = await fetch("/CGPACalculation/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.statusCode === 200) {
+                document.getElementById("sgpaValue").innerText = result.data.sgpa;
+                document.getElementById("resultSection").style.display = "block";
+            } else {
+                alert("Error calculating SGPA: " + result.message);
+            }
+        });
+    </script>
+}

@@ -2,13 +2,58 @@
     ViewData["Title"] = "Event Details";
 }
 
+<!-- Font Awesome & Bootstrap -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
 
 <style>
+    body {
+        background: linear-gradient(135deg, #007bff, #6f42c1);
+        min-height: 100vh;
+        font-family: "Poppins", sans-serif;
+        color: #fff;
+    }
+
+    h2 {
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        margin-top: 60px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    #btnAddEvent {
+        font-weight: 600;
+        background: linear-gradient(90deg, #ff512f, #dd2476);
+        border: none;
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        #btnAddEvent:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(255, 81, 47, 0.4);
+        }
+
     .event-section {
         margin-bottom: 40px;
     }
+
+        .event-section h4 {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-left: 5px solid #ffc107;
+            padding-left: 10px;
+        }
 
     .event-slider {
         display: flex;
@@ -16,6 +61,7 @@
         gap: 20px;
         padding-bottom: 10px;
         scrollbar-width: thin;
+        scroll-behavior: smooth;
     }
 
         .event-slider::-webkit-scrollbar {
@@ -23,67 +69,129 @@
         }
 
         .event-slider::-webkit-scrollbar-thumb {
-            background: #555;
+            background: rgba(255, 255, 255, 0.4);
             border-radius: 4px;
         }
 
     .event-card {
         flex: 0 0 auto;
-        width: 220px;
-        background-color: #2c2c2c;
-        border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        width: 230px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 18px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         padding: 15px;
-        color: white;
+        color: #fff;
         text-align: center;
-        position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        }
 
         .event-card img {
             width: 100px;
             height: 100px;
             object-fit: cover;
             border-radius: 50%;
-            border: 3px solid white;
+            border: 3px solid #fff;
             margin-bottom: 10px;
         }
 
         .event-card h5 {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             margin-bottom: 5px;
             font-weight: bold;
+            color: #ffd166;
         }
 
         .event-card p {
             font-size: 0.9rem;
-            color: #bbb;
+            color: #e6e6e6;
             margin-bottom: 10px;
         }
 
-        .event-card .btn-view {
-            background-color: #ff4d4d;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 8px;
-            color: white;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: background 0.3s;
+    .btn-view {
+        background: linear-gradient(90deg, #00c6ff, #0072ff);
+        border: none;
+        padding: 6px 14px;
+        border-radius: 8px;
+        color: white;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .btn-view:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(0, 198, 255, 0.5);
         }
 
-            .event-card .btn-view:hover {
-                background-color: #e63e3e;
-            }
+    /* Modal styling */
+    .modal-content {
+        background: #1e1e2f;
+        color: white;
+        border-radius: 15px;
+        border: none;
+    }
+
+        .modal-content h4 {
+            font-weight: 600;
+            color: #00c6ff;
+        }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #555;
+        background-color: #2c2c3c;
+        color: white;
+    }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.4);
+            border-color: #00c6ff;
+        }
+
+    .btn-success {
+        background: linear-gradient(90deg, #11998e, #38ef7d);
+        border: none;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+        .btn-success:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(56, 239, 125, 0.4);
+        }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
 </style>
 
-<div class="container mt-5">
-    <h2 class="mb-4">Event Details</h2>
-    <button id="btnAddEvent" class="btn btn-primary float-end mb-3">
-        <i class="fas fa-plus"></i> Add Event
-    </button>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-calendar-alt me-2"></i> Event Details</h2>
+        <button id="btnAddEvent" class="btn text-white">
+            <i class="fas fa-plus"></i> Add Event
+        </button>
+    </div>
 
     <div id="eventsContainer">
-        <!-- Date-wise event sections will be rendered here -->
+        <!-- Dynamic event sections -->
     </div>
 </div>
 
@@ -91,7 +199,7 @@
 <div class="modal fade" id="eventModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content p-4">
-            <h4 class="mb-4">Add New Event</h4>
+            <h4 class="mb-4"><i class="fas fa-calendar-plus me-2"></i>Add New Event</h4>
             <form id="eventForm">
                 <div class="row mb-3">
                     <div class="col">
@@ -136,7 +244,7 @@
                     <label>Brochure Image</label>
                     <input type="file" class="form-control" name="brochureFile" accept="image/*" />
                 </div>
-                <button type="submit" class="btn btn-success">Save</button>
+                <button type="submit" class="btn btn-success w-100">Save Event</button>
             </form>
         </div>
     </div>
@@ -165,17 +273,14 @@
 
     <script>
         $(document).ready(function () {
-            // Bootstrap 5 modal instances
             var eventModal = new bootstrap.Modal(document.getElementById('eventModal'), { backdrop: 'static', keyboard: false });
             var eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'), { backdrop: 'static', keyboard: false });
 
-            // Open Add Event modal
             $('#btnAddEvent').click(function () {
                 $('#eventForm')[0].reset();
                 eventModal.show();
             });
 
-            // Handle form submit
             $('#eventForm').submit(function (e) {
                 e.preventDefault();
 
@@ -203,9 +308,9 @@
                     contentType: false,
                     success: function (res) {
                         if (res.success) {
-                            eventModal.hide();             // close modal
-                            $('#eventForm')[0].reset();    // reset form
-                            loadEvents();                  // reload events
+                            eventModal.hide();
+                            $('#eventForm')[0].reset();
+                            loadEvents();
                         } else {
                             alert(res.message || "Failed to save event.");
                         }
@@ -213,7 +318,6 @@
                 });
             });
 
-            // Load events
             function loadEvents() {
                 $.get('/EventDetails/GetTodaysEvents', function (res) {
                     if (!res || !res.data) return;
@@ -243,7 +347,6 @@
                 });
             }
 
-            // Show event details modal
             window.showDetails = function (ev) {
                 $('#eventDetailsTitle').text(ev.eventName);
                 $('#eventDetailsDate').text(formatDate(ev.eventDate));
@@ -253,7 +356,7 @@
                 $('#eventDetailsContact').text(ev.contactNumber || '');
                 $('#eventDetailsLocation').text(ev.location || '');
                 $('#eventDetailsDescription').text(ev.description || '');
-                $('#eventDetailsBrochure').html(ev.brochureUrl ? `<a href="${ev.brochureUrl}" target="_blank">📄 View Brochure</a>` : '');
+                $('#eventDetailsBrochure').html(ev.brochureUrl ? `<a href="${ev.brochureUrl}" target="_blank" class="text-info"><i class="fas fa-file-image me-2"></i>View Brochure</a>` : '');
                 eventDetailsModal.show();
             }
 
@@ -266,7 +369,6 @@
                 return `${dd}/${mm}/${yy}`;
             }
 
-            // Initial load
             loadEvents();
         });
     </script>

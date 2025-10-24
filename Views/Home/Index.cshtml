@@ -57,20 +57,43 @@
         z-index: 1000;
     }
 
-        .profile-round-btn:hover {
-            background: #0056b3;
-        }
+    .profile-round-btn:hover {
+        background: #0056b3;
+    }
 
-        .profile-round-btn::before {
-            content: '';
-            display: block;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-        }
+    .profile-round-btn::before {
+        content: '';
+        display: block;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border-radius: 50%;
+    }
+
+    /* New Campus Button */
+    .campus-btn {
+        position: absolute;
+        top: 15px;
+        right: 80px; /* Next to profile button */
+        background: #28a745;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        transition: background 0.2s;
+        z-index: 1000;
+    }
+
+    .campus-btn:hover {
+        background: #1e7e34;
+    }
 </style>
 
+<!-- Buttons -->
+<a href="javascript:void(0)" onclick="openCampusMap()" class="campus-btn" title="View Campus">View Campus</a>
 <a href="/Profile" class="profile-round-btn" title="Go to Profile"></a>
 
 <div class="background">
@@ -83,3 +106,13 @@
         </p>
     </div>
 </div>
+
+<script>
+    function openCampusMap() {
+        window.open("https://www.google.com/maps/place/11.078071,76.990016", "_blank");
+    }
+</script>
+
+
+
+

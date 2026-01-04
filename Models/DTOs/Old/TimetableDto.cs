@@ -1,4 +1,4 @@
-﻿namespace ksi.Models.DTOs
+﻿namespace ksi_project.Models.DTOs
 {
     public class TimetableDTO
     {
@@ -9,6 +9,5 @@
         public string dayOfWeek { get; set; }
         public int hourNo { get; set; }
         public string subject { get; set; }
-
     }
 }

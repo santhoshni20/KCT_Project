@@ -1,4 +1,4 @@
-﻿namespace ksi.Models.DTOs
+﻿namespace ksi_project.Models.DTOs
 {
     public class ApiResponseDTO
     {

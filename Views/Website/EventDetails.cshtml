@@ -1,0 +1,382 @@
+﻿@{
+    ViewData["Title"] = "Event Details";
+}
+
+<!-- Font Awesome & Bootstrap -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+
+<style>
+    body {
+        background: linear-gradient(135deg, #007bff, #6f42c1);
+        min-height: 100vh;
+        font-family: "Poppins", sans-serif;
+        color: #fff;
+    }
+
+    h2 {
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        margin-top: 60px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    #btnAddEvent {
+        font-weight: 600;
+        background: linear-gradient(90deg, #ff512f, #dd2476);
+        border: none;
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        #btnAddEvent:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(255, 81, 47, 0.4);
+        }
+
+    .event-section {
+        margin-bottom: 40px;
+    }
+
+        .event-section h4 {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-left: 5px solid #ffc107;
+            padding-left: 10px;
+        }
+
+    .event-slider {
+        display: flex;
+        overflow-x: auto;
+        gap: 20px;
+        padding-bottom: 10px;
+        scrollbar-width: thin;
+        scroll-behavior: smooth;
+    }
+
+        .event-slider::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .event-slider::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 4px;
+        }
+
+    .event-card {
+        flex: 0 0 auto;
+        width: 230px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 18px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        padding: 15px;
+        color: #fff;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        }
+
+        .event-card img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            margin-bottom: 10px;
+        }
+
+        .event-card h5 {
+            font-size: 1.15rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #ffd166;
+        }
+
+        .event-card p {
+            font-size: 0.9rem;
+            color: #e6e6e6;
+            margin-bottom: 10px;
+        }
+
+    .btn-view {
+        background: linear-gradient(90deg, #00c6ff, #0072ff);
+        border: none;
+        padding: 6px 14px;
+        border-radius: 8px;
+        color: white;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .btn-view:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(0, 198, 255, 0.5);
+        }
+
+    /* Modal styling */
+    .modal-content {
+        background: #1e1e2f;
+        color: white;
+        border-radius: 15px;
+        border: none;
+    }
+
+        .modal-content h4 {
+            font-weight: 600;
+            color: #00c6ff;
+        }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #555;
+        background-color: #2c2c3c;
+        color: white;
+    }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.4);
+            border-color: #00c6ff;
+        }
+
+    .btn-success {
+        background: linear-gradient(90deg, #11998e, #38ef7d);
+        border: none;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+        .btn-success:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(56, 239, 125, 0.4);
+        }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .event-title,
+    .event-title i {
+        color: black !important;
+        text-shadow: none !important;
+    }
+
+</style>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="event-title"><i class="fas fa-calendar-alt me-2"></i> Event Details</h2>
+        <button id="btnAddEvent" class="btn text-white">
+            <i class="fas fa-plus"></i> Add Event
+        </button>
+    </div>
+
+    <div id="eventsContainer">
+        <!-- Dynamic event sections -->
+    </div>
+</div>
+
+<!-- Modal for adding event -->
+<div class="modal fade" id="eventModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Add New Event</h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="eventForm">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label>Event Name</label>
+                        <input type="text" class="form-control" name="eventName" required />
+                    </div>
+                    <div class="col">
+                        <label>Contact Number</label>
+                        <input type="text" class="form-control" name="contactNumber" required />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label>Deadline Date</label>
+                        <input type="date" class="form-control" name="deadlineDate" required />
+                    </div>
+                    <div class="col">
+                        <label>Event Date</label>
+                        <input type="date" class="form-control" name="eventDate" required />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>Eligibility</label>
+                    <textarea class="form-control" name="eligibility"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Description</label>
+                    <textarea class="form-control" name="description"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>Location</label>
+                    <input type="text" class="form-control" name="location" />
+                </div>
+                <div class="mb-3">
+                    <label>Division</label>
+                    <select class="form-select" name="division">
+                        <option value="Intra">Intra</option>
+                        <option value="Inter">Inter</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Brochure Image</label>
+                    <input type="file" class="form-control" name="brochureFile" accept="image/*" />
+                </div>
+                <button type="submit" class="btn btn-success w-100">Save Event</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for full event details -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-4">
+            <h4 id="eventDetailsTitle"></h4>
+            <p><strong>Date:</strong> <span id="eventDetailsDate"></span></p>
+            <p><strong>Deadline:</strong> <span id="eventDetailsDeadline"></span></p>
+            <p><strong>Eligibility:</strong> <span id="eventDetailsEligibility"></span></p>
+            <p><strong>Division:</strong> <span id="eventDetailsDivision"></span></p>
+            <p><strong>Contact:</strong> <span id="eventDetailsContact"></span></p>
+            <p><strong>Location:</strong> <span id="eventDetailsLocation"></span></p>
+            <p><strong>Description:</strong> <span id="eventDetailsDescription"></span></p>
+            <div id="eventDetailsBrochure"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            var eventModal = new bootstrap.Modal(document.getElementById('eventModal'), { backdrop: 'static', keyboard: false });
+            var eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'), { backdrop: 'static', keyboard: false });
+
+            $('#btnAddEvent').click(function () {
+                $('#eventForm')[0].reset();
+                eventModal.show();
+            });
+
+            $('#eventForm').submit(function (e) {
+                e.preventDefault();
+
+                var formData = new FormData();
+                formData.append("EventName", $('[name="eventName"]').val());
+                formData.append("DeadlineDate", $('[name="deadlineDate"]').val());
+                formData.append("EventId", 0);
+                formData.append("CreatedBy", 1);
+                formData.append("EventDate", $('[name="eventDate"]').val());
+                formData.append("Eligibility", $('[name="eligibility"]').val());
+                formData.append("Division", $('[name="division"]').val());
+                formData.append("ContactNumber", $('[name="contactNumber"]').val());
+                formData.append("Description", $('[name="description"]').val());
+                formData.append("Location", $('[name="location"]').val());
+                var fileInput = $('[name="brochureFile"]')[0];
+                if (fileInput.files.length > 0) {
+                    formData.append("BrochureFile", fileInput.files[0]);
+                }
+
+                $.ajax({
+                    url: '/EventDetails/SaveEvent',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        if (res.success) {
+                            eventModal.hide();
+                            $('#eventForm')[0].reset();
+                            loadEvents();
+                        } else {
+                            alert(res.message || "Failed to save event.");
+                        }
+                    }
+                });
+            });
+
+            function loadEvents() {
+                $.get('/EventDetails/GetTodaysEvents', function (res) {
+                    if (!res || !res.data) return;
+                    let grouped = {};
+                    res.data.forEach(e => {
+                        let dateKey = e.eventDate ? formatDate(e.eventDate) : 'Unknown Date';
+                        if (!grouped[dateKey]) grouped[dateKey] = [];
+                        grouped[dateKey].push(e);
+                    });
+
+                    let html = '';
+                    for (let date in grouped) {
+                        html += `<div class="event-section">
+                                    <h4>${date}</h4>
+                                    <div class="event-slider">`;
+                        grouped[date].forEach(ev => {
+                            html += `<div class="event-card">
+                                        <img src="${ev.brochureUrl || 'https://via.placeholder.com/100'}" alt="${ev.eventName}">
+                                        <h5>${ev.eventName}</h5>
+                                        <p>${ev.location || ''}</p>
+                                        <button class="btn-view" onclick='showDetails(${JSON.stringify(ev)})'>View Details</button>
+                                     </div>`;
+                        });
+                        html += `</div></div>`;
+                    }
+                    $('#eventsContainer').html(html);
+                });
+            }
+
+            window.showDetails = function (ev) {
+                $('#eventDetailsTitle').text(ev.eventName);
+                $('#eventDetailsDate').text(formatDate(ev.eventDate));
+                $('#eventDetailsDeadline').text(formatDate(ev.deadlineDate));
+                $('#eventDetailsEligibility').text(ev.eligibility || '');
+                $('#eventDetailsDivision').text(ev.division || '');
+                $('#eventDetailsContact').text(ev.contactNumber || '');
+                $('#eventDetailsLocation').text(ev.location || '');
+                $('#eventDetailsDescription').text(ev.description || '');
+                $('#eventDetailsBrochure').html(ev.brochureUrl ? `<a href="${ev.brochureUrl}" target="_blank" class="text-info"><i class="fas fa-file-image me-2"></i>View Brochure</a>` : '');
+                eventDetailsModal.show();
+            }
+
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                let dateObj = new Date(dateStr);
+                let dd = String(dateObj.getDate()).padStart(2, '0');
+                let mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                let yy = String(dateObj.getFullYear()).slice(-2);
+                return `${dd}/${mm}/${yy}`;
+            }
+
+            loadEvents();
+        });
+    </script>
+}

@@ -144,44 +144,73 @@
 //        #endregion
 
 //        #region Event details
-//        public async Task<ApiResponseDTO> SaveEventAsync(EventDTO eventDTO)
+//        public async Task<ApiResponseDTO> saveEventAsync(EventDTO eventDto, IFormFile brochureFile)
 //        {
 //            try
 //            {
+//                string brochurePath = null;
+
+//                if (brochureFile != null && brochureFile.Length > 0)
+//                {
+//                    string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "brochures");
+//                    Directory.CreateDirectory(folder);
+
+//                    string fileName = $"{Guid.NewGuid()}{Path.GetExtension(brochureFile.FileName)}";
+//                    string fullPath = Path.Combine(folder, fileName);
+
+//                    using var stream = new FileStream(fullPath, FileMode.Create);
+//                    await brochureFile.CopyToAsync(stream);
+
+//                    brochurePath = $"/uploads/brochures/{fileName}";
+//                }
+
 //                var entity = new events
 //                {
-//                    eventName = eventDTO.eventName,
-//                    contactNumber = eventDTO.contactNumber,
-//                    deadlineDate = eventDTO.deadlineDate,
-//                    eventDate = eventDTO.eventDate,
-//                    eligibility = eventDTO.eligibility,
-//                    description = eventDTO.description,
-//                    location = eventDTO.location,
-//                    division = eventDTO.division,
-//                    brochureImage = eventDTO.brochureUrl,
-//                    createdBy = eventDTO.createdBy
+//                    eventName = eventDto.eventName,
+//                    contactNumber = eventDto.contactNumber,
+//                    deadlineDate = eventDto.deadlineDate,
+//                    eventDate = eventDto.eventDate,
+//                    eligibility = eventDto.eligibility,
+//                    description = eventDto.description,
+//                    location = eventDto.location,
+//                    division = eventDto.division,
+//                    brochureImage = brochurePath,
+//                    createdBy = eventDto.createdBy,
+//                    isActive = true
 //                };
 
 //                _context.events.Add(entity);
 //                await _context.SaveChangesAsync();
 
-//                return ApiResponseDTO.Success(entity.eventId, "Event saved successfully.");
+//                return new ApiResponseDTO
+//                {
+//                    statusCode = 200,
+//                    success = true,
+//                    message = "Event saved successfully"
+//                };
 //            }
 //            catch (Exception ex)
 //            {
-//                // Log exception in console for debugging
-//                Console.WriteLine(ex.ToString());
-//                return ApiResponseDTO.Failure("Failed to save event.", ex.Message);
+//                return new ApiResponseDTO
+//                {
+//                    statusCode = 500,
+//                    success = false,
+//                    message = "Failed to save event",
+//                    errorDetails = ex.Message
+//                };
 //            }
 //        }
 
-//        public async Task<ApiResponseDTO> GetTodaysEventsAsync()
+//        public async Task<ApiResponseDTO> getTodaysEventsAsync()
 //        {
 //            try
 //            {
-//                var today = DateTime.Now.Date;
+//                var today = DateTime.Today;
+
 //                var eventsList = await _context.events
+//                    .AsNoTracking()
 //                    .Where(e => e.isActive && e.eventDate >= today)
+//                    .OrderBy(e => e.eventDate)
 //                    .Select(e => new EventDTO
 //                    {
 //                        eventId = e.eventId,
@@ -195,15 +224,24 @@
 //                        division = e.division,
 //                        brochureUrl = e.brochureImage
 //                    })
-//                    .OrderBy(e => e.eventDate)
 //                    .ToListAsync();
 
-//                return ApiResponseDTO.Success(eventsList);
+//                return new ApiResponseDTO
+//                {
+//                    statusCode = 200,
+//                    success = true,
+//                    data = eventsList
+//                };
 //            }
 //            catch (Exception ex)
 //            {
-//                Console.WriteLine(ex.ToString());
-//                return ApiResponseDTO.Failure("Error fetching today's events.", ex.Message);
+//                return new ApiResponseDTO
+//                {
+//                    statusCode = 500,
+//                    success = false,
+//                    message = "Error fetching events",
+//                    errorDetails = ex.Message
+//                };
 //            }
 //        }
 //        #endregion
@@ -347,54 +385,16 @@
 //        #endregion
 
 //        #region Syllabus
-//        public async Task<ApiResponseDTO> GetSyllabusByBatchAndDepartmentAsync(string batch, string department)
+//        public async Task<string?> getSyllabusLinkAsync(string batch, string department)
 //        {
-//            try
-//            {
-//                var syllabus = await _context.syllabus
-//                    //.Where(s => s.isActive == true
-//                    //            && s.batch.ToLower() == batch.ToLower()
-//                    //            && s.department.ToLower() == department.ToLower())
-//                    .Where(s => s.isActive == true
-//                                && s.batch.Trim().ToLower() == batch.Trim().ToLower()
-//                                && s.department.Trim().ToLower() == department.Trim().ToLower())
-
-//                    .Select(s => new SyllabusDTO
-//                    {
-//                        syllabusId = s.syllabusId,
-//                        batch = s.batch,
-//                        department = s.department,
-//                        syllabusLink = s.syllabusLink,
-//                        isActive = s.isActive
-//                    })
-//                    .FirstOrDefaultAsync();
-
-//                if (syllabus == null)
-//                {
-//                    return new ApiResponseDTO
-//                    {
-//                        statusCode = 404,
-//                        message = "Syllabus not found for the selected batch and department.",
-//                        data = null
-//                    };
-//                }
-
-//                return new ApiResponseDTO
-//                {
-//                    statusCode = 200,
-//                    message = "Syllabus fetched successfully.",
-//                    data = syllabus
-//                };
-//            }
-//            catch (Exception ex)
-//            {
-//                return new ApiResponseDTO
-//                {
-//                    statusCode = 500,
-//                    message = "Error fetching syllabus.",
-//                    errorDetails = ex.Message
-//                };
-//            }
+//            return await _context.syllabus
+//                .AsNoTracking()
+//                .Where(s =>
+//                    s.isActive &&
+//                    s.batch == batch &&
+//                    s.department == department)
+//                .Select(s => s.syllabusLink)
+//                .FirstOrDefaultAsync();
 //        }
 //        #endregion
 

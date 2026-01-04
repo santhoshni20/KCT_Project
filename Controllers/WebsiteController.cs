@@ -210,57 +210,17 @@
 
 //        #region Event
 //        [HttpPost]
-//        public async Task<IActionResult> SaveEvent(IFormCollection form)
+//        public async Task<IActionResult> SaveEvent(EventDTO eventDto, IFormFile brochureFile)
 //        {
-//            try
-//            {
-//                string brochureUrl = null;
-//                var file = form.Files["BrochureFile"];
-
-//                if (file != null && file.Length > 0)
-//                {
-//                    string uploadDir = Path.Combine(_env.WebRootPath, "uploads", "brochures");
-//                    if (!Directory.Exists(uploadDir))
-//                        Directory.CreateDirectory(uploadDir);
-
-//                    string fileName = $"{Guid.NewGuid()}_{file.FileName}";
-//                    string filePath = Path.Combine(uploadDir, fileName);
-
-//                    using (var stream = new FileStream(filePath, FileMode.Create))
-//                        await file.CopyToAsync(stream);
-
-//                    brochureUrl = $"/uploads/brochures/{fileName}";
-//                }
-
-//                var eventDTO = new EventDTO
-//                {
-//                    eventName = form["EventName"],
-//                    contactNumber = form["ContactNumber"],
-//                    deadlineDate = DateTime.TryParse(form["DeadlineDate"], out var dd) ? dd : null,
-//                    eventDate = DateTime.TryParse(form["EventDate"], out var ed) ? ed : null,
-//                    eligibility = form["Eligibility"],
-//                    description = form["Description"],
-//                    location = form["Location"],
-//                    division = form["Division"],
-//                    brochureUrl = brochureUrl,
-//                    createdBy = form["CreatedBy"].ToString()  // always string
-//                };
-
-//                var response = await _repo.SaveEventAsync(eventDTO);
-//                return Json(response);
-//            }
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine(ex.ToString());
-//                return Json(ApiResponseDTO.Failure("Error while saving event.", ex.Message));
-//            }
+//            var response = await _repo.saveEventAsync(eventDto, brochureFile);
+//            return StatusCode(response.statusCode, response);
 //        }
 
 //        [HttpGet]
 //        public async Task<IActionResult> GetTodaysEvents()
 //        {
-//            var response = await _repo.GetTodaysEventsAsync();
-//            return Json(response);
+//            var response = await _repo.getTodaysEventsAsync();
+//            return StatusCode(response.statusCode, response);
 //        }
 //        #endregion
 
@@ -585,7 +545,7 @@
 //        #endregion
 
 //        #region Syllabus
-//        [HttpGet("Syllabus/DownloadSyllabus")]
+//        [HttpGet]
 //        public async Task<IActionResult> DownloadSyllabus(string batch, string dept)
 //        {
 //            if (string.IsNullOrEmpty(batch) || string.IsNullOrEmpty(dept))
@@ -593,35 +553,25 @@
 //                return Json(new ApiResponseDTO
 //                {
 //                    statusCode = 400,
-//                    message = "Batch and Department are required."
+//                    success = false,
+//                    message = "Batch and Department are required"
 //                });
 //            }
 
-//            // Normalize department name
-//            switch (dept.Trim().ToUpper())
+//            var syllabusLink = await _repo.getSyllabusLinkAsync(batch, dept);
+
+//            if (string.IsNullOrEmpty(syllabusLink))
 //            {
-//                case "AIDS":
-//                case "AI&DS":
-//                case "AI_AND_DS":
-//                case "AI_DS":
-//                    dept = "AI & DS"; // must match DB
-//                    break;
-//                default:
-//                    dept = dept.Trim();
-//                    break;
+//                return Json(new ApiResponseDTO
+//                {
+//                    statusCode = 404,
+//                    success = false,
+//                    message = "Syllabus not found"
+//                });
 //            }
 
-//            var response = await _repo.GetSyllabusByBatchAndDepartmentAsync(batch.Trim(), dept);
-
-//            // ✅ If syllabus found, redirect to the file link
-//            if (response.statusCode == 200 && response.data is SyllabusDTO syllabus && !string.IsNullOrEmpty(syllabus.syllabusLink))
-//            {
-//                // If syllabusLink is a Drive or file URL, open directly
-//                return Redirect(syllabus.syllabusLink);
-//            }
-
-//            // Otherwise return JSON error
-//            return Json(response);
+//            // ✅ Frontend checks response.redirected
+//            return Redirect(syllabusLink);
 //        }
 //        #endregion
 

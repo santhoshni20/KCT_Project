@@ -24,8 +24,8 @@
 //        #endregion
 
 //        #region Event details
-//        Task<ApiResponseDTO> SaveEventAsync(EventDTO eventDTO);
-//        Task<ApiResponseDTO> GetTodaysEventsAsync();
+//        Task<ApiResponseDTO> saveEventAsync(EventDTO eventDto, IFormFile brochureFile);
+//        Task<ApiResponseDTO> getTodaysEventsAsync();
 //        #endregion
 
 //        #region Faculty support
@@ -47,7 +47,7 @@
 //        #endregion
 
 //        #region Syllabus
-//        Task<ApiResponseDTO> GetSyllabusByBatchAndDepartmentAsync(string batch, string department);
+//        Task<string?> getSyllabusLinkAsync(string batch, string department);
 //        #endregion
 
 //        #region Timetable

@@ -1,135 +1,190 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      class="light-style layout-menu-fixed"
+      dir="ltr"
+      data-theme="theme-default"
+      data-assets-path="~/"
+      data-template="vertical-menu-template-free">
+
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - KSI_Project</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no" />
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ksi.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>@ViewData["Title"] | Student Portal</title>
 
-    <style>
-        body {
-            margin: 0;
-        }
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/img/favicon/favicon.ico" />
 
-        html, body {
-            overflow-x: hidden;
-        }
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet" />
 
-        .sidebar {
-            width: 240px;
-            background-color: #343a40;
-            color: white;
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            padding-top: 60px;
-        }
+    <!-- Icons & Core CSS -->
+    <link rel="stylesheet" href="~/vendor/fonts/boxicons.css" />
+    <link rel="stylesheet" href="~/vendor/css/core.css" />
+    <link rel="stylesheet" href="~/vendor/css/theme-default.css" />
+    <link rel="stylesheet" href="~/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
 
-        .main-layout {
-            margin-left: 240px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .main-content {
-            padding: 20px;
-            flex-grow: 1;
-            background-color: #f8f9fa;
-        }
-
-        .footer {
-            padding: 1rem;
-            background-color: #e9ecef;
-            text-align: center;
-        }
-
-        /* When sidebar is hidden (like in Login page) */
-        .no-sidebar .main-layout {
-            margin-left: 0 !important;
-        }
-    </style>
 </head>
-<body class="@(ViewData["NoSidebar"] != null ? "no-sidebar" : "")">
-    <div class="wrapper d-flex flex-column min-vh-100">
 
-        <!-- Sidebar -->
-        @if (ViewData["NoSidebar"] == null)
-        {
-            @* Hide sidebar for Login *@
-            <nav class="sidebar">
-                <div class="sidebar-sticky">
-                    <h5 class="text-center text-light">KSI Services</h5>
-                    <ul class="nav flex-column mt-4">
-                        @* <li><a class="nav-link" asp-controller="Login" asp-action="Index"><i class="fas fa-sign-in-alt"></i> Login</a></li> *@
-                        <li><a class="nav-link" asp-controller="CGPACalculation" asp-action="Index"><i class="fas fa-calculator"></i> CGPA Calculation</a></li>
-                        <li><a class="nav-link" asp-controller="PlacementSupport" asp-action="Index"><i class="fas fa-briefcase"></i> Placement Support</a></li>
-                        <li><a class="nav-link" asp-controller="Syllabus" asp-action="Index"><i class="fas fa-calendar-alt"></i> Syllabus</a></li>
-                        <li><a class="nav-link" asp-controller="EventDetails" asp-action="Index"><i class="fas fa-calendar-plus"></i> Event Details</a></li>
-                        <li><a class="nav-link" asp-controller="Canteen" asp-action="Index"><i class="fas fa-utensils"></i> Canteen Details</a></li>
-                        <li><a class="nav-link" asp-controller="FacultySupport" asp-action="Index"><i class="fas fa-users"></i> Faculty Support</a></li>
-                        <li><a class="nav-link" asp-controller="Timetable" asp-action="Index"><i class="fas fa-table"></i> Timetable</a></li>
-                        <li><a class="nav-link" asp-controller="IDBalance" asp-action="Index"><i class="fas fa-id-card"></i> ID Balance</a></li>
-                    </ul>
+<body>
+
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
+
+            <!-- ================= SIDEBAR ================= -->
+            <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
+                <!-- Brand -->
+                <div class="app-brand demo">
+                    <a href="#" class="app-brand-link">
+                        <span class="app-brand-text demo fw-bold ms-2">
+                            BINI UI
+                        </span>
+                    </a>
+
+                    <a href="javascript:void(0);"
+                       class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+                        <i class="bx bx-chevron-left bx-sm"></i>
+                    </a>
                 </div>
-            </nav>
-        }
 
-        <!-- Main Layout Column -->
-        <div class="main-layout flex-grow-1 d-flex flex-column">
+                <div class="menu-inner-shadow"></div>
 
-            <!-- Header -->
-            @if (ViewData["NoSidebar"] == null)
-            {
-                @* Hide header for Login *@
-                <header>
-                    <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow">
-                        <div class="container-fluid">
-                            <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">KSI_Project</a>
-                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                                <span class="navbar-toggler-icon"></span>
-                            </button>
-                            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
-                                <ul class="navbar-nav">
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                                    </li>
-                                </ul>
-                            </div>
+                <!-- Menu -->
+                <ul class="menu-inner py-1">
+
+                    <!-- CANTEEN -->
+                    <li class="menu-item">
+                        <a href="@Url.Action("Index", "Canteen")" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-food-menu"></i>
+                            <div>Canteen</div>
+                        </a>
+                    </li>
+
+                    <!-- CGPA -->
+                    <li class="menu-item">
+                        <a href="@Url.Action("Index", "CGPA")" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-line-chart"></i>
+                            <div>CGPA</div>
+                        </a>
+                    </li>
+
+                    <!-- EVENT DETAILS -->
+                    <li class="menu-item">
+                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-calendar-event"></i>
+                            <div>Event Details</div>
+                        </a>
+
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="@Url.Action("AddEvents", "EventDetails")" class="menu-link">
+                                    <div>Add Events</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- FACULTY SUPPORT -->
+                    <li class="menu-item">
+                        <a href="@Url.Action("Index", "FacultySupport")" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-support"></i>
+                            <div>Faculty Support</div>
+                        </a>
+                    </li>
+
+                    <!-- ID BALANCE -->
+                    <li class="menu-item">
+                        <a href="@Url.Action("Index", "IDBalance")" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-wallet"></i>
+                            <div>ID Balance</div>
+                        </a>
+                    </li>
+
+                    <!-- PLACEMENT SUPPORT -->
+                    <li class="menu-item">
+                        <a href="@Url.Action("Index", "PlacementSupport")" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-briefcase"></i>
+                            <div>Placement Support</div>
+                        </a>
+                    </li>
+
+                    <!-- SYLLABUS -->
+                    <li class="menu-item">
+                        <a href="@Url.Action("Index", "Syllabus")" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-book"></i>
+                            <div>Syllabus</div>
+                        </a>
+                    </li>
+
+                    <!-- TIMETABLE -->
+                    <li class="menu-item">
+                        <a href="@Url.Action("Index", "Timetable")" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-time"></i>
+                            <div>Timetable</div>
+                        </a>
+                    </li>
+
+                </ul>
+            </aside>
+            <!-- ================= /SIDEBAR ================= -->
+            <!-- ================= PAGE ================= -->
+            <div class="layout-page">
+
+                <!-- NAVBAR -->
+                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached bg-navbar-theme">
+                    <div class="layout-menu-toggle d-xl-none me-3">
+                        <a class="nav-item nav-link px-0" href="javascript:void(0)">
+                            <i class="bx bx-menu bx-sm"></i>
+                        </a>
+                    </div>
+                </nav>
+
+                <!-- CONTENT -->
+                <div class="content-wrapper">
+                    <div class="container-xxl flex-grow-1 container-p-y">
+                        @RenderBody()
+                    </div>
+
+                    <footer class="content-footer footer bg-footer-theme">
+                        <div class="container-xxl py-2 text-center">
+                            © <script>document.write(new Date().getFullYear())</script> Student Portal
                         </div>
-                    </nav>
-                </header>
-            }
+                    </footer>
+                </div>
 
-            <!-- Main Content -->
-            <div class="main-content pt-5 flex-grow-1">
-                <main role="main" class="pb-3">
-                    @RenderBody()
-                </main>
             </div>
-
-            <!-- Footer -->
-            @if (ViewData["NoSidebar"] == null)
-            {
-                @* Hide footer for Login *@
-                <footer class="footer mt-auto">
-                    &copy; 2025 - KSI_Project - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                </footer>
-            }
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <!-- ================= JS ================= -->
+    <script src="~/vendor/libs/jquery/jquery.js"></script>
+    <script src="~/vendor/libs/popper/popper.js"></script>
+    <script src="~/vendor/js/bootstrap.js"></script>
+    <script src="~/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="~/vendor/js/menu.js"></script>
+    <script src="~/js/main.js"></script>
+
+    <!-- ACTIVE MENU SCRIPT -->
+    <script>
+        $(document).ready(function () {
+            const path = window.location.pathname.toLowerCase();
+
+            $('.menu-link').each(function () {
+                const href = $(this).attr('href')?.toLowerCase();
+                if (href && path.includes(href)) {
+                    $(this).closest('.menu-item').addClass('active');
+                    $(this).parents('.menu-item').addClass('open');
+                }
+            });
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+
 </body>
 </html>

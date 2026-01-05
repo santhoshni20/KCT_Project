@@ -68,6 +68,7 @@ builder.Services.AddDbContext<ksiDbContext>(options =>
 builder.Services.AddScoped<ICanteenRepository, CanteenRepository>();     
 builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();
 builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
+builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 
 // Add MVC
 builder.Services.AddControllersWithViews();

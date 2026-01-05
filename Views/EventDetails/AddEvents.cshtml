@@ -34,39 +34,50 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5>Add Event</h5>
+                <h5 class="modal-title">Add Event</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
-                <div class="mb-2">
-                    <label>Enter Event Name:</label>
-                    <input id="eventName" class="form-control" placeholder="Event Name" />
-                </div>
-                <div class="mb-2">
-                    <label>Organised By:</label>
-                    <input id="organisedBy" class="form-control" placeholder="Organised By" />
-                </div>
-                <div class="mb-2">
-                    <label>Event Date:</label>
-                    <input type="date" id="eventDate" class="form-control" />
-                </div>
-                <div class="mb-2">
-                    <label>Registration Deadline:</label>
-                    <input type="date" id="registrationDeadline" class="form-control" />
-                </div>
-                <div class="mb-2">
-                    <label>Contact Number:</label>
-                    <input id="contactNumber" class="form-control" placeholder="Contact Number" />
-                </div>
-                <div class="mb-2">
-                    <label>Brochure Image:</label>
-                    <input type="file" id="brochureImage" class="form-control" />
-                </div>
-                <div class="mb-2">
-                    <label>Description:</label>
-                    <textarea id="description" class="form-control" rows="3" placeholder="Enter description"></textarea>
-                </div>
+                <!-- FORM WRAPPER -->
+                <form id="eventForm">
+                    <div class="mb-2">
+                        <label>Enter Event Name:</label>
+                        <input id="eventName" class="form-control" placeholder="Event Name" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Organised By:</label>
+                        <input id="organisedBy" class="form-control" placeholder="Organised By" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Event Date:</label>
+                        <input type="date" id="eventDate" class="form-control" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Registration Deadline:</label>
+                        <input type="date" id="registrationDeadline" class="form-control" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Contact Number:</label>
+                        <input id="contactNumber" class="form-control" placeholder="Contact Number" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Brochure Image:</label>
+                        <input type="file" id="brochureImage" class="form-control" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Description:</label>
+                        <textarea id="description" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
             </div>
+
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="saveEvent()">Save</button>
             </div>
@@ -87,7 +98,9 @@
                         <td>${new Date(e.eventDate).toLocaleDateString()}</td>
                         <td>${e.contactNumber}</td>
                         <td>${e.description ?? ''}</td>
-                        <td>${e.brochureImagePath ? `<a href="${e.brochureImagePath}" target="_blank">View</a>` : ''}</td>
+                        <td>${e.brochureImagePath
+                            ? `<a href="${e.brochureImagePath}" target="_blank">View</a>`
+                            : ''}</td>
                     </tr>`;
                 });
                 $('#eventsTable tbody').html(rows);
@@ -115,11 +128,17 @@
                 contentType: false,
                 data: formData,
                 success: function () {
+                    $('#eventForm')[0].reset();     // ✅ CLEAR FORM
                     $('#eventModal').modal('hide');
                     loadEvents();
                 }
             });
         }
+
+        // Extra safety: clear form when modal closes
+        $('#eventModal').on('hidden.bs.modal', function () {
+            $('#eventForm')[0].reset();
+        });
 
         $(document).ready(loadEvents);
     </script>

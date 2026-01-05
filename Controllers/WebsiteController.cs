@@ -642,6 +642,7 @@
 //}
 // Controllers/WebsiteController.cs
 using ksi.Interfaces;
+using ksi.Models.DTOs;
 using KSI_Project.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -655,15 +656,13 @@ namespace ksi.Controllers
         {
             _repo = repo;
         }
-
-        // GET: Website/Canteen - Display all canteens for users
+        #region Canteen
         public IActionResult Canteen()
         {
             var canteens = _repo.GetAllActiveCanteens();
             return View(canteens);
         }
 
-        // GET: Website/CanteenMenu?canteenId=1 - Display menu for users
         public IActionResult CanteenMenu(int canteenId)
         {
             var canteen = _repo.GetCanteenById(canteenId);
@@ -693,5 +692,28 @@ namespace ksi.Controllers
         {
             return View();
         }
+        #endregion
+
+        #region Event details
+        public IActionResult EventDetails()
+        {
+            return View();
+        }
+
+        // Fetch events for table
+        [HttpGet]
+        public IActionResult GetAllEvents()
+        {
+            var data = _repo.GetAllEvents();
+
+            return Json(new ApiResponseDTO
+            {
+                statusCode = 200,
+                message = "Events fetched successfully",
+                data = data
+            });
+        }
+        #endregion
+
     }
 }

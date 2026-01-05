@@ -61,6 +61,7 @@
 //    }
 //}
 // Interfaces/IWebsiteRepository.cs
+using ksi.Models.DTOs;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 
@@ -68,15 +69,15 @@ namespace ksi.Interfaces
 {
     public interface IWebsiteRepository
     {
-        // Canteen - Public View (for website users)
+        #region Canteen
         IEnumerable<CanteenId> GetAllActiveCanteens();
         CanteenId GetCanteenById(int canteenId);
         IEnumerable<Canteen> GetMenuByCanteenId(int canteenId);
+        #endregion
 
-        // You can add other website sections here later
-        // #region CGPA
-        // #region Event
-        // #region Faculty
-        // etc.
+        #region Event details
+        List<EventDetailsDTO> GetAllEvents();
+        #endregion
+
     }
 }

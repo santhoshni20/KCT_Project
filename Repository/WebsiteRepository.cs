@@ -513,6 +513,7 @@
 //}
 // Repository/WebsiteRepository.cs
 using ksi.Interfaces;
+using ksi.Models.DTOs;
 using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -528,6 +529,7 @@ namespace ksi.Repository
             _context = context;
         }
 
+        #region Canteen
         // Get all active canteens for public display
         public IEnumerable<CanteenId> GetAllActiveCanteens()
         {
@@ -555,5 +557,30 @@ namespace ksi.Repository
                 .OrderBy(c => c.DishName)
                 .ToList();
         }
+        #endregion
+
+        #region Event details
+        public List<EventDetailsDTO> GetAllEvents()
+        {
+            return _context.mstEventDetails
+                .Where(x => x.isActive && x.deletedDate == null)
+                .OrderByDescending(x => x.createdDate)
+                .Select(x => new EventDetailsDTO
+                {
+                    mstEventId = x.mstEventId,
+                    eventName = x.eventName,
+                    organisedBy = x.organisedBy,
+                    eventDate = x.eventDate,
+                    registrationDeadline = x.registrationDeadline,
+                    contactNumber = x.contactNumber,
+                    description = x.description,
+                    brochureImagePath = x.brochureImagePath,
+                    createdDate = x.createdDate,
+                    isActive = x.isActive
+                })
+                .ToList();
+        }
+        #endregion
+
     }
 }

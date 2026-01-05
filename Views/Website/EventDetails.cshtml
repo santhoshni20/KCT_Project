@@ -6,123 +6,136 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
 
 <style>
-    .event-section {
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .event-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 30px;
+    }
+
+    /* Header */
+    .event-header {
+        text-align: center;
+        margin-bottom: 50px;
+        color: white;
+    }
+
+        .event-header h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .event-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+    /* Date Section */
+    .event-date-section {
         margin-bottom: 40px;
     }
 
+        .event-date-section h3 {
+            color: white;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 5px;
+        }
+
+    /* Horizontal scroll container */
     .event-row {
         display: flex;
-        flex-wrap: wrap;
         gap: 20px;
+        overflow-x: auto;
+        padding-bottom: 10px;
     }
 
+        .event-row::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .event-row::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+
+    /* Card */
     .event-card {
-        width: auto;
-        height: 280px; 
-        background-color: #2c2c2c;
-        border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        padding: 15px;
-        color: white;
-        text-align: center;
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        width: 260px;
+        height: 320px;
         display: flex;
         flex-direction: column;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        flex-shrink: 0; /* Prevent shrinking in horizontal scroll */
     }
 
-
-        .event-card img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 3px solid white;
-            margin-bottom: 10px;
-            align-self: center;
+        .event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
 
         .event-card h5 {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-            min-height: 42px; /* ⭐ keeps title area same */
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
         }
 
         .event-card p {
             font-size: 0.9rem;
-            color: #bbb;
-            margin-bottom: 10px;
-            min-height: 40px; /* ⭐ keeps organiser text same */
+            color: #666;
+            margin-bottom: 6px;
         }
 
     .btn-view {
-        margin-top: auto; /* ⭐ pushes button to bottom */
-        background-color: #ff4d4d;
-        border: none;
-        padding: 6px 14px;
-        border-radius: 8px;
+        margin-top: auto;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        font-size: 0.85rem;
-        cursor: pointer;
+        border-radius: 50px;
+        font-weight: 600;
+        border: none;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
     }
-
 
         .btn-view:hover {
-            background-color: #e63e3e;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
         }
 
-    .event-scroll {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 20px;
-        padding-bottom: 10px;
+    .no-events {
+        color: white;
+        text-align: center;
+        font-size: 1.2rem;
     }
-
-        .event-scroll::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .event-scroll::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 4px;
-        }
-
-    .event-row,
-    .event-scroll {
-        display: flex;
-        gap: 20px;
-    }
-
-        .event-row .event-card,
-        .event-scroll .event-card {
-            flex: 0 0 200px; /* 🔥 forces exact width */
-        }
-
 </style>
 
-<div class="container mt-5">
-    <h2 class="mb-4">Event Details</h2>
+<div class="event-container">
+    <div class="event-header">
+        <h1>📅 Event Details</h1>
+        <p>Explore upcoming college events</p>
+    </div>
 
-    <div id="eventsContainer"></div>
-</div>
-
-<!-- Event Details Modal -->
-<div class="modal fade" id="eventDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content p-4">
-            <h4 id="eventDetailsTitle"></h4>
-            <p><strong>Date:</strong> <span id="eventDetailsDate"></span></p>
-            <p><strong>Deadline:</strong> <span id="eventDetailsDeadline"></span></p>
-            <p><strong>Contact:</strong> <span id="eventDetailsContact"></span></p>
-            <p><strong>Description:</strong> <span id="eventDetailsDescription"></span></p>
-            <div id="eventDetailsBrochure"></div>
-        </div>
+    <div id="eventGrid">
+        <!-- Events loaded here by JS -->
     </div>
 </div>
 
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script>
         $(document).ready(function () {
@@ -130,90 +143,64 @@
         });
 
         function loadEvents() {
-            $.get('/Website/GetAllEvents', function (res) {
-                if (!res || !res.data) return;
+            $.ajax({
+                url: '@Url.Action("GetAllEvents", "Website")',
+                type: 'GET',
+                success: function (res) {
+                    let dataArray = res && (res.data || res);
 
-                let grouped = {};
-                let today = new Date();
-                today.setHours(0, 0, 0, 0);
+                    if (!Array.isArray(dataArray) || dataArray.length === 0) {
+                        $("#eventGrid").html('<div class="no-events">No events found</div>');
+                        return;
+                    }
 
-                res.data.forEach(e => {
-                    if (!e.eventDate) return;
+                    // Filter upcoming events only
+                    const today = new Date();
+                    dataArray = dataArray.filter(e => new Date(e.eventDate) >= today);
 
-                    let eventDate = new Date(e.eventDate);
-                    eventDate.setHours(0, 0, 0, 0);
-
-                    if (eventDate <= today) return;
-
-                    let dateKey = formatDate(e.eventDate);
-                    if (!grouped[dateKey]) grouped[dateKey] = [];
-                    grouped[dateKey].push(e);
-                });
-
-                let html = '';
-
-                // for (let date in grouped) {
-                //     html += `<div class="event-section">
-                //                 <h4>${date}</h4>
-                //                 <div class="event-row">`;
-
-                //     grouped[date].forEach(ev => {
-                //         html += `<div class="event-card">
-                //                     <img src="${ev.brochureImagePath || 'https:via.placeholder.com/100'}">
-                //                     <h5>${ev.eventName}</h5>
-                //                     <p>${ev.organisedBy || ''}</p>
-                //                     <button class="btn-view" onclick='showDetails(${JSON.stringify(ev)})'>
-                //                         View Details
-                //                     </button>
-                //                  </div>`;
-                //     });
-
-                //     html += `</div></div>`;
-                // }
-                for (let date in grouped) {
-                    let events = grouped[date];
-                    let containerClass = events.length > 5 ? 'event-scroll' : 'event-row';
-
-                    html += `<div class="event-section">
-                                <h4>${date}</h4>
-                                <div class="${containerClass}">`;
-
-                    events.forEach(ev => {
-                        html += `<div class="event-card">
-                                    <img src="${ev.brochureImagePath || 'https://via.placeholder.com/100'}">
-                                    <h5>${ev.eventName}</h5>
-                                    <p>${ev.organisedBy || ''}</p>
-                                    <button class="btn-view"
-                                            onclick='showDetails(${JSON.stringify(ev)})'>
-                                        View Details
-                                    </button>
-                                 </div>`;
+                    // Group events by date
+                    const grouped = {};
+                    dataArray.forEach(e => {
+                        const dateKey = formatDate(e.eventDate);
+                        if (!grouped[dateKey]) grouped[dateKey] = [];
+                        grouped[dateKey].push(e);
                     });
 
-                    html += `</div></div>`;
-                }
-                $('#eventsContainer').html(html || '<p>No upcoming events</p>');
-            });
-        }
+                    let html = '';
 
-        window.showDetails = function (ev) {
-            $('#eventDetailsTitle').text(ev.eventName);
-            $('#eventDetailsDate').text(formatDate(ev.eventDate));
-            $('#eventDetailsDeadline').text(formatDate(ev.registrationDeadline));
-            $('#eventDetailsContact').text(ev.contactNumber || '');
-            $('#eventDetailsDescription').text(ev.description || '');
-            $('#eventDetailsBrochure').html(
-                ev.brochureImagePath
-                    ? `<a href="${ev.brochureImagePath}" target="_blank">📄 View Brochure</a>`
-                    : ''
-            );
-            $('#eventDetailsModal').modal('show');
+                    for (const [date, events] of Object.entries(grouped)) {
+                        html += `
+                            <div class="event-date-section">
+                                <h3>${date}</h3>
+                                <div class="event-row">
+                                    ${events.map(e => `
+                                        <div class="event-card">
+                                            <h5>${e.eventName ?? ''}</h5>
+                                            <p><strong>Organised By:</strong> ${e.organisedBy ?? ''}</p>
+                                            <p><strong>Registration Till:</strong> ${formatDate(e.registrationDeadline)}</p>
+                                            <p><strong>Contact:</strong> ${e.contactNumber ?? ''}</p>
+                                            <p>${e.description ?? ''}</p>
+                                            ${e.brochureImagePath ? `<a href="${e.brochureImagePath}" target="_blank" class="btn-view">View Brochure</a>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    $("#eventGrid").html(html);
+                },
+                error: function (xhr) {
+                    console.error("Error loading events", xhr.responseText);
+                    alert("Failed to load events");
+                }
+            });
         }
 
         function formatDate(dateStr) {
             if (!dateStr) return '';
-            let d = new Date(dateStr);
-            return d.toLocaleDateString();
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateStr).toLocaleDateString(undefined, options);
         }
     </script>
 }

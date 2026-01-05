@@ -1,0 +1,130 @@
+﻿@{
+    Layout = "_LayoutWebsite";
+    ViewData["Title"] = "College Dashboard";
+}
+
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    .dashboard-card {
+        background: white;
+        border-radius: 18px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+
+    .dashboard-icon {
+        font-size: 3.5rem;
+        margin-bottom: 15px;
+    }
+
+    .dashboard-card h5 {
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #333;
+    }
+
+    .dashboard-card p {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+</style>
+
+<!-- PAGE HEADER (MATCHES OTHER DASHBOARD PAGES) -->
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="fw-bold">College Dashboard</h4>
+</div>
+
+<!-- CARD WRAPPER -->
+<div class="card p-4">
+
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">🎓 Kumaraguru School Of Innovation</h2>
+        <p class="text-muted">
+            Empowering Education • Innovation • Excellence
+        </p>
+    </div>
+
+    <!-- DASHBOARD GRID (CANTEEN STYLE) -->
+    <div class="dashboard-grid">
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">🏫</div>
+            <h5>About the College</h5>
+            <p>
+                KSI Institute of Technology is committed to delivering quality education
+                that nurtures innovation, leadership, and ethical values.
+            </p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">📖</div>
+            <h5>Academic Excellence</h5>
+            <p>
+                Student-centric learning with experienced faculty, industry-aligned
+                curriculum, and continuous academic development.
+            </p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">🧪</div>
+            <h5>Infrastructure</h5>
+            <p>
+                Modern classrooms, advanced laboratories, smart boards,
+                and a well-equipped digital library.
+            </p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">🍽</div>
+            <h5>Campus Facilities</h5>
+            <p>
+                Hygienic canteens, hostels, sports complexes,
+                medical facilities, and a vibrant campus environment.
+            </p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">🚀</div>
+            <h5>Placements & Career</h5>
+            <p>
+                Dedicated placement cell offering internships,
+                training programs, and recruitment with top companies.
+            </p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-icon">🎯</div>
+            <h5>Student Development</h5>
+            <p>
+                Clubs, technical events, cultural activities,
+                leadership programs, and innovation cells.
+            </p>
+        </div>
+
+    </div>
+</div>

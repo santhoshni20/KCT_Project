@@ -69,6 +69,10 @@ namespace ksi.Interfaces
 {
     public interface IWebsiteRepository
     {
+        #region Dashboard
+        DashboardContentDTO getCollegeDashboardContent();
+        #endregion
+
         #region Canteen
         IEnumerable<CanteenId> GetAllActiveCanteens();
         CanteenId GetCanteenById(int canteenId);

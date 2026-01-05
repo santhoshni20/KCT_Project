@@ -656,6 +656,39 @@ namespace ksi.Controllers
         {
             _repo = repo;
         }
+
+        #region Dashboard
+        public IActionResult AdminDashboard()
+        {
+            return View();
+        }
+        public IActionResult Index()
+        {
+            try
+            {
+                var content = _repo.getCollegeDashboardContent();
+
+                var response = new ApiResponseDTO
+                {
+                    statusCode = 200,
+                    message = "College dashboard content loaded successfully",
+                    data = content
+                };
+
+                return View(response);
+            }
+            catch (Exception ex)
+            {
+                return View(new ApiResponseDTO
+                {
+                    statusCode = 500,
+                    message = "Failed to load dashboard content",
+                    errorDetails = ex.Message
+                });
+            }
+        }
+        #endregion
+
         #region Canteen
         public IActionResult Canteen()
         {
@@ -685,12 +718,6 @@ namespace ksi.Controllers
             ViewBag.CanteenId = canteenId;
             ViewBag.CanteenName = canteen.CanteenName;
             return View(menu);
-        }
-
-        // Home page (optional)
-        public IActionResult Index()
-        {
-            return View();
         }
         #endregion
 

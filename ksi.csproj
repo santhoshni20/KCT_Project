@@ -27,6 +27,7 @@
 
 	<ItemGroup>
 		<Folder Include="Views\Cgpa\" />
+		<Folder Include="Views\Dashboard\" />
 		<Folder Include="Views\Id balance\" />
 		<Folder Include="Views\Timetable\" />
 		<Folder Include="Views\Syllabus\" />

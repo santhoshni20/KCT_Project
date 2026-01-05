@@ -517,6 +517,7 @@ using ksi.Models.DTOs;
 using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace ksi.Repository
 {
@@ -528,6 +529,37 @@ namespace ksi.Repository
         {
             _context = context;
         }
+
+        #region Dashboard
+        public DashboardContentDTO getCollegeDashboardContent()
+        {
+            return new DashboardContentDTO
+            {
+                collegeName = "KSI Institute of Technology",
+                tagline = "Empowering Education • Innovation • Excellence",
+
+                aboutCollege =
+                    "KSI Institute of Technology is committed to providing high-quality education " +
+                    "that nurtures innovation, leadership, and ethical values among students.",
+
+                academicExcellence =
+                    "Our institution follows a student-centric learning approach with experienced faculty, " +
+                    "industry-aligned curriculum, and continuous academic assessment.",
+
+                infrastructure =
+                    "The campus features modern classrooms, advanced laboratories, a digital library, " +
+                    "and smart learning environments to support holistic education.",
+
+                campusFacilities =
+                    "We provide well-maintained hostels, hygienic canteens, sports complexes, medical facilities, " +
+                    "and a vibrant campus life for students.",
+
+                placements =
+                    "Our dedicated placement cell ensures career readiness through training programs, internships, " +
+                    "and collaborations with leading organizations."
+            };
+        }
+        #endregion
 
         #region Canteen
         // Get all active canteens for public display

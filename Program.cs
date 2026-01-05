@@ -89,6 +89,6 @@ app.UseAuthorization();
 // Default route - Set Website as default for users
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Website}/{action=Canteen}/{id?}");
+    pattern: "{controller=Website}/{action=AdminDashboard}/{id?}");
 
 app.Run();

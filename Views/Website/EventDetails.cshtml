@@ -35,15 +35,23 @@
                 url: '@Url.Action("GetAllEvents", "Website")',
                 type: 'GET',
                 success: function (res) {
+                    console.log("GetAllEvents response:", res);
+
+                    // Some APIs wrap the payload differently; ensure we use the data array
+                    var dataArray = res && (res.data || res);
                     let rows = "";
 
-                    if (res.data && res.data.length > 0) {
-                        res.data.forEach((e, i) => {
+                    if (res && res.statusCode && res.statusCode !== 200) {
+                        console.warn("Server returned non-200 status:", res.statusCode, res.message);
+                    }
+
+                    if (Array.isArray(dataArray) && dataArray.length > 0) {
+                        dataArray.forEach((e, i) => {
                             rows += `
                             <tr>
                                 <td>${i + 1}</td>
-                                <td>${e.eventName}</td>
-                                <td>${e.organisedBy}</td>
+                                <td>${e.eventName ?? ''}</td>
+                                <td>${e.organisedBy ?? ''}</td>
                                 <td>${formatDate(e.eventDate)}</td>
                                 <td>${formatDate(e.registrationDeadline)}</td>
                                 <td>${e.contactNumber ?? ''}</td>
@@ -63,8 +71,9 @@
 
                     $("#eventsTable tbody").html(rows);
                 },
-                error: function () {
-                    alert("Failed to load events");
+                error: function (xhr, status, error) {
+                    console.error("Failed to load events:", status, error, xhr.responseText);
+                    alert("Failed to load events. See console for details.");
                 }
             });
         }

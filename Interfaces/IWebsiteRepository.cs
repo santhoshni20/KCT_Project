@@ -60,3 +60,23 @@
 //        #endregion
 //    }
 //}
+// Interfaces/IWebsiteRepository.cs
+using KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
+
+namespace ksi.Interfaces
+{
+    public interface IWebsiteRepository
+    {
+        // Canteen - Public View (for website users)
+        IEnumerable<CanteenId> GetAllActiveCanteens();
+        CanteenId GetCanteenById(int canteenId);
+        IEnumerable<Canteen> GetMenuByCanteenId(int canteenId);
+
+        // You can add other website sections here later
+        // #region CGPA
+        // #region Event
+        // #region Faculty
+        // etc.
+    }
+}

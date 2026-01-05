@@ -1,0 +1,266 @@
+﻿@* Views/Website/CanteenMenu.cshtml *@
+@model IEnumerable<KSI_Project.Models.DTOs.CanteenMenuDto>
+@{
+    Layout = null;
+
+    ViewData["Title"] = ViewBag.CanteenName + " Menu";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .menu-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .menu-header {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        text-align: center;
+    }
+
+        .menu-header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .menu-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+    .back-btn {
+        display: inline-block;
+        padding: 10px 25px;
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-top: 15px;
+    }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            color: white;
+        }
+
+    .search-container {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .search-input {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        font-size: 1rem;
+    }
+
+    .menu-table-container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        overflow-x: auto;
+    }
+
+    .menu-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .menu-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .menu-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .menu-table td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .menu-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+    .time-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        margin: 3px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        background: #e7e7ff;
+        color: #5a5aff;
+        font-weight: 500;
+    }
+
+    .price {
+        font-weight: 700;
+        color: #28a745;
+        font-size: 1.2rem;
+    }
+
+    .no-items {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+        .no-items h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+    .filter-section {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .filter-btn {
+        padding: 8px 20px;
+        margin: 5px;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+</style>
+
+<div class="menu-container">
+    <div class="menu-header">
+        <h1>🍽️ @ViewBag.CanteenName</h1>
+        <p>Discover our delicious offerings</p>
+        <a href="@Url.Action("Canteen", "Website")" class="back-btn">
+            ← Back to Canteens
+        </a>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 Search dishes..." class="search-input form-control">
+    </div>
+
+    <div class="menu-table-container">
+        <!-- Filter buttons -->
+        <div class="filter-section">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="morning">🌅 Morning</button>
+            <button class="filter-btn" data-filter="afternoon">☀️ Afternoon</button>
+            <button class="filter-btn" data-filter="evening">🌆 Evening</button>
+            <button class="filter-btn" data-filter="snacks">🍿 Snacks</button>
+        </div>
+
+        @if (Model.Any())
+        {
+            <table class="menu-table">
+                <thead>
+                    <tr>
+                        <th>Dish Name</th>
+                        <th>Price</th>
+                        <th>Available Timings</th>
+                    </tr>
+                </thead>
+                <tbody id="menuTableBody">
+                    @foreach (var item in Model)
+                    {
+                        <tr data-morning="@item.Morning"
+                            data-afternoon="@item.Afternoon"
+                            data-evening="@item.Evening"
+                            data-snacks="@item.Snacks">
+                            <td><strong>@item.DishName</strong></td>
+                            <td class="price">₹@item.Price.ToString("F2")</td>
+                            <td>
+                                @if (item.Morning)
+                                {
+                                    <span class="time-badge">🌅 Morning</span>
+                                }
+                                @if (item.Afternoon)
+                                {
+                                    <span class="time-badge">☀️ Afternoon</span>
+                                }
+                                @if (item.Evening)
+                                {
+                                    <span class="time-badge">🌆 Evening</span>
+                                }
+                                @if (item.Snacks)
+                                {
+                                    <span class="time-badge">🍿 Snacks</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="no-items">
+                <h3>😔 No items available</h3>
+                <p>Please check back later for updated menu</p>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#menuTableBody tr');
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            let filter = this.dataset.filter;
+            let rows = document.querySelectorAll('#menuTableBody tr');
+
+            rows.forEach(row => {
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else {
+                    let showRow = row.dataset[filter] === 'True';
+                    row.style.display = showRow ? '' : 'none';
+                }
+            });
+        });
+    });
+</script>

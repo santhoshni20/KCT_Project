@@ -1,11 +1,11 @@
-﻿using ksi.Models.DTOs;
+﻿//using ksi.Models.DTOs;
 
-namespace ksi.Interfaces
-{
-    public interface IEventDetailsRepository
-    {
-        List<EventDetailsDTO> getAllEvents();
+//namespace ksi.Interfaces
+//{
+//    public interface IEventDetailsRepository
+//    {
+//        List<EventDetailsDTO> getAllEvents();
 
-        bool addEvent(EventDetailsDTO eventDto);
-    }
-}
+//        bool addEvent(EventDetailsDTO eventDto);
+//    }
+//}

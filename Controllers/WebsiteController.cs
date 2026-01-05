@@ -640,3 +640,58 @@
 //    }
 
 //}
+// Controllers/WebsiteController.cs
+using ksi.Interfaces;
+using KSI_Project.Models.DTOs;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ksi.Controllers
+{
+    public class WebsiteController : Controller
+    {
+        private readonly IWebsiteRepository _repo;
+
+        public WebsiteController(IWebsiteRepository repo)
+        {
+            _repo = repo;
+        }
+
+        // GET: Website/Canteen - Display all canteens for users
+        public IActionResult Canteen()
+        {
+            var canteens = _repo.GetAllActiveCanteens();
+            return View(canteens);
+        }
+
+        // GET: Website/CanteenMenu?canteenId=1 - Display menu for users
+        public IActionResult CanteenMenu(int canteenId)
+        {
+            var canteen = _repo.GetCanteenById(canteenId);
+            if (canteen == null)
+                return NotFound();
+
+            var menu = _repo.GetMenuByCanteenId(canteenId)
+                .Select(c => new CanteenMenuDto
+                {
+                    ItemID = c.ItemID,
+                    DishName = c.DishName,
+                    Price = c.Price,
+                    Availability = c.Availability,
+                    Morning = c.Morning,
+                    Afternoon = c.Afternoon,
+                    Evening = c.Evening,
+                    Snacks = c.Snacks
+                }).ToList();
+
+            ViewBag.CanteenId = canteenId;
+            ViewBag.CanteenName = canteen.CanteenName;
+            return View(menu);
+        }
+
+        // Home page (optional)
+        public IActionResult Index()
+        {
+            return View();
+        }
+    }
+}

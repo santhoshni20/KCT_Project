@@ -1,6 +1,8 @@
-﻿@model IEnumerable<KSI_Project.Models.Entity.CanteenId>
+﻿@* Views/Website/Canteen.cshtml *@
+@model IEnumerable<KSI_Project.Models.Entity.CanteenId>
 @{
-    ViewData["Title"] = "Canteen List";
+    Layout = null;
+    ViewData["Title"] = "College Canteens";
 }
 
 <style>
@@ -97,11 +99,30 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
             color: white;
         }
+
+    .back-home {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+        .back-home a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+            .back-home a:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
 </style>
 
 <div class="canteen-container">
     <div class="canteen-header">
-        <h1>🍽 College Canteens</h1>
+        <h1>🍽️ College Canteens</h1>
         <p>Choose your favorite canteen and explore the menu</p>
     </div>
 
@@ -119,7 +140,7 @@
                             @Html.Raw("🍔")
                             ; break;
                         case 3:
-                            @Html.Raw("☕")
+                            @Html.Raw("🍕")
                             ; break;
                         case 4:
                             @Html.Raw("🍱")
@@ -131,16 +152,20 @@
                             @Html.Raw("🫖")
                             ; break;
                         default:
-                            @Html.Raw("🍽")
+                            @Html.Raw("🍽️")
                             ; break;
                     }
                 </div>
                 <h2>@canteen.CanteenName</h2>
-                <a href="@Url.Action("Menu", "Canteen", new { canteenId = canteen.CanteenID })"
+                <a href="@Url.Action("CanteenMenu", "Website", new { canteenId = canteen.CanteenID })"
                    class="view-menu-btn">
-                    View Menu
+                    View Menu 🔍
                 </a>
             </div>
         }
+    </div>
+
+    <div class="back-home">
+        <a href="@Url.Action("Index", "Website")">← Back to Home</a>
     </div>
 </div>

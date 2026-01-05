@@ -511,3 +511,49 @@
 
 //    }
 //}
+// Repository/WebsiteRepository.cs
+using ksi.Interfaces;
+using KSI_Project.Helpers.DbContexts;
+using KSI_Project.Models.Entity;
+using Microsoft.EntityFrameworkCore;
+
+namespace ksi.Repository
+{
+    public class WebsiteRepository : IWebsiteRepository
+    {
+        private readonly ksiDbContext _context;
+
+        public WebsiteRepository(ksiDbContext context)
+        {
+            _context = context;
+        }
+
+        // Get all active canteens for public display
+        public IEnumerable<CanteenId> GetAllActiveCanteens()
+        {
+            return _context.CanteenIds
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.CanteenName)
+                .ToList();
+        }
+
+        // Get specific canteen details
+        public CanteenId GetCanteenById(int canteenId)
+        {
+            return _context.CanteenIds
+                .FirstOrDefault(c => c.CanteenID == canteenId && c.IsActive);
+        }
+
+        // Get menu items for a canteen (only available items for public)
+        public IEnumerable<Canteen> GetMenuByCanteenId(int canteenId)
+        {
+            return _context.Canteens
+                .Include(c => c.CanteenDetails)
+                .Where(c => c.CanteenID == canteenId
+                         && c.IsActive
+                         && c.Availability == "Yes") // Only show available items
+                .OrderBy(c => c.DishName)
+                .ToList();
+        }
+    }
+}

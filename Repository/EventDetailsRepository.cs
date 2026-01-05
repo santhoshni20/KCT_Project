@@ -2,6 +2,9 @@
 using ksi.Models.DTOs;
 using ksi.Models.Entity;
 using KSI_Project.Helpers.DbContexts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ksi.Repository
 {
@@ -14,7 +17,8 @@ namespace ksi.Repository
             _context = context;
         }
 
-        public List<EventDetailsDTO> getAllEvents()
+        // Note PascalCase here
+        public List<EventDetailsDTO> GetAllEvents()
         {
             return _context.mstEventDetails
                 .Where(x => x.isActive && x.deletedDate == null)
@@ -24,9 +28,10 @@ namespace ksi.Repository
                     eventName = x.eventName,
                     organisedBy = x.organisedBy,
                     registrationDeadline = x.registrationDeadline,
-                    brochureImagePath = x.brochureImagePath,
                     eventDate = x.eventDate,
                     contactNumber = x.contactNumber,
+                    brochureImagePath = x.brochureImagePath,
+                    description = x.description,
                     isActive = x.isActive,
                     createdDate = x.createdDate
                 })
@@ -34,18 +39,20 @@ namespace ksi.Repository
                 .ToList();
         }
 
-        public bool addEvent(EventDetailsDTO eventDto)
+        // Note PascalCase here
+        public bool AddEvent(EventDetailsDTO eventDto)
         {
             var entity = new mstEventDetails
             {
                 eventName = eventDto.eventName,
                 organisedBy = eventDto.organisedBy,
-                registrationDeadline = eventDto.registrationDeadline,
-                brochureImagePath = eventDto.brochureImagePath,
-                eventDate = eventDto.eventDate,
+                registrationDeadline = eventDto.registrationDeadline ?? DateTime.Now,
+                eventDate = eventDto.eventDate ?? DateTime.Now,
                 contactNumber = eventDto.contactNumber,
-
-                createdBy = 1, // replace with session user
+                brochureImagePath = eventDto.brochureImagePath,
+                description = eventDto.description,
+                isActive = true,
+                createdBy = 1, // replace with session user id
                 createdDate = DateTime.Now
             };
 

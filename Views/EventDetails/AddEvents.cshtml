@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = "_Layout"; 
+    Layout = "_Layout";
     ViewData["Title"] = "Add Event";
 }
 
@@ -20,6 +20,8 @@
                     <th>Organised By</th>
                     <th>Event Date</th>
                     <th>Contact</th>
+                    <th>Description</th>
+                    <th>Brochure</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -36,11 +38,34 @@
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input id="eventName" class="form-control mb-2" placeholder="Event Name" />
-                <input id="organisedBy" class="form-control mb-2" placeholder="Organised By" />
-                <input type="date" id="registrationDeadline" class="form-control mb-2" />
-                <input type="date" id="eventDate" class="form-control mb-2" />
-                <input id="contactNumber" class="form-control mb-2" placeholder="Contact Number" />
+                <div class="mb-2">
+                    <label>Enter Event Name:</label>
+                    <input id="eventName" class="form-control" placeholder="Event Name" />
+                </div>
+                <div class="mb-2">
+                    <label>Organised By:</label>
+                    <input id="organisedBy" class="form-control" placeholder="Organised By" />
+                </div>
+                <div class="mb-2">
+                    <label>Event Date:</label>
+                    <input type="date" id="eventDate" class="form-control" />
+                </div>
+                <div class="mb-2">
+                    <label>Registration Deadline:</label>
+                    <input type="date" id="registrationDeadline" class="form-control" />
+                </div>
+                <div class="mb-2">
+                    <label>Contact Number:</label>
+                    <input id="contactNumber" class="form-control" placeholder="Contact Number" />
+                </div>
+                <div class="mb-2">
+                    <label>Brochure Image:</label>
+                    <input type="file" id="brochureImage" class="form-control" />
+                </div>
+                <div class="mb-2">
+                    <label>Description:</label>
+                    <textarea id="description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="saveEvent()">Save</button>
@@ -52,7 +77,7 @@
 @section Scripts {
     <script>
         function loadEvents() {
-            $.get('@Url.Action("getAllEvents", "EventDetails")', function (res) {
+            $.get('@Url.Action("GetAllEvents", "EventDetails")', function (res) {
                 let rows = '';
                 res.data.forEach((e, i) => {
                     rows += `<tr>
@@ -61,6 +86,8 @@
                         <td>${e.organisedBy}</td>
                         <td>${new Date(e.eventDate).toLocaleDateString()}</td>
                         <td>${e.contactNumber}</td>
+                        <td>${e.description ?? ''}</td>
+                        <td>${e.brochureImagePath ? `<a href="${e.brochureImagePath}" target="_blank">View</a>` : ''}</td>
                     </tr>`;
                 });
                 $('#eventsTable tbody').html(rows);
@@ -68,19 +95,25 @@
         }
 
         function saveEvent() {
-            const data = {
-                eventName: $('#eventName').val(),
-                organisedBy: $('#organisedBy').val(),
-                registrationDeadline: $('#registrationDeadline').val(),
-                eventDate: $('#eventDate').val(),
-                contactNumber: $('#contactNumber').val()
-            };
+            var formData = new FormData();
+            formData.append("eventName", $('#eventName').val());
+            formData.append("organisedBy", $('#organisedBy').val());
+            formData.append("eventDate", $('#eventDate').val());
+            formData.append("registrationDeadline", $('#registrationDeadline').val());
+            formData.append("contactNumber", $('#contactNumber').val());
+            formData.append("description", $('#description').val());
+
+            var fileInput = $('#brochureImage')[0];
+            if (fileInput.files.length > 0) {
+                formData.append("brochureImage", fileInput.files[0]);
+            }
 
             $.ajax({
-                url: '@Url.Action("addEvent", "EventDetails")',
+                url: '@Url.Action("AddEvent", "EventDetails")',
                 type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
+                processData: false,
+                contentType: false,
+                data: formData,
                 success: function () {
                     $('#eventModal').modal('hide');
                     loadEvents();

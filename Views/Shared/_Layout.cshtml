@@ -75,7 +75,7 @@
 
                     <!-- EVENT DETAILS -->
                     <li class="menu-item">
-                        <a href="javascript:void(0)" class="menu-link menu-toggle">
+                        <a href="#" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-calendar-event"></i>
                             <div>Event Details</div>
                         </a>
@@ -177,10 +177,14 @@
             $('.menu-link').each(function () {
                 const href = $(this).attr('href')?.toLowerCase();
                 if (href && path.includes(href)) {
-                    $(this).closest('.menu-item').addClass('active');
+                    $(this).closest('.menu-item').addClass('active open');
                     $(this).parents('.menu-item').addClass('open');
                 }
             });
+        });
+        $(document).on('click', '.menu-toggle', function (e) {
+            e.preventDefault();
+            $(this).parent('.menu-item').toggleClass('open');
         });
     </script>
 

@@ -13,7 +13,7 @@ namespace KSI_Project.Helpers.DbContexts
 
         public DbSet<StudentProfile> student_profile { get; set; }
         public DbSet<syllabus> syllabus { get; set; }
-        //public DbSet<mstEventDetails> mstEventDetails { get; set; }
+        public DbSet<mstEventDetails> mstEventDetails { get; set; }
         public DbSet<timetable> timetable { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Canteen> Canteens { get; set; }

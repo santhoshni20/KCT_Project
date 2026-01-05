@@ -65,8 +65,9 @@ builder.Services.AddDbContext<ksiDbContext>(options =>
 );
 
 // Register repositories
-builder.Services.AddScoped<ICanteenRepository, CanteenRepository>();      // For admin
-builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();      // For users
+builder.Services.AddScoped<ICanteenRepository, CanteenRepository>();     
+builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();
+builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 
 // Add MVC
 builder.Services.AddControllersWithViews();

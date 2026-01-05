@@ -123,10 +123,23 @@
 
                     <!-- TIMETABLE -->
                     <li class="menu-item">
-                        <a href="@Url.Action("Index", "Timetable")" class="menu-link">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-time"></i>
                             <div>Timetable</div>
                         </a>
+
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="@Url.Action("AddDetails", "Timetable")" class="menu-link">
+                                    <div>Add Details</div>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="@Url.Action("SubjectsAdd", "Timetable")" class="menu-link">
+                                    <div>Add Subjects</div>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
 
                 </ul>

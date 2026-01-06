@@ -15,7 +15,7 @@ namespace ksi.Controllers
 
         // ================= VIEWS =================
         [HttpGet] public IActionResult AddDetails() => View();
-        [HttpGet] public IActionResult SubjectsAdd() => View();
+        [HttpGet] public IActionResult AddTimetable() => View();
 
         // ================= ADD =================
         [HttpPost("api/timetable/batch")]
@@ -64,20 +64,15 @@ namespace ksi.Controllers
         [HttpGet("api/timetable/dropdowns")]
         public async Task<ApiResponseDTO> getDropdowns()
         {
-            try
+            var data = new
             {
-                var data = new
-                {
-                    batches = await _repository.getBatchesAsync(),
-                    departments = await _repository.getDepartmentsAsync(),
-                    sections = await _repository.getSectionsAsync()
-                };
-                return new ApiResponseDTO { statusCode = 200, success = true, data = data };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponseDTO { statusCode = 500, success = false, message = "Error loading dropdowns", errorDetails = ex.Message };
-            }
+                batches = await _repository.getBatchesAsync(),
+                departments = await _repository.getDepartmentsAsync(),
+                sections = await _repository.getSectionsAsync(),
+                subjects = await _repository.getSubjectsAsync()
+            };
+
+            return new ApiResponseDTO { statusCode = 200, success = true, data = data };
         }
 
         // ================= SUBJECT =================
@@ -135,6 +130,29 @@ namespace ksi.Controllers
             {
                 return new ApiResponseDTO { statusCode = 500, success = false, message = "Error loading active dropdowns", errorDetails = ex.Message };
             }
+        }
+        
+
+        [HttpPost("api/timetable/toggle")]
+        public async Task<ApiResponseDTO> toggleStatus([FromBody] TimetableDTO dto)
+        {
+            bool result = false;
+
+            if (dto.batchId.HasValue)
+                result = await _repository.toggleBatchAsync(dto.batchId.Value, dto.isActive);
+            else if (dto.departmentId.HasValue)
+                result = await _repository.toggleDepartmentAsync(dto.departmentId.Value, dto.isActive);
+            else if (dto.sectionId.HasValue)
+                result = await _repository.toggleSectionAsync(dto.sectionId.Value, dto.isActive);
+            else if (dto.subjectId.HasValue)
+                result = await _repository.toggleSubjectAsync(dto.subjectId.Value, dto.isActive);
+
+            return new ApiResponseDTO
+            {
+                statusCode = 200,
+                success = result,
+                message = result ? "Status updated" : "Update failed"
+            };
         }
 
     }

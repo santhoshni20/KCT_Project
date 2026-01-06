@@ -172,6 +172,26 @@ namespace ksi.Repository
                 })
                 .ToListAsync();
         }
+        public async Task<List<TimetableDTO>> getSubjectsAsync()
+        {
+            return await _context.mstSubject
+                .Select(x => new TimetableDTO
+                {
+                    subjectId = x.subjectId,
+                    name = x.subjectName,
+                    isActive = x.isActive
+                })
+                .ToListAsync();
+        }
+
+        public async Task<bool> toggleSubjectAsync(int id, bool isActive)
+        {
+            var entity = await _context.mstSubject.FindAsync(id);
+            if (entity == null) return false;
+
+            entity.isActive = isActive;
+            return await _context.SaveChangesAsync() > 0;
+        }
 
     }
 }

@@ -1,0 +1,175 @@
+﻿@model IEnumerable<KSI_Project.Models.Entity.CanteenId>
+
+@{
+    ViewData["Title"] = "Canteen Management";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">🍽 Canteen Management</h2>
+
+    <!-- Success / Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Add Canteen -->
+    <div class="card mb-4">
+        <div class="card-header fw-bold">Add New Canteen</div>
+        <div class="card-body">
+            <form asp-action="AddCanteen" asp-controller="Canteen" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text"
+                               name="CanteenName"
+                               class="form-control"
+                               placeholder="Enter Canteen Name"
+                               required />
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">
+                            ➕ Add Canteen
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Canteen List -->
+    <div class="card">
+        <div class="card-header fw-bold">Canteen List</div>
+        <div class="card-body">
+
+            @if (Model == null || !Model.Any())
+            {
+                <p class="text-muted">No canteens available.</p>
+            }
+            else
+            {
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width:10%">ID</th>
+                            <th style="width:35%">Canteen Name</th>
+                            <th style="width:15%">Status</th>
+                            <th style="width:40%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var canteen in Model)
+                        {
+                            <tr class="@(canteen.IsActive ? "" : "table-secondary")">
+                                <td>@canteen.CanteenID</td>
+                                <td>@canteen.CanteenName</td>
+                                <td>
+                                    @if (canteen.IsActive)
+                                    {
+                                        <span class="badge bg-success">Open</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Closed</span>
+                                    }
+                                </td>
+                                <td>
+                                    <!-- Toggle Status -->
+                                    <form asp-action="ToggleCanteenStatus"
+                                          asp-controller="Canteen"
+                                          method="post"
+                                          style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="canteenId" value="@canteen.CanteenID" />
+                                        <button type="submit"
+                                                class="btn btn-sm @(canteen.IsActive ? "btn-secondary" : "btn-success")"
+                                                title="@(canteen.IsActive ? "Close Canteen" : "Open Canteen")">
+                                            @(canteen.IsActive ? "🔒 Close" : "✅ Open")
+                                        </button>
+                                    </form>
+
+                                    <!-- Edit -->
+                                    <button class="btn btn-sm btn-warning"
+                                            onclick="openEditModal(@canteen.CanteenID, '@canteen.CanteenName')">
+                                        ✏ Edit
+                                    </button>
+
+                                    <!-- Delete -->
+                                    <form asp-action="DeleteCanteen"
+                                          asp-controller="Canteen"
+                                          method="post"
+                                          style="display:inline"
+                                          onsubmit="return confirm('Delete this canteen?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="canteenId" value="@canteen.CanteenID" />
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            🗑 Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editCanteenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="EditCanteen" asp-controller="Canteen" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Canteen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="CanteenID" id="editCanteenId" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Canteen Name</label>
+                        <input type="text"
+                               name="CanteenName"
+                               id="editCanteenName"
+                               class="form-control"
+                               required />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openEditModal(id, name) {
+            document.getElementById("editCanteenId").value = id;
+            document.getElementById("editCanteenName").value = name;
+
+            var modal = new bootstrap.Modal(document.getElementById('editCanteenModal'));
+            modal.show();
+        }
+    </script>
+}

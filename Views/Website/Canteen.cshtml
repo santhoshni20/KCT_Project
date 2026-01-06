@@ -124,45 +124,54 @@
         <h1>🍽️ College Canteens</h1>
         <p>Choose your favorite canteen and explore the menu</p>
     </div>
-
     <div class="canteen-grid">
-        @foreach (var canteen in Model)
+        @if (Model == null || !Model.Any())
         {
-            <div class="canteen-card">
-                <div class="canteen-icon">
-                    @switch (canteen.CanteenID)
-                    {
-                        case 1:
-                            @Html.Raw("☕")
-                            ; break;
-                        case 2:
-                            @Html.Raw("🍔")
-                            ; break;
-                        case 3:
-                            @Html.Raw("🍕")
-                            ; break;
-                        case 4:
-                            @Html.Raw("🍱")
-                            ; break;
-                        case 5:
-                            @Html.Raw("🍛")
-                            ; break;
-                        case 6:
-                            @Html.Raw("🫖")
-                            ; break;
-                        default:
-                            @Html.Raw("🍽️")
-                            ; break;
-                    }
+            <p style="color:white; text-align:center;">
+                No canteens available right now.
+            </p>
+        }
+        else
+        {
+            foreach (var canteen in Model)
+            {
+                <div class="canteen-card">
+                    <div class="canteen-icon">
+                        @switch (canteen.CanteenID)
+                        {
+                            case 1:
+                                @Html.Raw("☕")
+                                break;
+                            case 2:
+                                @Html.Raw("🍔")
+                                break;
+                            case 3:
+                                @Html.Raw("🍕")
+                                break;
+                            case 4:
+                                @Html.Raw("🍱")
+                                break;
+                            case 5:
+                                @Html.Raw("🍛")
+                                break;
+                            case 6:
+                                @Html.Raw("🫖")
+                                break;
+                            default:
+                                @Html.Raw("🍽️")
+                                break;
+                        }
+                    </div>
+                    <h2>@canteen.CanteenName</h2>
+                    <a href="@Url.Action("CanteenMenu", "Website", new { canteenId = canteen.CanteenID })"
+                       class="view-menu-btn">
+                        View Menu 🔍
+                    </a>
                 </div>
-                <h2>@canteen.CanteenName</h2>
-                <a href="@Url.Action("CanteenMenu", "Website", new { canteenId = canteen.CanteenID })"
-                   class="view-menu-btn">
-                    View Menu 🔍
-                </a>
-            </div>
+            }
         }
     </div>
+
 
     <div class="back-home">
         <a href="@Url.Action("Index", "Website")">← Back to Home</a>

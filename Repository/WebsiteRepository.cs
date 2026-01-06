@@ -19,95 +19,7 @@
 //            _context = context;
 //        }
 
-//        #region Canteen
-//        public IEnumerable<CanteenId> GetAllCanteens()
-//        {
-//            return _context.CanteenIds.Where(c => c.IsActive).OrderBy(c => c.CanteenID).ToList();
-//        }
-
-//        public CanteenId GetCanteenById(int canteenId)
-//        {
-//            return _context.CanteenIds.FirstOrDefault(c => c.CanteenID == canteenId && c.IsActive);
-//        }
-
-//        public IEnumerable<Canteen> GetMenuByCanteenId(int canteenId)
-//        {
-//            return _context.Canteens
-//                .Where(c => c.CanteenID == canteenId && c.IsActive)
-//                .OrderBy(c => c.DishName)
-//                .ToList();
-//        }
-
-//        public bool AddDish(AddDishDto dish)
-//        {
-//            try
-//            {
-//                var newDish = new Canteen
-//                {
-//                    CanteenID = dish.CanteenID,
-//                    DishName = dish.DishName,
-//                    Availability = dish.Availability,
-//                    Price = dish.Price,
-//                    Morning = dish.Morning,
-//                    Afternoon = dish.Afternoon,
-//                    Evening = dish.Evening,
-//                    Snacks = dish.Snacks,
-//                    IsActive = true,
-//                    CreatedDate = DateTime.Now,
-//                    CreatedBy = "Admin"
-//                };
-//                _context.Canteens.Add(newDish);
-//                _context.SaveChanges();
-//                return true;
-//            }
-//            catch { return false; }
-//        }
-
-//        // ✅ Get dish by ID with navigation property
-//        public Canteen GetDishById(int itemId)
-//        {
-//            return _context.Canteens
-//                .Include(d => d.CanteenDetails)
-//                .FirstOrDefault(d => d.ItemID == itemId && d.IsActive);
-//        }
-
-//        public bool UpdateDish(AddDishDto dish, int itemId)
-//        {
-//            try
-//            {
-//                var existing = _context.Canteens.FirstOrDefault(d => d.ItemID == itemId && d.IsActive);
-//                if (existing == null) return false;
-
-//                existing.DishName = dish.DishName;
-//                existing.Availability = dish.Availability;
-//                existing.Price = dish.Price;
-//                existing.Morning = dish.Morning;
-//                existing.Afternoon = dish.Afternoon;
-//                existing.Evening = dish.Evening;
-//                existing.Snacks = dish.Snacks;
-//                existing.UpdatedBy = "Admin";
-//                existing.UpdatedDate = DateTime.Now;
-
-//                _context.SaveChanges();
-//                return true;
-//            }
-//            catch
-//            {
-//                return false;
-//            }
-//        }
-//        public bool DeleteDish(int itemId, string deletedBy)
-//        {
-//            var dish = _context.Canteens.FirstOrDefault(d => d.ItemID == itemId && d.IsActive);
-//            if (dish == null) return false;
-
-//            dish.IsActive = false;
-//            dish.DeletedBy = deletedBy;
-//            dish.DeletedDate = DateTime.Now;
-//            _context.SaveChanges();
-//            return true;
-//        }
-//        #endregion
+//      
 
 //        #region Cgpa
 //        public async Task<List<CourseDTO>> GetCoursesAsync(string department, string batch, int semester)
@@ -143,108 +55,7 @@
 //        }
 //        #endregion
 
-//        #region Event details
-//        public async Task<ApiResponseDTO> saveEventAsync(EventDTO eventDto, IFormFile brochureFile)
-//        {
-//            try
-//            {
-//                string brochurePath = null;
-
-//                if (brochureFile != null && brochureFile.Length > 0)
-//                {
-//                    string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "brochures");
-//                    Directory.CreateDirectory(folder);
-
-//                    string fileName = $"{Guid.NewGuid()}{Path.GetExtension(brochureFile.FileName)}";
-//                    string fullPath = Path.Combine(folder, fileName);
-
-//                    using var stream = new FileStream(fullPath, FileMode.Create);
-//                    await brochureFile.CopyToAsync(stream);
-
-//                    brochurePath = $"/uploads/brochures/{fileName}";
-//                }
-
-//                var entity = new events
-//                {
-//                    eventName = eventDto.eventName,
-//                    contactNumber = eventDto.contactNumber,
-//                    deadlineDate = eventDto.deadlineDate,
-//                    eventDate = eventDto.eventDate,
-//                    eligibility = eventDto.eligibility,
-//                    description = eventDto.description,
-//                    location = eventDto.location,
-//                    division = eventDto.division,
-//                    brochureImage = brochurePath,
-//                    createdBy = eventDto.createdBy,
-//                    isActive = true
-//                };
-
-//                _context.events.Add(entity);
-//                await _context.SaveChangesAsync();
-
-//                return new ApiResponseDTO
-//                {
-//                    statusCode = 200,
-//                    success = true,
-//                    message = "Event saved successfully"
-//                };
-//            }
-//            catch (Exception ex)
-//            {
-//                return new ApiResponseDTO
-//                {
-//                    statusCode = 500,
-//                    success = false,
-//                    message = "Failed to save event",
-//                    errorDetails = ex.Message
-//                };
-//            }
-//        }
-
-//        public async Task<ApiResponseDTO> getTodaysEventsAsync()
-//        {
-//            try
-//            {
-//                var today = DateTime.Today;
-
-//                var eventsList = await _context.events
-//                    .AsNoTracking()
-//                    .Where(e => e.isActive && e.eventDate >= today)
-//                    .OrderBy(e => e.eventDate)
-//                    .Select(e => new EventDTO
-//                    {
-//                        eventId = e.eventId,
-//                        eventName = e.eventName,
-//                        contactNumber = e.contactNumber,
-//                        deadlineDate = e.deadlineDate,
-//                        eventDate = e.eventDate,
-//                        eligibility = e.eligibility,
-//                        description = e.description,
-//                        location = e.location,
-//                        division = e.division,
-//                        brochureUrl = e.brochureImage
-//                    })
-//                    .ToListAsync();
-
-//                return new ApiResponseDTO
-//                {
-//                    statusCode = 200,
-//                    success = true,
-//                    data = eventsList
-//                };
-//            }
-//            catch (Exception ex)
-//            {
-//                return new ApiResponseDTO
-//                {
-//                    statusCode = 500,
-//                    success = false,
-//                    message = "Error fetching events",
-//                    errorDetails = ex.Message
-//                };
-//            }
-//        }
-//        #endregion
+//      
 
 //        #region Faculty support
 //        public IEnumerable<Faculty> GetAllFaculty()
@@ -561,35 +372,61 @@ namespace ksi.Repository
         }
         #endregion
 
-        #region Canteen
-        // Get all active canteens for public display
+        #region Canteen Operations
+
+
         public IEnumerable<CanteenId> GetAllActiveCanteens()
         {
-            return _context.CanteenIds
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.CanteenName)
-                .ToList();
+            try
+            {
+                return _context.CanteenIds
+                    .Where(c => c.IsActive && c.DeletedDate == null)
+                    .OrderBy(c => c.CanteenName ?? "")
+                    .ToList()
+                    ?? new List<CanteenId>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving active canteens: {ex.Message}", ex);
+            }
         }
 
-        // Get specific canteen details
         public CanteenId GetCanteenById(int canteenId)
         {
-            return _context.CanteenIds
-                .FirstOrDefault(c => c.CanteenID == canteenId && c.IsActive);
+            try
+            {
+                return _context.CanteenIds
+                    .FirstOrDefault(c => c.CanteenID == canteenId
+                                      && c.IsActive
+                                      && c.DeletedDate == null);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving canteen by ID: {ex.Message}", ex);
+            }
         }
 
-        // Get menu items for a canteen (only available items for public)
         public IEnumerable<Canteen> GetMenuByCanteenId(int canteenId)
         {
-            return _context.Canteens
-                .Include(c => c.CanteenDetails)
-                .Where(c => c.CanteenID == canteenId
-                         && c.IsActive
-                         && c.Availability == "Yes") // Only show available items
-                .OrderBy(c => c.DishName)
-                .ToList();
+            try
+            {
+                return _context.Canteens
+                    .Include(c => c.CanteenDetails)
+                    .Where(c => c.CanteenID == canteenId
+                             && c.IsActive
+                             && c.DeletedDate == null
+                             && c.Availability.ToLower() == "yes")
+                    .OrderBy(c => c.DishName)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving menu items: {ex.Message}", ex);
+            }
         }
+
         #endregion
+
 
         #region Event details
         public List<EventDetailsDTO> GetAllEvents()
@@ -616,3 +453,7 @@ namespace ksi.Repository
 
     }
 }
+
+
+
+  

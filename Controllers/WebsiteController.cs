@@ -20,130 +20,7 @@
 //            _env = env;
 //        }
 
-//        #region Canteen
-//        public IActionResult Menu(int canteenId)
-//        {
-//            var canteen = _repo.GetCanteenById(canteenId);
-//            if (canteen == null) return NotFound();
-
-//            var menu = _repo.GetMenuByCanteenId(canteenId)
-//                .Select(c => new CanteenMenuDto
-//                {
-//                    ItemID = c.ItemID,
-//                    DishName = c.DishName,
-//                    Price = c.Price,
-//                    Availability = c.Availability,
-//                    Morning = c.Morning,
-//                    Afternoon = c.Afternoon,
-//                    Evening = c.Evening,
-//                    Snacks = c.Snacks
-//                }).ToList();
-
-//            ViewBag.CanteenId = canteenId;
-//            ViewBag.CanteenName = canteen.CanteenName;
-//            return View(menu);
-//        }
-
-//        // ADD NEW DISH (GET) - ✅ Keep only this one!
-//        public IActionResult AddDish(int canteenId)
-//        {
-//            var canteen = _repo.GetCanteenById(canteenId);
-//            if (canteen == null) return NotFound();
-
-//            // ✅ Initialize and pass the model
-//            var model = new AddDishDto
-//            {
-//                CanteenID = canteenId,
-//                ItemID = 0, // For new dish
-//                Availability = "Yes" // Default value
-//            };
-
-//            ViewBag.CanteenId = canteenId;
-//            ViewBag.CanteenName = canteen.CanteenName;
-//            return View(model); // ✅ Pass the model
-//        }
-
-//        // ADD NEW DISH (POST)
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public IActionResult AddDish(AddDishDto dish)
-//        {
-//            if (ModelState.IsValid)
-//            {
-//                var result = _repo.AddDish(dish);
-//                if (result)
-//                {
-//                    TempData["Success"] = "Dish added successfully!";
-//                    return RedirectToAction("Menu", new { canteenId = dish.CanteenID });
-//                }
-//                TempData["Error"] = "Failed to add dish.";
-//            }
-
-//            ViewBag.CanteenId = dish.CanteenID;
-//            // Get canteen name for display on validation error
-//            var canteen = _repo.GetCanteenById(dish.CanteenID);
-//            ViewBag.CanteenName = canteen?.CanteenName ?? "";
-//            return View(dish);
-//        }
-
-//        // EDIT DISH (GET)
-//        public IActionResult EditDish(int itemId)
-//        {
-//            var dish = _repo.GetDishById(itemId);
-//            if (dish == null) return NotFound();
-
-//            var dto = new AddDishDto
-//            {
-//                CanteenID = dish.CanteenID,
-//                ItemID = dish.ItemID,
-//                DishName = dish.DishName,
-//                Availability = dish.Availability,
-//                Price = dish.Price,
-//                Morning = dish.Morning,
-//                Afternoon = dish.Afternoon,
-//                Evening = dish.Evening,
-//                Snacks = dish.Snacks
-//            };
-
-//            ViewBag.CanteenId = dish.CanteenID;
-//            ViewBag.CanteenName = dish.CanteenDetails?.CanteenName ?? "";
-//            return View("AddDish", dto); // reuse AddDish view
-//        }
-
-//        // EDIT DISH (POST)
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public IActionResult EditDish(AddDishDto dish)
-//        {
-//            if (ModelState.IsValid)
-//            {
-//                var result = _repo.UpdateDish(dish, dish.ItemID);
-//                if (result)
-//                {
-//                    TempData["Success"] = "Dish updated successfully!";
-//                    return RedirectToAction("Menu", new { canteenId = dish.CanteenID });
-//                }
-//                TempData["Error"] = "Failed to update dish.";
-//            }
-
-//            ViewBag.CanteenId = dish.CanteenID;
-//            // Get canteen name for display on validation error
-//            var existingDish = _repo.GetDishById(dish.ItemID);
-//            ViewBag.CanteenName = existingDish?.CanteenDetails?.CanteenName ?? "";
-//            return View("AddDish", dish);
-//        }
-
-//        // DELETE DISH
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public IActionResult DeleteDish(int itemId, int canteenId)
-//        {
-//            var result = _repo.DeleteDish(itemId, "Admin");
-//            TempData[result ? "Success" : "Error"] =
-//                result ? "Dish deleted successfully!" : "Failed to delete dish.";
-//            return RedirectToAction("Menu", new { canteenId });
-//        }
-//        #endregion
+//       
 
 //        #region CGPA
 //        [HttpPost("getCourses")]
@@ -207,23 +84,6 @@
 //            }
 //        }
 //        #endregion
-
-//        #region Event
-//        [HttpPost]
-//        public async Task<IActionResult> SaveEvent(EventDTO eventDto, IFormFile brochureFile)
-//        {
-//            var response = await _repo.saveEventAsync(eventDto, brochureFile);
-//            return StatusCode(response.statusCode, response);
-//        }
-
-//        [HttpGet]
-//        public async Task<IActionResult> GetTodaysEvents()
-//        {
-//            var response = await _repo.getTodaysEventsAsync();
-//            return StatusCode(response.statusCode, response);
-//        }
-//        #endregion
-
 //        #region Faculty
 //        // GET: /FacultySupport/Department?dept=CSE
 //        [HttpGet]
@@ -644,6 +504,7 @@
 using ksi.Interfaces;
 using ksi.Models.DTOs;
 using KSI_Project.Models.DTOs;
+using KSI_Project.Models.Entity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ksi.Controllers
@@ -690,35 +551,63 @@ namespace ksi.Controllers
         #endregion
 
         #region Canteen
+
         public IActionResult Canteen()
         {
-            var canteens = _repo.GetAllActiveCanteens();
-            return View(canteens);
+            try
+            {
+                var canteens = _repo.GetAllActiveCanteens() ?? new List<CanteenId>();
+                return View(canteens);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error loading canteens: {ex.Message}";
+                return View(new List<CanteenId>());
+            }
         }
 
         public IActionResult CanteenMenu(int canteenId)
         {
-            var canteen = _repo.GetCanteenById(canteenId);
-            if (canteen == null)
-                return NotFound();
+            try
+            {
+                var canteen = _repo.GetCanteenById(canteenId);
 
-            var menu = _repo.GetMenuByCanteenId(canteenId)
-                .Select(c => new CanteenMenuDto
+                if (canteen == null)
                 {
-                    ItemID = c.ItemID,
-                    DishName = c.DishName,
-                    Price = c.Price,
-                    Availability = c.Availability,
-                    Morning = c.Morning,
-                    Afternoon = c.Afternoon,
-                    Evening = c.Evening,
-                    Snacks = c.Snacks
-                }).ToList();
+                    TempData["Error"] = "Canteen not found";
+                    return RedirectToAction("Canteen");
+                }
 
-            ViewBag.CanteenId = canteenId;
-            ViewBag.CanteenName = canteen.CanteenName;
-            return View(menu);
+                var menu = _repo.GetMenuByCanteenId(canteenId)
+                    .Select(c => new CanteenMenuDto
+                    {
+                        ItemID = c.ItemID,
+                        DishName = c.DishName,
+                        Price = c.Price,
+                        Availability = c.Availability,
+                        Morning = c.Morning,
+                        Afternoon = c.Afternoon,
+                        Evening = c.Evening,
+                        Snacks = c.Snacks
+                    }).ToList();
+
+                ViewBag.CanteenId = canteenId;
+                ViewBag.CanteenName = canteen.CanteenName;
+
+                return View(menu);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error loading menu: {ex.Message}";
+                return RedirectToAction("Canteen");
+            }
         }
+
+        //// Home page
+        //public IActionResult Index()
+        //{
+        //    return View();
+        //}
         #endregion
 
         #region Event details
@@ -744,3 +633,4 @@ namespace ksi.Controllers
 
     }
 }
+

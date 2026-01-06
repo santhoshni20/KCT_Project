@@ -15,7 +15,7 @@ namespace ksi.Controllers
 
         // ================= VIEWS =================
         [HttpGet] public IActionResult AddDetails() => View();
-        [HttpGet] public IActionResult SubjectsAdd() => View();
+        [HttpGet] public IActionResult AddTimetable() => View();
 
         // ================= ADD =================
         [HttpPost("api/timetable/batch")]

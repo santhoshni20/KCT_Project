@@ -17,8 +17,9 @@ namespace ksi.Repository
             _context = context;
         }
 
-        // Note PascalCase here
-        public List<EventDetailsDTO> GetAllEvents()
+        #region Events
+
+        public List<EventDetailsDTO> getAllEvents()
         {
             return _context.mstEventDetails
                 .Where(x => x.isActive && x.deletedDate == null)
@@ -39,8 +40,7 @@ namespace ksi.Repository
                 .ToList();
         }
 
-        // Note PascalCase here
-        public bool AddEvent(EventDetailsDTO eventDto)
+        public bool addEvent(EventDetailsDTO eventDto)
         {
             var entity = new mstEventDetails
             {
@@ -52,12 +52,52 @@ namespace ksi.Repository
                 brochureImagePath = eventDto.brochureImagePath,
                 description = eventDto.description,
                 isActive = true,
-                createdBy = 1, // replace with session user id
+                createdBy = 1,
                 createdDate = DateTime.Now
             };
 
             _context.mstEventDetails.Add(entity);
             return _context.SaveChanges() > 0;
         }
+
+        #endregion
+
+        #region Clubs
+
+        public List<EventDetailsDTO> getAllClubs()
+        {
+            return _context.mstClubs
+                .Where(x => x.isActive && x.deletedDate == null)
+                .Select(x => new EventDetailsDTO
+                {
+                    mstClubId = x.mstClubId,
+                    clubName = x.clubName,
+                    president = x.president,
+                    contactNumber = x.contactNumber,
+                    description = x.description,
+                    createdDate = x.createdDate
+                })
+                .OrderByDescending(x => x.createdDate)
+                .ToList();
+        }
+
+        public bool addClub(EventDetailsDTO clubDto)
+        {
+            var entity = new mstClubs
+            {
+                clubName = clubDto.clubName,
+                president = clubDto.president,
+                contactNumber = clubDto.contactNumber,
+                description = clubDto.description,
+                isActive = true,
+                createdBy = 1,
+                createdDate = DateTime.Now
+            };
+
+            _context.mstClubs.Add(entity);
+            return _context.SaveChanges() > 0;
+        }
+
+        #endregion
     }
 }

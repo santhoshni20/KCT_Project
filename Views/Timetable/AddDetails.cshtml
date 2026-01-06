@@ -3,191 +3,315 @@
 }
 
 <style>
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
     body {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
+        margin: 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
     }
 
     .page-container {
-        max-width: 900px;
+        max-width: 1200px;
         margin: 40px auto;
         padding: 30px;
     }
 
     .page-header {
         text-align: center;
-        margin-bottom: 40px;
+        margin-bottom: 35px;
         color: white;
     }
 
-        .page-header h1 {
-            font-size: 2.8rem;
-            font-weight: bold;
-        }
-
-        .page-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-    .detail-card {
-        background: white;
-        border-radius: 20px;
-        padding: 25px 30px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    .input-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
         margin-bottom: 30px;
-        position: relative;
-        overflow: hidden;
     }
 
-        .detail-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-        }
-
-    .detail-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 20px;
-        color: #333;
+    .input-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 25px;
     }
 
-    .detail-row {
+    .input-box {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
+        min-width: 0; 
     }
 
-        .detail-row input {
+        .input-box input {
             flex: 1;
-            padding: 12px 15px;
-            border-radius: 30px;
+            min-width: 0;
+            height: 44px;
+            padding: 0 18px;
+            border-radius: 25px;
             border: 1px solid #ccc;
+            font-size: 15px;
             outline: none;
         }
 
+            .input-box input:focus {
+                border-color: #667eea;
+            }
+
     .icon-btn {
-        width: 45px;
-        height: 45px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         border: none;
         background: linear-gradient(135deg, #667eea, #764ba2);
         color: white;
         font-size: 22px;
         cursor: pointer;
-        transition: transform 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0; 
     }
 
-        .icon-btn:hover {
-            transform: scale(1.1);
-        }
+    .toggle-wrapper {
+        display: flex;
+        align-items: center;
+        height: 44px;
+        flex-shrink: 0; 
+    }
 
     .toggle-switch {
-        width: 55px;
-        height: 28px;
         position: relative;
+        width: 52px;
+        height: 28px;
     }
 
         .toggle-switch input {
-            display: none;
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
 
-    .slider {
+    /* SLIDER */
+    .toggle-slider {
         position: absolute;
+        inset: 0;
         cursor: pointer;
-        background-color: #ccc;
+        background-color: #cfcfcf;
         border-radius: 30px;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        transition: .4s;
+        transition: background 0.3s ease;
     }
 
-        .slider:before {
-            position: absolute;
+        .toggle-slider::before {
             content: "";
+            position: absolute;
             height: 22px;
             width: 22px;
             left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
+            top: 3px;
+            background-color: #fff;
             border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
 
-    input:checked + .slider {
+    .toggle-switch input:checked + .toggle-slider {
         background: linear-gradient(135deg, #667eea, #764ba2);
     }
 
-        input:checked + .slider:before {
-            transform: translateX(26px);
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(24px);
         }
+
+    .table-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr)); 
+        gap: 20px;
+    }
+
+    .table-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        overflow-x: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: #667eea;
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+
+    td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
 </style>
 
 <div class="page-container">
+
     <div class="page-header">
         <h1>📅 Timetable – Add Details</h1>
-        <p>Add Batch, Department and Section</p>
+        <p>Batch | Department | Section</p>
     </div>
 
-    <!-- Batch -->
-    <div class="detail-card">
-        <div class="detail-title">Batch</div>
-        <div class="detail-row">
-            <input type="text" id="batchName" placeholder="Enter batch name" />
-            <button class="icon-btn" onclick="saveBatch()">+</button>
-            <label class="toggle-switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-            </label>
+    <div class="input-card">
+        <div class="input-row">
+
+            <!-- Batch -->
+            <div class="input-box">
+                <input type="text" id="batchName" placeholder="Batch" />
+                <button class="icon-btn" onclick="saveBatch()">+</button>
+                <div class="toggle-wrapper">
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Department -->
+            <div class="input-box">
+                <input type="text" id="departmentName" placeholder="Department" />
+                <button class="icon-btn" onclick="saveDepartment()">+</button>
+                <div class="toggle-wrapper">
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Section -->
+            <div class="input-box">
+                <input type="text" id="sectionName" placeholder="Section" />
+                <button class="icon-btn" onclick="saveSection()">+</button>
+                <div class="toggle-wrapper">
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Department -->
-    <div class="detail-card">
-        <div class="detail-title">Department</div>
-        <div class="detail-row">
-            <input type="text" id="departmentName" placeholder="Enter department name" />
-            <button class="icon-btn" onclick="saveDepartment()">+</button>
-            <label class="toggle-switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-            </label>
-        </div>
-    </div>
+    <!-- TABLES -->
+    <div class="table-grid">
 
-    <!-- Section -->
-    <div class="detail-card">
-        <div class="detail-title">Section</div>
-        <div class="detail-row">
-            <input type="text" id="sectionName" placeholder="Enter section name" />
-            <button class="icon-btn" onclick="saveSection()">+</button>
-            <label class="toggle-switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-            </label>
+        <div class="table-card">
+            <h4>Batch List</h4>
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Batch Name</th></tr>
+                </thead>
+                <tbody id="batchTable"></tbody>
+            </table>
         </div>
+
+        <div class="table-card">
+            <h4>Department List</h4>
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Department Name</th></tr>
+                </thead>
+                <tbody id="departmentTable"></tbody>
+            </table>
+        </div>
+
+        <div class="table-card">
+            <h4>Section List</h4>
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Section Name</th></tr>
+                </thead>
+                <tbody id="sectionTable"></tbody>
+            </table>
+        </div>
+
     </div>
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', loadTables);
+
+    function loadTables() {
+        fetch('/api/timetable/dropdowns')
+        .then(r => r.json())
+        .then(res => {
+            if (!res.success) return;
+            fillTable('batchTable', res.data.batches, 'batch');
+            fillTable('departmentTable', res.data.departments, 'department');
+            fillTable('sectionTable', res.data.sections, 'section');
+        });
+    }
+
+    function fillTable(id, data, type) {
+        const tbody = document.getElementById(id);
+        tbody.innerHTML = '';
+
+        data.forEach((x, i) => {
+            tbody.innerHTML += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${x.name}</td>
+                <td>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${x.isActive ? 'checked' : ''}
+                            onchange="toggleStatus(${x.id}, this.checked, '${type}')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function toggleStatus(id, isActive, type) {
+        let payload = { isActive };
+
+        if (type === 'batch') payload.batchId = id;
+        if (type === 'department') payload.departmentId = id;
+        if (type === 'section') payload.sectionId = id;
+
+        fetch('/api/timetable/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (!res.success) alert("Failed to update status");
+        });
+    }
+
     function saveBatch() {
-        postData('/api/timetable/batch', { name: document.getElementById('batchName').value });
+        postData('/api/timetable/batch', { name: batchName.value });
+        batchName.value = '';
     }
 
     function saveDepartment() {
-        postData('/api/timetable/department', { name: document.getElementById('departmentName').value });
+        postData('/api/timetable/department', { name: departmentName.value });
+        departmentName.value = '';
     }
 
     function saveSection() {
-        postData('/api/timetable/section', { name: document.getElementById('sectionName').value });
+        postData('/api/timetable/section', { name: sectionName.value });
+        sectionName.value = '';
     }
 
     function postData(url, data) {
@@ -195,6 +319,11 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
-        }).then(r => r.json()).then(res => alert(res.message));
+        })
+        .then(r => r.json())
+        .then(res => {
+            alert(res.message);
+            if (res.success) loadTables();
+        });
     }
 </script>

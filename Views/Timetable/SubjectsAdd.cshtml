@@ -84,7 +84,7 @@
 
 <script>
     window.onload = () => {
-        fetch('/api/timetable/dropdowns')
+        fetch('/api/timetable/active-dropdowns') // only active records
             .then(res => res.json())
             .then(data => {
                 fill('batch', data.data.batches);

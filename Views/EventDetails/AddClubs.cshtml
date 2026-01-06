@@ -1,0 +1,125 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add Club";
+}
+
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="fw-bold">Club Details</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clubModal">
+        <i class="bx bx-plus"></i> Add Club
+    </button>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table" id="clubsTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Club Name</th>
+                    <th>President</th>
+                    <th>Contact Number</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="clubModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Add Club</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="clubForm">
+
+                    <div class="mb-2">
+                        <label>Club Name:</label>
+                        <input id="clubName" class="form-control" placeholder="Enter Club Name" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>President:</label>
+                        <input id="president" class="form-control" placeholder="President Name" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Contact Number:</label>
+                        <input id="contactNumber" class="form-control" placeholder="Contact Number" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Description:</label>
+                        <textarea id="description" class="form-control" rows="3"></textarea>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="saveClub()">Save</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadClubs() {
+            $.get('@Url.Action("getAllClubs", "EventDetails")', function (res) {
+                if (res.statusCode !== 200) return;
+
+                let rows = '';
+                res.data.forEach((c, i) => {
+                    rows += `<tr>
+                        <td>${i + 1}</td>
+                        <td>${c.clubName}</td>
+                        <td>${c.president}</td>
+                        <td>${c.contactNumber ?? ''}</td>
+                        <td>${c.description ?? ''}</td>
+                    </tr>`;
+                });
+
+                $('#clubsTable tbody').html(rows);
+            });
+        }
+
+        function saveClub() {
+            var formData = new FormData();
+            formData.append("clubName", $('#clubName').val());
+            formData.append("president", $('#president').val());
+            formData.append("contactNumber", $('#contactNumber').val());
+            formData.append("description", $('#description').val());
+
+            $.ajax({
+                url: '@Url.Action("addClub", "EventDetails")',
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: function (res) {
+                    if (res.statusCode === 200) {
+                        $('#clubForm')[0].reset();
+                        $('#clubModal').modal('hide');
+                        loadClubs();
+                    }
+                }
+            });
+        }
+
+
+        $('#clubModal').on('hidden.bs.modal', function () {
+            $('#clubForm')[0].reset();
+        });
+
+        $(document).ready(loadClubs);
+    </script>
+}

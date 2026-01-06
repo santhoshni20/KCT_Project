@@ -15,7 +15,7 @@ namespace ksi.Controllers
             _eventRepo = eventRepo;
         }
 
-        // GET: EventDetails/AddEvents
+        #region Events
         public IActionResult AddEvents()
         {
             return View();
@@ -25,7 +25,7 @@ namespace ksi.Controllers
         [HttpGet]
         public IActionResult GetAllEvents()
         {
-            var data = _eventRepo.GetAllEvents();
+            var data = _eventRepo.getAllEvents(); // ✅ FIXED
             return Json(new ApiResponseDTO
             {
                 statusCode = 200,
@@ -34,51 +34,63 @@ namespace ksi.Controllers
             });
         }
 
-        // POST: EventDetails/AddEvent
         [HttpPost]
-        public IActionResult AddEvent([FromForm] EventDetailsDTO eventDto, IFormFile brochureImage)
+        public IActionResult AddEvent([FromForm] EventDetailsDTO eventDto)
         {
-            try
+            if (eventDto.brochureImage != null && eventDto.brochureImage.Length > 0)
             {
-                // Handle brochure image upload
-                if (brochureImage != null && brochureImage.Length > 0)
-                {
-                    // Generate unique file name
-                    var fileName = Guid.NewGuid() + Path.GetExtension(brochureImage.FileName);
+                var fileName = Guid.NewGuid() + Path.GetExtension(eventDto.brochureImage.FileName);
 
-                    // Save path: wwwroot/uploads/
-                    var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                    Directory.CreateDirectory(uploadPath); // ensure folder exists
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                Directory.CreateDirectory(uploadPath);
 
-                    var filePath = Path.Combine(uploadPath, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        brochureImage.CopyTo(stream);
-                    }
+                var filePath = Path.Combine(uploadPath, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                eventDto.brochureImage.CopyTo(stream);
 
-                    // Save relative path to DTO
-                    eventDto.brochureImagePath = "/uploads/" + fileName;
-                }
-
-
-                // Save to database via repository
-                var result = _eventRepo.AddEvent(eventDto);
-
-                return Json(new ApiResponseDTO
-                {
-                    statusCode = result ? 200 : 500,
-                    message = result ? "Event added successfully" : "Failed to add event"
-                });
+                eventDto.brochureImagePath = "/uploads/" + fileName;
             }
-            catch (Exception ex)
+
+            var result = _eventRepo.addEvent(eventDto); // ✅ FIXED
+
+            return Json(new ApiResponseDTO
             {
-                // Log error (optional) and return failure
-                return Json(new ApiResponseDTO
-                {
-                    statusCode = 500,
-                    message = "Error: " + ex.Message
-                });
-            }
+                statusCode = result ? 200 : 500,
+                message = result ? "Event added successfully" : "Failed"
+            });
         }
+
+        #endregion
+
+        #region Clubs
+        public IActionResult AddClubs()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult getAllClubs()
+        {
+            var data = _eventRepo.getAllClubs();
+
+            return Json(new ApiResponseDTO
+            {
+                statusCode = 200,
+                message = "Clubs fetched successfully",
+                data = data
+            });
+        }
+        [HttpPost]
+        public IActionResult addClub([FromForm] EventDetailsDTO clubDto)
+        {
+            var result = _eventRepo.addClub(clubDto);
+
+            return Json(new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 500,
+                message = result ? "Club added successfully" : "Failed to add club"
+            });
+        }
+        #endregion
     }
 }

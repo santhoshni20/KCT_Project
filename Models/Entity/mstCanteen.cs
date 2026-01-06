@@ -5,9 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KSI_Project.Models.Entity
 {
-    /// <summary>
-    /// Entity representing the canteen_id table (Canteen Master)
-    /// </summary>
     [Table("mstcanteenid")]
     public class CanteenId
     {
@@ -49,9 +46,6 @@ namespace KSI_Project.Models.Entity
         public virtual ICollection<mstCanteen> Canteens { get; set; } = new List<mstCanteen>();
     }
 
-    /// <summary>
-    /// Entity representing the canteen table (Menu Items/Dishes)
-    /// </summary>
     [Table("mstcanteen")]
     public class mstCanteen
     {

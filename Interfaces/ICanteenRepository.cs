@@ -1,20 +1,24 @@
-﻿// Interfaces/ICanteenRepository.cs
-using KSI_Project.Models.DTOs;
+﻿using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 
 namespace ksi.Interfaces
 {
     public interface ICanteenRepository
     {
-        // Canteen operations
-        IEnumerable<CanteenId> GetAllCanteens();
-        CanteenId GetCanteenById(int canteenId);
+        // Canteen Operations
+        IEnumerable<CanteenId> GetAllCanteens(bool includeInactive = false);
+        CanteenId? GetCanteenById(int canteenId);
+        bool AddCanteen(AddCanteenDto canteen);
+        bool UpdateCanteen(AddCanteenDto canteen);
+        bool DeleteCanteen(int canteenId, string deletedBy);
+        bool ToggleCanteenStatus(int canteenId, string updatedBy);
 
-        // Menu/Dish operations
-        IEnumerable<Canteen> GetMenuByCanteenId(int canteenId);
-        Canteen GetDishById(int itemId);
+        // Dish Operations
+        IEnumerable<Canteen> GetAllDishes(bool includeInactive = false);
+        Canteen? GetDishById(int itemId);
         bool AddDish(AddDishDto dish);
-        bool UpdateDish(AddDishDto dish, int itemId);
+        bool UpdateDish(AddDishDto dish);
         bool DeleteDish(int itemId, string deletedBy);
+        bool ToggleDishStatus(int itemId, string updatedBy);
     }
 }

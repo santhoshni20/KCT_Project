@@ -1,9 +1,11 @@
-﻿// Repository/CanteenRepository.cs
-using ksi.Interfaces;
+﻿using ksi.Interfaces;
 using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ksi.Repository
 {
@@ -16,115 +18,268 @@ namespace ksi.Repository
             _context = context;
         }
 
-        // Get all active canteens
-        public IEnumerable<CanteenId> GetAllCanteens()
+        #region Canteen Operations
+
+        public bool ToggleCanteenStatus(int canteenId, string updatedBy)
         {
-            return _context.CanteenIds
-                .Where(c => c.IsActive)
-                .OrderBy(c => c.CanteenName)
-                .ToList();
+            var canteen = _context.mstCanteenIds
+                .FirstOrDefault(c => c.CanteenID == canteenId && c.DeletedDate == null);
+
+            if (canteen == null)
+                return false;
+
+            canteen.IsActive = !canteen.IsActive;
+            canteen.UpdatedDate = DateTime.Now;
+            canteen.UpdatedBy = updatedBy ?? "System";
+
+            _context.mstCanteenIds.Update(canteen);
+            return _context.SaveChanges() > 0;
         }
 
-        // Get canteen by ID
+        public IEnumerable<CanteenId> GetAllCanteens(bool includeInactive = false)
+        {
+            try
+            {
+                var query = _context.mstCanteenIds
+                    .Where(c => c.DeletedDate == null);
+
+                if (!includeInactive)
+                {
+                    query = query.Where(c => c.IsActive);
+                }
+
+                return query.OrderBy(c => c.CanteenName).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving canteens: {ex.Message}", ex);
+
+            }
+        }
+
         public CanteenId GetCanteenById(int canteenId)
         {
-            return _context.CanteenIds
-                .FirstOrDefault(c => c.CanteenID == canteenId && c.IsActive);
+            try
+            {
+                return _context.mstCanteenIds
+                    .FirstOrDefault(c => c.CanteenID == canteenId && c.DeletedDate == null);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving canteen by ID: {ex.Message}", ex);
+            }
         }
 
-        // Get menu items for a specific canteen
-        public IEnumerable<Canteen> GetMenuByCanteenId(int canteenId)
-        {
-            return _context.Canteens
-                .Include(c => c.CanteenDetails)
-                .Where(c => c.CanteenID == canteenId && c.IsActive)
-                .OrderBy(c => c.DishName)
-                .ToList();
-        }
-
-        // Get specific dish by ID
-        public Canteen GetDishById(int itemId)
-        {
-            return _context.Canteens
-                .Include(c => c.CanteenDetails)
-                .FirstOrDefault(c => c.ItemID == itemId && c.IsActive);
-        }
-
-        // Add new dish
-        public bool AddDish(AddDishDto dish)
+        public bool AddCanteen(AddCanteenDto canteenDto)
         {
             try
             {
-                var newDish = new Canteen
+                var canteen = new CanteenId
                 {
-                    CanteenID = dish.CanteenID,
-                    DishName = dish.DishName,
-                    Availability = dish.Availability,
-                    Price = dish.Price,
-                    Morning = dish.Morning,
-                    Afternoon = dish.Afternoon,
-                    Evening = dish.Evening,
-                    Snacks = dish.Snacks,
+                    CanteenName = canteenDto.CanteenName,
                     IsActive = true,
                     CreatedDate = DateTime.Now,
-                    CreatedBy = "Admin" // TODO: Replace with actual user
+                    CreatedBy = canteenDto.CreatedBy ?? "System"
                 };
 
-                _context.Canteens.Add(newDish);
+                _context.mstCanteenIds.Add(canteen);
                 return _context.SaveChanges() > 0;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                throw new Exception($"Error adding canteen: {ex.Message}", ex);
             }
         }
 
-        // Update existing dish
-        public bool UpdateDish(AddDishDto dish, int itemId)
+        public bool UpdateCanteen(AddCanteenDto canteenDto)
         {
             try
             {
-                var existingDish = _context.Canteens.Find(itemId);
-                if (existingDish == null || !existingDish.IsActive)
+                var canteen = _context.mstCanteenIds
+                    .FirstOrDefault(c => c.CanteenID == canteenDto.CanteenID);
+
+                if (canteen == null)
                     return false;
 
-                existingDish.DishName = dish.DishName;
-                existingDish.Availability = dish.Availability;
-                existingDish.Price = dish.Price;
-                existingDish.Morning = dish.Morning;
-                existingDish.Afternoon = dish.Afternoon;
-                existingDish.Evening = dish.Evening;
-                existingDish.Snacks = dish.Snacks;
-                existingDish.UpdatedDate = DateTime.Now;
-                existingDish.UpdatedBy = "Admin"; // TODO: Replace with actual user
+                canteen.CanteenName = canteenDto.CanteenName;
+                canteen.UpdatedDate = DateTime.Now;
+                canteen.UpdatedBy = canteenDto.UpdatedBy ?? "System";
 
+                _context.mstCanteenIds.Update(canteen);
                 return _context.SaveChanges() > 0;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                throw new Exception($"Error updating canteen: {ex.Message}", ex);
             }
         }
 
-        // Soft delete dish
+        public bool DeleteCanteen(int canteenId, string deletedBy)
+        {
+            try
+            {
+                var canteen = _context.mstCanteenIds
+                    .FirstOrDefault(c => c.CanteenID == canteenId);
+
+                if (canteen == null)
+                    return false;
+
+                canteen.IsActive = false;
+                canteen.DeletedDate = DateTime.Now;
+                canteen.DeletedBy = deletedBy ?? "System";
+
+                _context.mstCanteenIds.Update(canteen);
+                return _context.SaveChanges() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error deleting canteen: {ex.Message}", ex);
+            }
+        }
+
+        #endregion
+
+        #region Dish Operations
+
+        public IEnumerable<Canteen> GetAllDishes(bool includeInactive = false)
+        {
+            try
+            {
+                var query = _context.mstCanteens
+                    .Include(d => d.CanteenDetails)
+                    .Where(d => d.DeletedDate == null);
+
+                if (!includeInactive)
+                {
+                    query = query.Where(d => d.IsActive);
+                }
+
+                return query.OrderBy(d => d.CanteenID).ThenBy(d => d.DishName).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving dishes: {ex.Message}", ex);
+            }
+        }
+
+        public Canteen GetDishById(int itemId)
+        {
+            try
+            {
+                return _context.mstCanteens
+                    .Include(d => d.CanteenDetails)
+                    .FirstOrDefault(d => d.ItemID == itemId && d.DeletedDate == null);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving dish by ID: {ex.Message}", ex);
+            }
+        }
+
+        public bool AddDish(AddDishDto dishDto)
+        {
+            try
+            {
+                var dish = new Canteen
+                {
+                    CanteenID = dishDto.CanteenID,
+                    DishName = dishDto.DishName,
+                    Price = dishDto.Price,
+                    Availability = dishDto.Availability,
+                    Morning = dishDto.Morning,
+                    Afternoon = dishDto.Afternoon,
+                    Evening = dishDto.Evening,
+                    Snacks = dishDto.Snacks,
+                    IsActive = true,
+                    CreatedDate = DateTime.Now,
+                    CreatedBy = dishDto.CreatedBy ?? "System"
+                };
+
+                _context.mstCanteens.Add(dish);
+                return _context.SaveChanges() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error adding dish: {ex.Message}", ex);
+            }
+        }
+
+        public bool UpdateDish(AddDishDto dishDto)
+        {
+            try
+            {
+                var dish = _context.mstCanteens
+                    .FirstOrDefault(d => d.ItemID == dishDto.ItemID);
+
+                if (dish == null)
+                    return false;
+
+                dish.CanteenID = dishDto.CanteenID;
+                dish.DishName = dishDto.DishName;
+                dish.Price = dishDto.Price;
+                dish.Availability = dishDto.Availability;
+                dish.Morning = dishDto.Morning;
+                dish.Afternoon = dishDto.Afternoon;
+                dish.Evening = dishDto.Evening;
+                dish.Snacks = dishDto.Snacks;
+                dish.UpdatedDate = DateTime.Now;
+                dish.UpdatedBy = dishDto.UpdatedBy ?? "System";
+
+                _context.mstCanteens.Update(dish);
+                return _context.SaveChanges() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating dish: {ex.Message}", ex);
+            }
+        }
+
         public bool DeleteDish(int itemId, string deletedBy)
         {
             try
             {
-                var dish = _context.Canteens.Find(itemId);
+                var dish = _context.mstCanteens
+                    .FirstOrDefault(d => d.ItemID == itemId);
+
                 if (dish == null)
                     return false;
 
                 dish.IsActive = false;
                 dish.DeletedDate = DateTime.Now;
-                dish.DeletedBy = deletedBy;
+                dish.DeletedBy = deletedBy ?? "System";
 
+                _context.mstCanteens.Update(dish);
                 return _context.SaveChanges() > 0;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                throw new Exception($"Error deleting dish: {ex.Message}", ex);
             }
         }
+
+        public bool ToggleDishStatus(int itemId, string updatedBy)
+        {
+            try
+            {
+                var dish = _context.mstCanteens
+                    .FirstOrDefault(d => d.ItemID == itemId && d.DeletedDate == null);
+
+                if (dish == null)
+                    return false;
+
+                dish.IsActive = !dish.IsActive;
+                dish.UpdatedDate = DateTime.Now;
+                dish.UpdatedBy = updatedBy ?? "System";
+
+                _context.mstCanteens.Update(dish);
+                return _context.SaveChanges() > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error toggling dish status: {ex.Message}", ex);
+            }
+        }
+
+        #endregion
     }
 }

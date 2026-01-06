@@ -1,4 +1,5 @@
-﻿using ksi.Models.Entity;
+﻿using ksi.Models;
+using ksi.Models.Entity;
 using KSI.Models.Entity;
 using ksi_project.Models.Entity;
 using KSI_Project.Models.Entity;
@@ -23,18 +24,30 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<Course> Courses { get; set; }
         public DbSet<Canteen> mstCanteens { get; set; }
         public DbSet<CanteenId> mstCanteenIds { get; set; }
- 
+
+        public DbSet<Faculty> Faculties { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            // Configure Canteen -> CanteenId relationship
+            // Faculty configuration
+            modelBuilder.Entity<Faculty>(entity =>
+            {
+                entity.HasKey(e => e.FacultyID);
+                entity.Property(e => e.FacultyID).ValueGeneratedOnAdd();
+                entity.Property(e => e.IsActive).HasDefaultValue(true);
+                entity.Property(e => e.CreatedDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasIndex(e => e.IsActive);
+            });
+            // Canteen -> CanteenId relationship
             modelBuilder.Entity<Canteen>()
                 .HasOne(c => c.CanteenDetails)
                 .WithMany(ci => ci.Canteens)
                 .HasForeignKey(c => c.CanteenID)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete
+                .OnDelete(DeleteBehavior.Restrict);
         }
+
+
 
     }
 }

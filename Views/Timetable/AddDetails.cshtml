@@ -3,7 +3,6 @@
 }
 
 <style>
-    /* ===== GLOBAL RESET & SAFETY ===== */
     *,
     *::before,
     *::after {
@@ -15,10 +14,9 @@
         min-height: 100vh;
         margin: 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow-x: hidden; /* 🔥 critical */
+        overflow-x: hidden;
     }
 
-    /* ===== PAGE LAYOUT ===== */
     .page-container {
         max-width: 1200px;
         margin: 40px auto;
@@ -31,7 +29,6 @@
         color: white;
     }
 
-    /* ===== INPUT CARD ===== */
     .input-card {
         background: #fff;
         border-radius: 18px;
@@ -40,25 +37,22 @@
         margin-bottom: 30px;
     }
 
-    /* GRID */
     .input-row {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr)); /* 🔥 FIX */
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 25px;
     }
 
-    /* FLEX CONTAINER */
     .input-box {
         display: flex;
         align-items: center;
         gap: 12px;
-        min-width: 0; /* 🔥 FIX */
+        min-width: 0; 
     }
 
-        /* INPUT */
         .input-box input {
             flex: 1;
-            min-width: 0; /* 🔥 FIX */
+            min-width: 0;
             height: 44px;
             padding: 0 18px;
             border-radius: 25px;
@@ -71,7 +65,6 @@
                 border-color: #667eea;
             }
 
-    /* ===== PLUS BUTTON ===== */
     .icon-btn {
         width: 44px;
         height: 44px;
@@ -84,15 +77,14 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        flex-shrink: 0; /* 🔥 FIX */
+        flex-shrink: 0; 
     }
 
-    /* ===== TOGGLE SWITCH ===== */
     .toggle-wrapper {
         display: flex;
         align-items: center;
         height: 44px;
-        flex-shrink: 0; /* 🔥 FIX */
+        flex-shrink: 0; 
     }
 
     .toggle-switch {
@@ -138,14 +130,12 @@
             transform: translateX(24px);
         }
 
-    /* ===== TABLE GRID ===== */
     .table-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr)); /* 🔥 FIX */
+        grid-template-columns: repeat(3, minmax(0, 1fr)); 
         gap: 20px;
     }
 
-    /* CARD */
     .table-card {
         background: #fff;
         border-radius: 15px;
@@ -154,7 +144,6 @@
         overflow-x: hidden;
     }
 
-    /* TABLE */
     table {
         width: 100%;
         border-collapse: collapse;
@@ -180,7 +169,6 @@
         <p>Batch | Department | Section</p>
     </div>
 
-    <!-- INPUT SECTION -->
     <div class="input-card">
         <div class="input-row">
 
@@ -264,24 +252,50 @@
 
     function loadTables() {
         fetch('/api/timetable/dropdowns')
-            .then(r => r.json())
-            .then(res => {
-                if (!res.success) return;
-                fillTable('batchTable', res.data.batches);
-                fillTable('departmentTable', res.data.departments);
-                fillTable('sectionTable', res.data.sections);
-            });
+        .then(r => r.json())
+        .then(res => {
+            if (!res.success) return;
+            fillTable('batchTable', res.data.batches, 'batch');
+            fillTable('departmentTable', res.data.departments, 'department');
+            fillTable('sectionTable', res.data.sections, 'section');
+        });
     }
 
-    function fillTable(id, data) {
+    function fillTable(id, data, type) {
         const tbody = document.getElementById(id);
         tbody.innerHTML = '';
+
         data.forEach((x, i) => {
             tbody.innerHTML += `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${x.name}</td>
-                </tr>`;
+            <tr>
+                <td>${i + 1}</td>
+                <td>${x.name}</td>
+                <td>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${x.isActive ? 'checked' : ''}
+                            onchange="toggleStatus(${x.id}, this.checked, '${type}')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function toggleStatus(id, isActive, type) {
+        let payload = { isActive };
+
+        if (type === 'batch') payload.batchId = id;
+        if (type === 'department') payload.departmentId = id;
+        if (type === 'section') payload.sectionId = id;
+
+        fetch('/api/timetable/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (!res.success) alert("Failed to update status");
         });
     }
 

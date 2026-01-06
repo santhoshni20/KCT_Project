@@ -8,6 +8,8 @@
         public int? batchId { get; set; }
         public int? departmentId { get; set; }
         public int? sectionId { get; set; }
+
+        public bool isActive { get; set; }
     }
 
     public class SubjectAddDTO

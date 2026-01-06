@@ -13,44 +13,22 @@ namespace ksi.Controllers
             _repository = repository;
         }
 
-        // ================== VIEWS ==================
+        // ================= VIEWS =================
+        [HttpGet] public IActionResult AddDetails() => View();
+        [HttpGet] public IActionResult SubjectsAdd() => View();
 
-        [HttpGet]
-        public IActionResult AddDetails()
-        {
-            return View();
-        }
-
-        [HttpGet]
-        public IActionResult SubjectsAdd()
-        {
-            return View();
-        }
-
-        // ================== APIs ==================
-
+        // ================= ADD =================
         [HttpPost("api/timetable/batch")]
         public async Task<ApiResponseDTO> addBatch([FromBody] TimetableDTO dto)
         {
             try
             {
                 var result = await _repository.addBatchAsync(dto, 1);
-                return new ApiResponseDTO
-                {
-                    statusCode = 200,
-                    success = result,
-                    message = "Batch added successfully"
-                };
+                return new ApiResponseDTO { statusCode = 200, success = result, message = "Batch added successfully" };
             }
             catch (Exception ex)
             {
-                return new ApiResponseDTO
-                {
-                    statusCode = 500,
-                    success = false,
-                    message = "Error adding batch",
-                    errorDetails = ex.Message
-                };
+                return new ApiResponseDTO { statusCode = 500, success = false, message = "Error adding batch", errorDetails = ex.Message };
             }
         }
 
@@ -82,6 +60,7 @@ namespace ksi.Controllers
             }
         }
 
+        // ================= GET =================
         [HttpGet("api/timetable/dropdowns")]
         public async Task<ApiResponseDTO> getDropdowns()
         {
@@ -93,7 +72,6 @@ namespace ksi.Controllers
                     departments = await _repository.getDepartmentsAsync(),
                     sections = await _repository.getSectionsAsync()
                 };
-
                 return new ApiResponseDTO { statusCode = 200, success = true, data = data };
             }
             catch (Exception ex)
@@ -102,6 +80,7 @@ namespace ksi.Controllers
             }
         }
 
+        // ================= SUBJECT =================
         [HttpPost("api/timetable/subject")]
         public async Task<ApiResponseDTO> addSubject([FromBody] SubjectAddDTO dto)
         {
@@ -115,5 +94,48 @@ namespace ksi.Controllers
                 return new ApiResponseDTO { statusCode = 500, success = false, message = "Error adding subject", errorDetails = ex.Message };
             }
         }
+
+        // ================= TOGGLE =================
+        [HttpPost("api/timetable/toggle")]
+        public async Task<IActionResult> ToggleStatus([FromBody] TimetableDTO dto)
+        {
+            try
+            {
+                bool result = false;
+
+                if (dto.batchId.HasValue)
+                    result = await _repository.toggleBatchAsync(dto.batchId.Value, dto.isActive);
+                else if (dto.departmentId.HasValue)
+                    result = await _repository.toggleDepartmentAsync(dto.departmentId.Value, dto.isActive);
+                else if (dto.sectionId.HasValue)
+                    result = await _repository.toggleSectionAsync(dto.sectionId.Value, dto.isActive);
+
+                return Ok(new ApiResponseDTO { success = result, message = result ? "Status updated" : "Failed to update" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponseDTO { success = false, message = "Error updating status", errorDetails = ex.Message });
+            }
+        }
+        [HttpGet("api/timetable/active-dropdowns")]
+        public async Task<ApiResponseDTO> getActiveDropdowns()
+        {
+            try
+            {
+                var data = new
+                {
+                    batches = await _repository.getActiveBatchesAsync(),
+                    departments = await _repository.getActiveDepartmentsAsync(),
+                    sections = await _repository.getActiveSectionsAsync()
+                };
+
+                return new ApiResponseDTO { statusCode = 200, success = true, data = data };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponseDTO { statusCode = 500, success = false, message = "Error loading active dropdowns", errorDetails = ex.Message };
+            }
+        }
+
     }
 }

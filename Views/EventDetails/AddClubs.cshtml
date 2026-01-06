@@ -17,7 +17,9 @@
                 <tr>
                     <th>#</th>
                     <th>Club Name</th>
-                    <th>President Name</th>
+                    <th>President</th>
+                    <th>Contact Number</th>
+                    <th>Description</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -44,8 +46,18 @@
                     </div>
 
                     <div class="mb-2">
-                        <label>President Name:</label>
-                        <input id="presidentName" class="form-control" placeholder="Enter President Name" />
+                        <label>President:</label>
+                        <input id="president" class="form-control" placeholder="President Name" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Contact Number:</label>
+                        <input id="contactNumber" class="form-control" placeholder="Contact Number" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Description:</label>
+                        <textarea id="description" class="form-control" rows="3"></textarea>
                     </div>
 
                 </form>
@@ -62,15 +74,20 @@
 @section Scripts {
     <script>
         function loadClubs() {
-            $.get('@Url.Action("GetAllClubs", "ClubDetails")', function (res) {
+            $.get('@Url.Action("getAllClubs", "EventDetails")', function (res) {
+                if (res.statusCode !== 200) return;
+
                 let rows = '';
                 res.data.forEach((c, i) => {
                     rows += `<tr>
                         <td>${i + 1}</td>
                         <td>${c.clubName}</td>
-                        <td>${c.presidentName}</td>
+                        <td>${c.president}</td>
+                        <td>${c.contactNumber ?? ''}</td>
+                        <td>${c.description ?? ''}</td>
                     </tr>`;
                 });
+
                 $('#clubsTable tbody').html(rows);
             });
         }
@@ -78,23 +95,27 @@
         function saveClub() {
             var formData = new FormData();
             formData.append("clubName", $('#clubName').val());
-            formData.append("presidentName", $('#presidentName').val());
+            formData.append("president", $('#president').val());
+            formData.append("contactNumber", $('#contactNumber').val());
+            formData.append("description", $('#description').val());
 
             $.ajax({
-                url: '@Url.Action("AddClub", "ClubDetails")',
+                url: '@Url.Action("addClub", "EventDetails")',
                 type: 'POST',
                 processData: false,
                 contentType: false,
                 data: formData,
-                success: function () {
-                    $('#clubForm')[0].reset();     // clear form
-                    $('#clubModal').modal('hide');
-                    loadClubs();
+                success: function (res) {
+                    if (res.statusCode === 200) {
+                        $('#clubForm')[0].reset();
+                        $('#clubModal').modal('hide');
+                        loadClubs();
+                    }
                 }
             });
         }
 
-        // Clear form when modal closes
+
         $('#clubModal').on('hidden.bs.modal', function () {
             $('#clubForm')[0].reset();
         });

@@ -4,6 +4,7 @@ namespace ksi.Models.DTOs
 {
     public class EventDetailsDTO
     {
+        /* ================= EVENTS ================= */
         public int mstEventId { get; set; }
         public string eventName { get; set; }
         public string organisedBy { get; set; }
@@ -11,13 +12,18 @@ namespace ksi.Models.DTOs
         public DateTime? eventDate { get; set; }
         public string? contactNumber { get; set; }
 
-        // ✅ Stored in DB
-        public string? brochureImagePath { get; set; }
-
-        // ✅ Used ONLY for upload (NOT stored in DB)
+        // ✅ REQUIRED FOR FILE UPLOAD
         public IFormFile? brochureImage { get; set; }
 
+        public string? brochureImagePath { get; set; }
         public string? description { get; set; }
+
+        /* ================= CLUBS ================= */
+        public int mstClubId { get; set; }
+        public string clubName { get; set; }
+        public string president { get; set; }
+
+        /* ================= COMMON ================= */
         public bool isActive { get; set; }
         public DateTime createdDate { get; set; }
     }

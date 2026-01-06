@@ -5,7 +5,11 @@ namespace ksi.Interfaces
 {
     public interface IEventDetailsRepository
     {
-        List<EventDetailsDTO> GetAllEvents();
-        bool AddEvent(EventDetailsDTO eventDto);
+        List<EventDetailsDTO> getAllEvents();
+        bool addEvent(EventDetailsDTO eventDto);
+
+        List<EventDetailsDTO> getAllClubs();
+        bool addClub(EventDetailsDTO clubDto);
     }
+
 }

@@ -18,7 +18,7 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<mstDepartment> mstDepartment { get; set; }
         public DbSet<mstSection> mstSection { get; set; }
         public DbSet<mstSubject> mstSubject { get; set; }
-
+        public DbSet<mstClubs> mstClubs { get; set; }
         public DbSet<timetable> timetable { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Canteen> mstCanteens { get; set; }

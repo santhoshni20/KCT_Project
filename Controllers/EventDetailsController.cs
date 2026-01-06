@@ -15,7 +15,7 @@ namespace ksi.Controllers
             _eventRepo = eventRepo;
         }
 
-        // GET: EventDetails/AddEvents
+        #region Events
         public IActionResult AddEvents()
         {
             return View();
@@ -25,7 +25,7 @@ namespace ksi.Controllers
         [HttpGet]
         public IActionResult GetAllEvents()
         {
-            var data = _eventRepo.GetAllEvents();
+            var data = _eventRepo.getAllEvents(); // ✅ FIXED
             return Json(new ApiResponseDTO
             {
                 statusCode = 200,
@@ -34,7 +34,6 @@ namespace ksi.Controllers
             });
         }
 
-        // POST: EventDetails/AddEvent
         [HttpPost]
         public IActionResult AddEvent([FromForm] EventDetailsDTO eventDto)
         {
@@ -46,15 +45,13 @@ namespace ksi.Controllers
                 Directory.CreateDirectory(uploadPath);
 
                 var filePath = Path.Combine(uploadPath, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    eventDto.brochureImage.CopyTo(stream);
-                }
+                using var stream = new FileStream(filePath, FileMode.Create);
+                eventDto.brochureImage.CopyTo(stream);
 
                 eventDto.brochureImagePath = "/uploads/" + fileName;
             }
 
-            var result = _eventRepo.AddEvent(eventDto);
+            var result = _eventRepo.addEvent(eventDto); // ✅ FIXED
 
             return Json(new ApiResponseDTO
             {
@@ -63,5 +60,37 @@ namespace ksi.Controllers
             });
         }
 
+        #endregion
+
+        #region Clubs
+        public IActionResult AddClubs()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult getAllClubs()
+        {
+            var data = _eventRepo.getAllClubs();
+
+            return Json(new ApiResponseDTO
+            {
+                statusCode = 200,
+                message = "Clubs fetched successfully",
+                data = data
+            });
+        }
+        [HttpPost]
+        public IActionResult addClub([FromForm] EventDetailsDTO clubDto)
+        {
+            var result = _eventRepo.addClub(clubDto);
+
+            return Json(new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 500,
+                message = result ? "Club added successfully" : "Failed to add club"
+            });
+        }
+        #endregion
     }
 }

@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using System.ComponentModel.DataAnnotations;
 
 namespace ksi.Models.Entity
 {
     public class mstSubject
     {
+        [Key]
         public int subjectId { get; set; }
         public string subjectName { get; set; }
         public int batchId { get; set; }

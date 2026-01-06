@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using System.ComponentModel.DataAnnotations;
 
 namespace ksi.Models.Entity
 {
     public class mstSection
     {
+        [Key]
         public int sectionId { get; set; }
         public string sectionName { get; set; }
         public bool isActive { get; set; } = true;

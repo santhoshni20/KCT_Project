@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using System.ComponentModel.DataAnnotations;
 
 namespace ksi.Models.Entity
 {
     public class mstBatch
     {
+        [Key]
         public int batchId { get; set; }
         public string batchName { get; set; }
         public bool isActive { get; set; } = true;

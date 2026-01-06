@@ -22,7 +22,7 @@ namespace ksi.Repository
 
         public bool ToggleCanteenStatus(int canteenId, string updatedBy)
         {
-            var canteen = _context.CanteenIds
+            var canteen = _context.mstCanteenIds
                 .FirstOrDefault(c => c.CanteenID == canteenId && c.DeletedDate == null);
 
             if (canteen == null)
@@ -32,7 +32,7 @@ namespace ksi.Repository
             canteen.UpdatedDate = DateTime.Now;
             canteen.UpdatedBy = updatedBy ?? "System";
 
-            _context.CanteenIds.Update(canteen);
+            _context.mstCanteenIds.Update(canteen);
             return _context.SaveChanges() > 0;
         }
 
@@ -40,7 +40,7 @@ namespace ksi.Repository
         {
             try
             {
-                var query = _context.CanteenIds
+                var query = _context.mstCanteenIds
                     .Where(c => c.DeletedDate == null);
 
                 if (!includeInactive)
@@ -61,7 +61,7 @@ namespace ksi.Repository
         {
             try
             {
-                return _context.CanteenIds
+                return _context.mstCanteenIds
                     .FirstOrDefault(c => c.CanteenID == canteenId && c.DeletedDate == null);
             }
             catch (Exception ex)
@@ -82,7 +82,7 @@ namespace ksi.Repository
                     CreatedBy = canteenDto.CreatedBy ?? "System"
                 };
 
-                _context.CanteenIds.Add(canteen);
+                _context.mstCanteenIds.Add(canteen);
                 return _context.SaveChanges() > 0;
             }
             catch (Exception ex)
@@ -95,7 +95,7 @@ namespace ksi.Repository
         {
             try
             {
-                var canteen = _context.CanteenIds
+                var canteen = _context.mstCanteenIds
                     .FirstOrDefault(c => c.CanteenID == canteenDto.CanteenID);
 
                 if (canteen == null)
@@ -105,7 +105,7 @@ namespace ksi.Repository
                 canteen.UpdatedDate = DateTime.Now;
                 canteen.UpdatedBy = canteenDto.UpdatedBy ?? "System";
 
-                _context.CanteenIds.Update(canteen);
+                _context.mstCanteenIds.Update(canteen);
                 return _context.SaveChanges() > 0;
             }
             catch (Exception ex)
@@ -118,7 +118,7 @@ namespace ksi.Repository
         {
             try
             {
-                var canteen = _context.CanteenIds
+                var canteen = _context.mstCanteenIds
                     .FirstOrDefault(c => c.CanteenID == canteenId);
 
                 if (canteen == null)
@@ -128,7 +128,7 @@ namespace ksi.Repository
                 canteen.DeletedDate = DateTime.Now;
                 canteen.DeletedBy = deletedBy ?? "System";
 
-                _context.CanteenIds.Update(canteen);
+                _context.mstCanteenIds.Update(canteen);
                 return _context.SaveChanges() > 0;
             }
             catch (Exception ex)
@@ -145,7 +145,7 @@ namespace ksi.Repository
         {
             try
             {
-                var query = _context.Canteens
+                var query = _context.mstCanteens
                     .Include(d => d.CanteenDetails)
                     .Where(d => d.DeletedDate == null);
 
@@ -166,7 +166,7 @@ namespace ksi.Repository
         {
             try
             {
-                return _context.Canteens
+                return _context.mstCanteens
                     .Include(d => d.CanteenDetails)
                     .FirstOrDefault(d => d.ItemID == itemId && d.DeletedDate == null);
             }
@@ -195,7 +195,7 @@ namespace ksi.Repository
                     CreatedBy = dishDto.CreatedBy ?? "System"
                 };
 
-                _context.Canteens.Add(dish);
+                _context.mstCanteens.Add(dish);
                 return _context.SaveChanges() > 0;
             }
             catch (Exception ex)
@@ -208,7 +208,7 @@ namespace ksi.Repository
         {
             try
             {
-                var dish = _context.Canteens
+                var dish = _context.mstCanteens
                     .FirstOrDefault(d => d.ItemID == dishDto.ItemID);
 
                 if (dish == null)
@@ -225,7 +225,7 @@ namespace ksi.Repository
                 dish.UpdatedDate = DateTime.Now;
                 dish.UpdatedBy = dishDto.UpdatedBy ?? "System";
 
-                _context.Canteens.Update(dish);
+                _context.mstCanteens.Update(dish);
                 return _context.SaveChanges() > 0;
             }
             catch (Exception ex)
@@ -238,7 +238,7 @@ namespace ksi.Repository
         {
             try
             {
-                var dish = _context.Canteens
+                var dish = _context.mstCanteens
                     .FirstOrDefault(d => d.ItemID == itemId);
 
                 if (dish == null)
@@ -248,7 +248,7 @@ namespace ksi.Repository
                 dish.DeletedDate = DateTime.Now;
                 dish.DeletedBy = deletedBy ?? "System";
 
-                _context.Canteens.Update(dish);
+                _context.mstCanteens.Update(dish);
                 return _context.SaveChanges() > 0;
             }
             catch (Exception ex)
@@ -261,7 +261,7 @@ namespace ksi.Repository
         {
             try
             {
-                var dish = _context.Canteens
+                var dish = _context.mstCanteens
                     .FirstOrDefault(d => d.ItemID == itemId && d.DeletedDate == null);
 
                 if (dish == null)
@@ -271,7 +271,7 @@ namespace ksi.Repository
                 dish.UpdatedDate = DateTime.Now;
                 dish.UpdatedBy = updatedBy ?? "System";
 
-                _context.Canteens.Update(dish);
+                _context.mstCanteens.Update(dish);
                 return _context.SaveChanges() > 0;
             }
             catch (Exception ex)

@@ -379,7 +379,7 @@ namespace ksi.Repository
         {
             try
             {
-                return _context.CanteenIds
+                return _context.mstCanteenIds
                     .Where(c => c.IsActive && c.DeletedDate == null)
                     .OrderBy(c => c.CanteenName ?? "")
                     .ToList()
@@ -395,7 +395,7 @@ namespace ksi.Repository
         {
             try
             {
-                return _context.CanteenIds
+                return _context.mstCanteenIds
                     .FirstOrDefault(c => c.CanteenID == canteenId
                                       && c.IsActive
                                       && c.DeletedDate == null);
@@ -410,7 +410,7 @@ namespace ksi.Repository
         {
             try
             {
-                return _context.Canteens
+                return _context.mstCanteens
                     .Include(c => c.CanteenDetails)
                     .Where(c => c.CanteenID == canteenId
                              && c.IsActive

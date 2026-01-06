@@ -8,7 +8,7 @@ namespace KSI_Project.Models.Entity
     /// <summary>
     /// Entity representing the canteen_id table (Canteen Master)
     /// </summary>
-    [Table("canteen_id")]
+    [Table("mstcanteenid")]
     public class CanteenId
     {
         [Key]
@@ -52,7 +52,7 @@ namespace KSI_Project.Models.Entity
     /// <summary>
     /// Entity representing the canteen table (Menu Items/Dishes)
     /// </summary>
-    [Table("canteen")]
+    [Table("mstcanteen")]
     public class Canteen
     {
         [Key]
@@ -118,3 +118,4 @@ namespace KSI_Project.Models.Entity
         public virtual CanteenId? CanteenDetails { get; set; }
     }
 }
+

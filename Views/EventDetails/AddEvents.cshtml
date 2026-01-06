@@ -48,7 +48,9 @@
 
                     <div class="mb-2">
                         <label>Organised By:</label>
-                        <input id="organisedBy" class="form-control" placeholder="Organised By" />
+                        <select id="organisedBy" class="form-control">
+                            <option value="">Select Club</option>
+                        </select>
                     </div>
 
                     <div class="mb-2">
@@ -134,12 +136,29 @@
                 }
             });
         }
+        function loadClubsDropdown() {
+            $.get('@Url.Action("getAllClubs", "EventDetails")', function (res) {
+                if (res.statusCode !== 200) return;
+
+                let options = '<option value="">Select Club</option>';
+                res.data.forEach(c => {
+                    options += `<option value="${c.clubName}">${c.clubName}</option>`;
+                });
+
+                $('#organisedBy').html(options);
+            });
+        }
 
         // Extra safety: clear form when modal closes
         $('#eventModal').on('hidden.bs.modal', function () {
             $('#eventForm')[0].reset();
+            loadClubsDropdown(); // refresh in case a new club was added
         });
 
-        $(document).ready(loadEvents);
+        $(document).ready(function() {
+            loadEvents();           // existing
+            loadClubsDropdown();    // new
+        });
+
     </script>
 }

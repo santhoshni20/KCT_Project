@@ -172,7 +172,7 @@ namespace ksi.Repository
                     }
                 }
 
-                var faculty = new Faculty
+                var faculty = new mstFaculty
                 {
                     FacultyName = facultyDTO.FacultyName,
                     Department = facultyDTO.Department,

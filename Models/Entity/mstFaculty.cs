@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ksi.Models
 {
-    [Table("Faculty")]
-    public class Faculty
+    [Table("mstFaculty")]
+    public class mstFaculty
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

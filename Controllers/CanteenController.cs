@@ -159,13 +159,13 @@ namespace ksi.Controllers
                 var canteens = _repo.GetAllCanteens();
 
                 ViewBag.Canteens = canteens ?? new List<CanteenId>();
-                return View(dishes ?? new List<Canteen>());
+                return View(dishes ?? new List<mstCanteen>());
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Error loading dishes: {ex.Message}";
                 ViewBag.Canteens = new List<CanteenId>();
-                return View(new List<Canteen>()); // ✅ Fixed: Always pass empty list
+                return View(new List<mstCanteen>()); // ✅ Fixed: Always pass empty list
             }
         }
 

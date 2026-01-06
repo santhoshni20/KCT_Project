@@ -141,7 +141,7 @@ namespace ksi.Repository
 
         #region Dish Operations
 
-        public IEnumerable<Canteen> GetAllDishes(bool includeInactive = false)
+        public IEnumerable<mstCanteen> GetAllDishes(bool includeInactive = false)
         {
             try
             {
@@ -162,7 +162,7 @@ namespace ksi.Repository
             }
         }
 
-        public Canteen GetDishById(int itemId)
+        public mstCanteen GetDishById(int itemId)
         {
             try
             {
@@ -180,7 +180,7 @@ namespace ksi.Repository
         {
             try
             {
-                var dish = new Canteen
+                var dish = new mstCanteen
                 {
                     CanteenID = dishDto.CanteenID,
                     DishName = dishDto.DishName,

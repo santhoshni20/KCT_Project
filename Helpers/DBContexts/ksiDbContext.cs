@@ -22,16 +22,16 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<mstClubs> mstClubs { get; set; }
         public DbSet<timetable> timetable { get; set; }
         public DbSet<Course> Courses { get; set; }
-        public DbSet<Canteen> mstCanteens { get; set; }
+        public DbSet<mstCanteen> mstCanteens { get; set; }
         public DbSet<CanteenId> mstCanteenIds { get; set; }
 
-        public DbSet<Faculty> Faculties { get; set; }
+        public DbSet<mstFaculty> Faculties { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             // Faculty configuration
-            modelBuilder.Entity<Faculty>(entity =>
+            modelBuilder.Entity<mstFaculty>(entity =>
             {
                 entity.HasKey(e => e.FacultyID);
                 entity.Property(e => e.FacultyID).ValueGeneratedOnAdd();
@@ -40,7 +40,7 @@ namespace KSI_Project.Helpers.DbContexts
                 entity.HasIndex(e => e.IsActive);
             });
             // Canteen -> CanteenId relationship
-            modelBuilder.Entity<Canteen>()
+            modelBuilder.Entity<mstCanteen>()
                 .HasOne(c => c.CanteenDetails)
                 .WithMany(ci => ci.Canteens)
                 .HasForeignKey(c => c.CanteenID)

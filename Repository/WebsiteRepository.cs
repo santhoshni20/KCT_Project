@@ -388,7 +388,7 @@ namespace ksi.Repository
             }
         }
 
-        public IEnumerable<Canteen> GetMenuByCanteenId(int canteenId)
+        public IEnumerable<mstCanteen> GetMenuByCanteenId(int canteenId)
         {
             try
             {

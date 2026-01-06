@@ -14,8 +14,8 @@ namespace ksi.Interfaces
         bool ToggleCanteenStatus(int canteenId, string updatedBy);
 
         // Dish Operations
-        IEnumerable<Canteen> GetAllDishes(bool includeInactive = false);
-        Canteen? GetDishById(int itemId);
+        IEnumerable<mstCanteen> GetAllDishes(bool includeInactive = false);
+        mstCanteen? GetDishById(int itemId);
         bool AddDish(AddDishDto dish);
         bool UpdateDish(AddDishDto dish);
         bool DeleteDish(int itemId, string deletedBy);

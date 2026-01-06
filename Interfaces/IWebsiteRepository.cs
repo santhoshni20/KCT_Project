@@ -15,7 +15,7 @@ namespace ksi.Interfaces
         #region Canteen
         IEnumerable<CanteenId> GetAllActiveCanteens();
         CanteenId GetCanteenById(int canteenId);
-        IEnumerable<Canteen> GetMenuByCanteenId(int canteenId);
+        IEnumerable<mstCanteen> GetMenuByCanteenId(int canteenId);
         #endregion
 
         #region Event details

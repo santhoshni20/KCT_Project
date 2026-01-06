@@ -46,14 +46,14 @@ namespace KSI_Project.Models.Entity
         public string? DeletedBy { get; set; }
 
         // Navigation property - One canteen can have many dishes
-        public virtual ICollection<Canteen> Canteens { get; set; } = new List<Canteen>();
+        public virtual ICollection<mstCanteen> Canteens { get; set; } = new List<mstCanteen>();
     }
 
     /// <summary>
     /// Entity representing the canteen table (Menu Items/Dishes)
     /// </summary>
     [Table("mstcanteen")]
-    public class Canteen
+    public class mstCanteen
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

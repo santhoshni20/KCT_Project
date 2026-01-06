@@ -36,49 +36,32 @@ namespace ksi.Controllers
 
         // POST: EventDetails/AddEvent
         [HttpPost]
-        public IActionResult AddEvent([FromForm] EventDetailsDTO eventDto, IFormFile brochureImage)
+        public IActionResult AddEvent([FromForm] EventDetailsDTO eventDto)
         {
-            try
+            if (eventDto.brochureImage != null && eventDto.brochureImage.Length > 0)
             {
-                // Handle brochure image upload
-                if (brochureImage != null && brochureImage.Length > 0)
+                var fileName = Guid.NewGuid() + Path.GetExtension(eventDto.brochureImage.FileName);
+
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                Directory.CreateDirectory(uploadPath);
+
+                var filePath = Path.Combine(uploadPath, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    // Generate unique file name
-                    var fileName = Guid.NewGuid() + Path.GetExtension(brochureImage.FileName);
-
-                    // Save path: wwwroot/uploads/
-                    var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                    Directory.CreateDirectory(uploadPath); // ensure folder exists
-
-                    var filePath = Path.Combine(uploadPath, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        brochureImage.CopyTo(stream);
-                    }
-
-                    // Save relative path to DTO
-                    eventDto.brochureImagePath = "/uploads/" + fileName;
+                    eventDto.brochureImage.CopyTo(stream);
                 }
 
-
-                // Save to database via repository
-                var result = _eventRepo.AddEvent(eventDto);
-
-                return Json(new ApiResponseDTO
-                {
-                    statusCode = result ? 200 : 500,
-                    message = result ? "Event added successfully" : "Failed to add event"
-                });
+                eventDto.brochureImagePath = "/uploads/" + fileName;
             }
-            catch (Exception ex)
+
+            var result = _eventRepo.AddEvent(eventDto);
+
+            return Json(new ApiResponseDTO
             {
-                // Log error (optional) and return failure
-                return Json(new ApiResponseDTO
-                {
-                    statusCode = 500,
-                    message = "Error: " + ex.Message
-                });
-            }
+                statusCode = result ? 200 : 500,
+                message = result ? "Event added successfully" : "Failed"
+            });
         }
+
     }
 }

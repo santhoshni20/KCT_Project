@@ -1,0 +1,104 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add Club";
+}
+
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="fw-bold">Club Details</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clubModal">
+        <i class="bx bx-plus"></i> Add Club
+    </button>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table" id="clubsTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Club Name</th>
+                    <th>President Name</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="clubModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Add Club</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="clubForm">
+
+                    <div class="mb-2">
+                        <label>Club Name:</label>
+                        <input id="clubName" class="form-control" placeholder="Enter Club Name" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>President Name:</label>
+                        <input id="presidentName" class="form-control" placeholder="Enter President Name" />
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="saveClub()">Save</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadClubs() {
+            $.get('@Url.Action("GetAllClubs", "ClubDetails")', function (res) {
+                let rows = '';
+                res.data.forEach((c, i) => {
+                    rows += `<tr>
+                        <td>${i + 1}</td>
+                        <td>${c.clubName}</td>
+                        <td>${c.presidentName}</td>
+                    </tr>`;
+                });
+                $('#clubsTable tbody').html(rows);
+            });
+        }
+
+        function saveClub() {
+            var formData = new FormData();
+            formData.append("clubName", $('#clubName').val());
+            formData.append("presidentName", $('#presidentName').val());
+
+            $.ajax({
+                url: '@Url.Action("AddClub", "ClubDetails")',
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: function () {
+                    $('#clubForm')[0].reset();     // clear form
+                    $('#clubModal').modal('hide');
+                    loadClubs();
+                }
+            });
+        }
+
+        // Clear form when modal closes
+        $('#clubModal').on('hidden.bs.modal', function () {
+            $('#clubForm')[0].reset();
+        });
+
+        $(document).ready(loadClubs);
+    </script>
+}

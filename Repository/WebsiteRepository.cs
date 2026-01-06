@@ -323,12 +323,14 @@
 //    }
 //}
 // Repository/WebsiteRepository.cs
+// Repository/WebsiteRepository.cs
 using ksi.Interfaces;
+using ksi.Models;
 using ksi.Models.DTOs;
 using KSI_Project.Helpers.DbContexts;
+using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace ksi.Repository
 {
@@ -348,33 +350,16 @@ namespace ksi.Repository
             {
                 collegeName = "KSI Institute of Technology",
                 tagline = "Empowering Education • Innovation • Excellence",
-
-                aboutCollege =
-                    "KSI Institute of Technology is committed to providing high-quality education " +
-                    "that nurtures innovation, leadership, and ethical values among students.",
-
-                academicExcellence =
-                    "Our institution follows a student-centric learning approach with experienced faculty, " +
-                    "industry-aligned curriculum, and continuous academic assessment.",
-
-                infrastructure =
-                    "The campus features modern classrooms, advanced laboratories, a digital library, " +
-                    "and smart learning environments to support holistic education.",
-
-                campusFacilities =
-                    "We provide well-maintained hostels, hygienic canteens, sports complexes, medical facilities, " +
-                    "and a vibrant campus life for students.",
-
-                placements =
-                    "Our dedicated placement cell ensures career readiness through training programs, internships, " +
-                    "and collaborations with leading organizations."
+                aboutCollege = "KSI Institute of Technology is committed to providing high-quality education that nurtures innovation, leadership, and ethical values among students.",
+                academicExcellence = "Our institution follows a student-centric learning approach with experienced faculty, industry-aligned curriculum, and continuous academic assessment.",
+                infrastructure = "The campus features modern classrooms, advanced laboratories, a digital library, and smart learning environments to support holistic education.",
+                campusFacilities = "We provide well-maintained hostels, hygienic canteens, sports complexes, medical facilities, and a vibrant campus life for students.",
+                placements = "Our dedicated placement cell ensures career readiness through training programs, internships, and collaborations with leading organizations."
             };
         }
         #endregion
 
         #region Canteen Operations
-
-
         public IEnumerable<CanteenId> GetAllActiveCanteens()
         {
             try
@@ -382,8 +367,7 @@ namespace ksi.Repository
                 return _context.mstCanteenIds
                     .Where(c => c.IsActive && c.DeletedDate == null)
                     .OrderBy(c => c.CanteenName ?? "")
-                    .ToList()
-                    ?? new List<CanteenId>();
+                    .ToList() ?? new List<CanteenId>();
             }
             catch (Exception ex)
             {
@@ -396,9 +380,7 @@ namespace ksi.Repository
             try
             {
                 return _context.mstCanteenIds
-                    .FirstOrDefault(c => c.CanteenID == canteenId
-                                      && c.IsActive
-                                      && c.DeletedDate == null);
+                    .FirstOrDefault(c => c.CanteenID == canteenId && c.IsActive && c.DeletedDate == null);
             }
             catch (Exception ex)
             {
@@ -412,10 +394,7 @@ namespace ksi.Repository
             {
                 return _context.mstCanteens
                     .Include(c => c.CanteenDetails)
-                    .Where(c => c.CanteenID == canteenId
-                             && c.IsActive
-                             && c.DeletedDate == null
-                             && c.Availability.ToLower() == "yes")
+                    .Where(c => c.CanteenID == canteenId && c.IsActive && c.DeletedDate == null && c.Availability.ToLower() == "yes")
                     .OrderBy(c => c.DishName)
                     .ToList();
             }
@@ -424,9 +403,7 @@ namespace ksi.Repository
                 throw new Exception($"Error retrieving menu items: {ex.Message}", ex);
             }
         }
-
         #endregion
-
 
         #region Event details
         public List<EventDetailsDTO> GetAllEvents()
@@ -451,9 +428,90 @@ namespace ksi.Repository
         }
         #endregion
 
+        #region Faculty Support
+        public async Task<List<FacultyDTO>> GetAllActiveFacultiesAsync()
+        {
+            try
+            {
+                return await _context.Faculties
+                    .Where(f => f.IsActive && f.DeletedDate == null)
+                    .OrderBy(f => f.Department)
+                    .ThenBy(f => f.FacultyName)
+                    .Select(f => new FacultyDTO
+                    {
+                        FacultyID = f.FacultyID,
+                        FacultyName = f.FacultyName,
+                        Department = f.Department,
+                        Designation = f.Designation,
+                        ExpertiseDomain = f.ExpertiseDomain,
+                        CollegeMail = f.CollegeMail,
+                        ContactNumber = f.ContactNumber,
+                        DOB = f.DOB,
+                        PhotoPath = string.IsNullOrEmpty(f.PhotoPath) ? "/images/faculty/default.jpg" : f.PhotoPath,
+                        IsActive = f.IsActive
+                    })
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving active faculties: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<List<FacultyDTO>> GetFacultiesByDepartmentAsync(string department)
+        {
+            try
+            {
+                return await _context.Faculties
+                    .Where(f => f.Department == department && f.IsActive && f.DeletedDate == null)
+                    .OrderBy(f => f.FacultyName)
+                    .Select(f => new FacultyDTO
+                    {
+                        FacultyID = f.FacultyID,
+                        FacultyName = f.FacultyName,
+                        Department = f.Department,
+                        Designation = f.Designation,
+                        ExpertiseDomain = f.ExpertiseDomain,
+                        CollegeMail = f.CollegeMail,
+                        ContactNumber = f.ContactNumber,
+                        DOB = f.DOB,
+                        PhotoPath = string.IsNullOrEmpty(f.PhotoPath) ? "/images/faculty/default.jpg" : f.PhotoPath,
+                        IsActive = f.IsActive
+                    })
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving faculties by department: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<FacultyDTO> GetFacultyByIdAsync(int facultyId)
+        {
+            try
+            {
+                return await _context.Faculties
+                    .Where(f => f.FacultyID == facultyId && f.IsActive && f.DeletedDate == null)
+                    .Select(f => new FacultyDTO
+                    {
+                        FacultyID = f.FacultyID,
+                        FacultyName = f.FacultyName,
+                        Department = f.Department,
+                        Designation = f.Designation,
+                        ExpertiseDomain = f.ExpertiseDomain,
+                        CollegeMail = f.CollegeMail,
+                        ContactNumber = f.ContactNumber,
+                        DOB = f.DOB,
+                        PhotoPath = string.IsNullOrEmpty(f.PhotoPath) ? "/images/faculty/default.jpg" : f.PhotoPath,
+                        IsActive = f.IsActive
+                    })
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving faculty: {ex.Message}", ex);
+            }
+        }
+        #endregion
     }
 }
-
-
-
-  

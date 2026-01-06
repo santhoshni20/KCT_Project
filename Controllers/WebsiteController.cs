@@ -499,9 +499,9 @@
 //        #endregion
 //    }
 
-//}
-// Controllers/WebsiteController.cs
+//}// Controllers/WebsiteController.cs
 using ksi.Interfaces;
+using ksi.Models;
 using ksi.Models.DTOs;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
@@ -523,19 +523,18 @@ namespace ksi.Controllers
         {
             return View();
         }
+
         public IActionResult Index()
         {
             try
             {
                 var content = _repo.getCollegeDashboardContent();
-
                 var response = new ApiResponseDTO
                 {
                     statusCode = 200,
                     message = "College dashboard content loaded successfully",
                     data = content
                 };
-
                 return View(response);
             }
             catch (Exception ex)
@@ -551,7 +550,6 @@ namespace ksi.Controllers
         #endregion
 
         #region Canteen
-
         public IActionResult Canteen()
         {
             try
@@ -571,7 +569,6 @@ namespace ksi.Controllers
             try
             {
                 var canteen = _repo.GetCanteenById(canteenId);
-
                 if (canteen == null)
                 {
                     TempData["Error"] = "Canteen not found";
@@ -593,7 +590,6 @@ namespace ksi.Controllers
 
                 ViewBag.CanteenId = canteenId;
                 ViewBag.CanteenName = canteen.CanteenName;
-
                 return View(menu);
             }
             catch (Exception ex)
@@ -602,12 +598,6 @@ namespace ksi.Controllers
                 return RedirectToAction("Canteen");
             }
         }
-
-        //// Home page
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
         #endregion
 
         #region Event details
@@ -616,12 +606,10 @@ namespace ksi.Controllers
             return View();
         }
 
-        // Fetch events for table
         [HttpGet]
         public IActionResult GetAllEvents()
         {
             var data = _repo.GetAllEvents();
-
             return Json(new ApiResponseDTO
             {
                 statusCode = 200,
@@ -631,6 +619,67 @@ namespace ksi.Controllers
         }
         #endregion
 
+        #region Faculty Support
+        public async Task<IActionResult> FacultySupport(string department = "")
+        {
+            try
+            {
+                List<FacultyDTO> faculties;
+
+                if (string.IsNullOrEmpty(department))
+                {
+                    faculties = await _repo.GetAllActiveFacultiesAsync();
+                }
+                else
+                {
+                    faculties = await _repo.GetFacultiesByDepartmentAsync(department);
+                }
+
+                ViewBag.SelectedDepartment = department;
+                return View(faculties);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error loading faculty: {ex.Message}";
+                return View(new List<FacultyDTO>());
+            }
+        }
+
+        // API endpoint for modal details
+        [HttpGet]
+        public async Task<IActionResult> GetFacultyDetails(int id)
+        {
+            try
+            {
+                var faculty = await _repo.GetFacultyByIdAsync(id);
+
+                if (faculty == null)
+                {
+                    return Json(new { success = false, message = "Faculty not found" });
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        facultyID = faculty.FacultyID,
+                        facultyName = faculty.FacultyName,
+                        department = faculty.Department,
+                        designation = faculty.Designation,
+                        expertiseDomain = faculty.ExpertiseDomain,
+                        collegeMail = faculty.CollegeMail,
+                        contactNumber = faculty.ContactNumber,
+                        dob = faculty.DOB,
+                        photoPath = faculty.PhotoPath
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        #endregion
     }
 }
-

@@ -1,5 +1,827 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model List<ksi.Models.FacultyDTO>
+
 @{
+    ViewData["Title"] = "Faculty Support";
+    Layout = null;
+    var selectedDept = ViewBag.SelectedDepartment as string ?? "";
 }
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section */
+        .faculty-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+
+        .hero-content {
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .stats-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 1rem;
+        }
+
+        /* Department Filter */
+        .department-filter {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .filter-title {
+            font-size: 1.3rem;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .dept-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .dept-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+            .dept-btn:hover, .dept-btn.active {
+                background: #667eea;
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+            }
+
+        /* Faculty Grid */
+        .faculty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .faculty-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .faculty-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+            }
+
+        .faculty-photo-container {
+            position: relative;
+            width: 100%;
+            height: 60%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .faculty-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .faculty-info {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .faculty-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .faculty-designation {
+            display: inline-block;
+            padding: 5px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .faculty-department {
+            color: #718096;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: auto;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+            .modal-overlay.active {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s;
+            }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+            position: relative;
+        }
+
+        @@keyframes slideUp {
+            from
+
+        {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 10;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+            .modal-close:hover {
+                background: #f7fafc;
+                transform: rotate(90deg);
+            }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .modal-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 5px solid white;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            display: block;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .modal-designation {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            margin-bottom: 5px;
+        }
+
+        .modal-department {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .modal-body {
+            padding: 40px;
+        }
+
+        .info-section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 18px;
+            background: #f7fafc;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+            .info-item:hover {
+                background: #edf2f7;
+                transform: translateX(5px);
+            }
+
+        .info-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.05rem;
+            color: #2d3748;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .expertise-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .expertise-badge {
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .contact-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            flex: 1;
+            min-width: 220px;
+            padding: 16px 28px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .email-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+            .email-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            }
+
+        .phone-btn {
+            background: #48bb78;
+            color: white;
+        }
+
+            .phone-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(72, 187, 120, 0.4);
+            }
+
+        /* No Faculty */
+        .no-faculty {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+            .no-faculty i {
+                font-size: 6rem;
+                color: #cbd5e0;
+                margin-bottom: 25px;
+            }
+
+            .no-faculty h3 {
+                color: #718096;
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+
+            .no-faculty p {
+                color: #a0aec0;
+                font-size: 1.1rem;
+            }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .hero-title
+
+        {
+            font-size: 2rem;
+        }
+
+        .faculty-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .faculty-name {
+            font-size: 1.1rem;
+        }
+
+        .modal-header {
+            padding: 40px 20px;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-name {
+            font-size: 1.8rem;
+        }
+
+        .contact-btn {
+            min-width: 100%;
+        }
+
+        .modal-photo {
+            width: 160px;
+            height: 160px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="faculty-hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <i class="bx bx-user-circle"></i> Our Faculty
+                </h1>
+                <p class="hero-subtitle">Meet our experienced and dedicated faculty members</p>
+                @if (Model != null && Model.Any())
+                {
+                    <div class="stats-badge">
+                        <i class="bx bx-group"></i>
+                        <strong>@Model.Count</strong> Faculty Members
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Department Filter -->
+        <div class="department-filter">
+            <h2 class="filter-title">
+                <i class="bx bx-filter"></i> Filter by Department
+            </h2>
+            <div class="dept-buttons">
+                <a href="@Url.Action("FacultySupport")"
+                   class="dept-btn @(string.IsNullOrEmpty(selectedDept) ? "active" : "")">
+                    <i class="bx bx-grid-alt"></i>
+                    All Departments
+                </a>
+                <a href="@Url.Action("FacultySupport", new { department = "Computer Science" })"
+                   class="dept-btn @(selectedDept == "Computer Science" ? "active" : "")">
+                    <i class="bx bx-laptop"></i>
+                    Computer Science
+                </a>
+                <a href="@Url.Action("FacultySupport", new { department = "Information Technology" })"
+                   class="dept-btn @(selectedDept == "Information Technology" ? "active" : "")">
+                    <i class="bx bx-code-alt"></i>
+                    Information Technology
+                </a>
+                <a href="@Url.Action("FacultySupport", new { department = "AIDS" })"
+                   class="dept-btn @(selectedDept == "AIDS" ? "active" : "")">
+                    <i class="bx bx-brain"></i>
+                    AIDS
+                </a>
+            </div>
+        </div>
+
+        <!-- Faculty Grid -->
+        @if (Model == null || !Model.Any())
+        {
+            <div class="no-faculty">
+                <i class="bx bx-user-x"></i>
+                <h3>No Faculty Found</h3>
+                <p>
+                    @if (!string.IsNullOrEmpty(selectedDept))
+                    {
+                        <text>No faculty members found in @selectedDept department.</text>
+                    }
+                    else
+                    {
+                        <text>No faculty members available at the moment.</text>
+                    }
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="faculty-grid">
+                @foreach (var faculty in Model)
+                {
+                    <div class="faculty-card" onclick="showFacultyDetails(@faculty.FacultyID)">
+                        <div class="faculty-photo-container">
+                            @if (!string.IsNullOrEmpty(faculty.PhotoPath))
+                            {
+                                <img src="@faculty.PhotoPath"
+                                     alt="@faculty.FacultyName"
+                                     class="faculty-photo"
+                                     onerror="this.src='/images/faculty/default.jpg'" />
+                            }
+                            else
+                            {
+                                <div class="faculty-photo" style="display: flex; align-items: center; justify-content: center;">
+                                    <i class="bx bx-user" style="font-size: 5rem; color: white; opacity: 0.5;"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="faculty-info">
+                            <div>
+                                <h3 class="faculty-name">@faculty.FacultyName</h3>
+                                @if (!string.IsNullOrEmpty(faculty.Designation))
+                                {
+                                    <span class="faculty-designation">@faculty.Designation</span>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(faculty.Department))
+                            {
+                                <div class="faculty-department">
+                                    <i class="bx bx-buildings"></i>
+                                    <span>@faculty.Department</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="facultyModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+
+            <div class="modal-header">
+                <img id="modalPhoto" src="" alt="Faculty Photo" class="modal-photo" />
+                <h2 class="modal-name" id="modalName"></h2>
+                <div class="modal-designation" id="modalDesignation"></div>
+                <div class="modal-department" id="modalDepartment"></div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Contact Section -->
+                <div class="info-section" id="contactSection">
+                    <h3 class="section-title">
+                        <i class="bx bx-phone-call"></i>
+                        Contact Information
+                    </h3>
+                    <div class="contact-actions" id="contactActions"></div>
+                </div>
+
+                <!-- Expertise Section -->
+                <div class="info-section" id="expertiseSection" style="display: none;">
+                    <h3 class="section-title">
+                        <i class="bx bx-book-bookmark"></i>
+                        Area of Expertise
+                    </h3>
+                    <div class="expertise-badges" id="expertiseBadges"></div>
+                </div>
+
+                <!-- Details Section -->
+                <div class="info-section">
+                    <h3 class="section-title">
+                        <i class="bx bx-info-circle"></i>
+                        Professional Details
+                    </h3>
+                    <div id="detailsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function showFacultyDetails(facultyId) {
+            try {
+                const response = await fetch(`@Url.Action("GetFacultyDetails")?id=${facultyId}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    alert(result.message || 'Failed to load faculty details');
+                    return;
+                }
+
+                const faculty = result.data;
+
+                // Set photo
+                document.getElementById('modalPhoto').src = faculty.photoPath || '/images/faculty/default.jpg';
+                document.getElementById('modalPhoto').onerror = function() {
+                    this.src = '/images/faculty/default.jpg';
+                };
+
+                // Set name, designation, and department
+                document.getElementById('modalName').textContent = faculty.facultyName || '';
+                document.getElementById('modalDesignation').textContent = faculty.designation || '';
+
+                const deptElement = document.getElementById('modalDepartment');
+                if (faculty.department) {
+                    deptElement.innerHTML = `<i class="bx bx-buildings"></i> ${faculty.department}`;
+                    deptElement.style.display = 'block';
+                } else {
+                    deptElement.style.display = 'none';
+                }
+
+                // Contact actions
+                const contactActions = document.getElementById('contactActions');
+                contactActions.innerHTML = '';
+
+                if (faculty.collegeMail) {
+                    contactActions.innerHTML += `
+                        <a href="mailto:${faculty.collegeMail}" class="contact-btn email-btn">
+                            <i class="bx bx-envelope"></i>
+                            Send Email
+                        </a>
+                    `;
+                }
+
+                if (faculty.contactNumber) {
+                    contactActions.innerHTML += `
+                        <a href="tel:${faculty.contactNumber}" class="contact-btn phone-btn">
+                            <i class="bx bx-phone"></i>
+                            Call Now
+                        </a>
+                    `;
+                }
+
+                // Expertise badges
+                const expertiseSection = document.getElementById('expertiseSection');
+                const expertiseBadges = document.getElementById('expertiseBadges');
+
+                if (faculty.expertiseDomain) {
+                    expertiseSection.style.display = 'block';
+                    expertiseBadges.innerHTML = '';
+                    const domains = faculty.expertiseDomain.split(',');
+                    domains.forEach(domain => {
+                        expertiseBadges.innerHTML += `<span class="expertise-badge">${domain.trim()}</span>`;
+                    });
+                } else {
+                    expertiseSection.style.display = 'none';
+                }
+
+                // Details
+                const detailsContainer = document.getElementById('detailsContainer');
+                detailsContainer.innerHTML = '';
+
+                if (faculty.collegeMail) {
+                    detailsContainer.innerHTML += `
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bx bx-envelope"></i></div>
+                            <div class="info-content">
+                                <div class="info-label">College Email</div>
+                                <div class="info-value">${faculty.collegeMail}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (faculty.contactNumber) {
+                    detailsContainer.innerHTML += `
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bx bx-phone"></i></div>
+                            <div class="info-content">
+                                <div class="info-label">Contact Number</div>
+                                <div class="info-value">${faculty.contactNumber}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (faculty.department) {
+                    detailsContainer.innerHTML += `
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bx bx-buildings"></i></div>
+                            <div class="info-content">
+                                <div class="info-label">Department</div>
+                                <div class="info-value">${faculty.department}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (faculty.designation) {
+                    detailsContainer.innerHTML += `
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bx bx-id-card"></i></div>
+                            <div class="info-content">
+                                <div class="info-label">Designation</div>
+                                <div class="info-value">${faculty.designation}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (faculty.dob) {
+                    const dobDate = new Date(faculty.dob);
+                    const formattedDob = dobDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+
+                    detailsContainer.innerHTML += `
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bx bx-calendar"></i></div>
+                            <div class="info-content">
+                                <div class="info-label">Date of Birth</div>
+                                <div class="info-value">${formattedDob}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Show modal
+                document.getElementById('facultyModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+
+            } catch (error) {
+                console.error('Error loading faculty details:', error);
+                alert('Failed to load faculty details. Please try again.');
+            }
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'facultyModal' || event.target.classList.contains('modal-close')) {
+                document.getElementById('facultyModal').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Card animation on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.faculty-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s';
+                    card.style.opacity = '1';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

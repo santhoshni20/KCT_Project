@@ -29,6 +29,35 @@
         padding: 4px 8px;
         font-size: 0.875rem;
     }
+
+    .photo-preview {
+        max-width: 200px;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+    }
+
+    .photo-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .photo-upload-area:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+
+    .faculty-photo-small {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -58,8 +87,9 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form asp-action="SaveFaculty" method="post" id="facultyForm">
+                    <form asp-action="SaveFaculty" method="post" id="facultyForm" enctype="multipart/form-data">
                         <input type="hidden" asp-for="FacultyID" />
+                        <input type="hidden" asp-for="PhotoPath" />
 
                         <!-- Nav tabs -->
                         <ul class="nav nav-tabs" id="facultyTabs" role="tablist">
@@ -172,11 +202,34 @@
                                     </div>
 
                                     <div class="col-12 mb-3">
-                                        <label class="form-label">Photo</label>
-                                        <div class="alert alert-info mb-0">
-                                            <i class="bx bx-info-circle me-2"></i>
-                                            Photo upload functionality will be added later
+                                        <label class="form-label">
+                                            <i class="bx bx-image me-1"></i>Faculty Photo
+                                        </label>
+
+                                        @if (!string.IsNullOrEmpty(Model?.PhotoPath))
+                                        {
+                                            <div class="mb-3">
+                                                <img src="@Model.PhotoPath" alt="Current Photo" class="photo-preview" />
+                                                <div class="mt-2">
+                                                    <small class="text-muted">Current photo - Upload a new one to replace</small>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
+                                            <i class="bx bx-cloud-upload" style="font-size: 3rem; color: #6c757d;"></i>
+                                            <p class="mb-1"><strong>Click to upload photo</strong></p>
+                                            <p class="text-muted small mb-0">
+                                                Allowed: JPG, JPEG, PNG, GIF (Max 2MB)
+                                            </p>
                                         </div>
+                                        <input type="file"
+                                               id="photoInput"
+                                               name="photo"
+                                               accept="image/*"
+                                               class="d-none"
+                                               onchange="previewPhoto(this)" />
+                                        <div id="photoPreview" class="mt-3"></div>
                                     </div>
                                 </div>
                             </div>
@@ -196,7 +249,7 @@
                             }
                             else
                             {
-                                <button type="reset" class="btn btn-secondary">
+                                <button type="reset" class="btn btn-secondary" onclick="clearPhotoPreview()">
                                     <i class="bx bx-refresh me-1"></i>Reset
                                 </button>
                             }
@@ -242,6 +295,7 @@
                             <table class="table table-hover table-striped align-middle">
                                 <thead class="table-light">
                                     <tr>
+                                        <th style="width: 60px;">Photo</th>
                                         <th style="width: 60px;">ID</th>
                                         <th>Name</th>
                                         <th>Department</th>
@@ -256,6 +310,18 @@
                                     @foreach (var faculty in faculties)
                                     {
                                         <tr>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(faculty.PhotoPath))
+                                                {
+                                                    <img src="@faculty.PhotoPath" alt="@faculty.FacultyName" class="faculty-photo-small" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="faculty-photo-small bg-secondary d-flex align-items-center justify-content-center text-white">
+                                                        <i class="bx bx-user"></i>
+                                                    </div>
+                                                }
+                                            </td>
                                             <td>@faculty.FacultyID</td>
                                             <td>
                                                 <strong>@faculty.FacultyName</strong>
@@ -318,6 +384,53 @@
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 
     <script>
+        // Preview photo before upload
+        function previewPhoto(input) {
+            var preview = document.getElementById('photoPreview');
+            preview.innerHTML = '';
+
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                var file = input.files[0];
+
+                // Validate file size (2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size must not exceed 2MB');
+                    input.value = '';
+                    return;
+                }
+
+                // Validate file type
+                var validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Only image files (JPG, JPEG, PNG, GIF) are allowed');
+                    input.value = '';
+                    return;
+                }
+
+                reader.onload = function (e) {
+                    var img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'photo-preview';
+
+                    var fileName = document.createElement('p');
+                    fileName.className = 'mt-2 mb-0 text-muted small';
+                    fileName.innerHTML = '<i class="bx bx-check-circle text-success me-1"></i>Selected: ' + file.name;
+
+                    preview.appendChild(img);
+                    preview.appendChild(fileName);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Clear photo preview on reset
+        function clearPhotoPreview() {
+            document.getElementById('photoInput').value = '';
+            document.getElementById('photoPreview').innerHTML = '';
+        }
+
         $(document).ready(function () {
             // Auto-dismiss alerts after 5 seconds
             setTimeout(function () {
@@ -328,23 +441,23 @@
         @if (Model?.FacultyID > 0)
         {
             <text>
-                        $('html, body').animate({
-                            scrollTop: $('#facultyForm').offset().top - 100
-                        }, 500);
+                    $('html, body').animate({
+                        scrollTop: $('#facultyForm').offset().top - 100
+                    }, 500);
             </text>
         }
         else
         {
             <text>
-                        // Scroll to table after adding new faculty
-                        if ($('.alert-success').length > 0) {
-                            setTimeout(function() {
-                                $('html, body').animate({
-                                    scrollTop: $('.card:last').offset().top - 100
-                                }, 500);
-                            }, 100);
-                        }
-            </text> 
+                    // Scroll to table after adding new faculty
+                    if ($('.alert-success').length > 0) {
+                        setTimeout(function() {
+                            $('html, body').animate({
+                                scrollTop: $('.card:last').offset().top - 100
+                            }, 500);
+                        }, 100);
+                    }
+            </text>
         }
         });
 

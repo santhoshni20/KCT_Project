@@ -24,6 +24,8 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<Course> Courses { get; set; }
         public DbSet<mstCanteen> mstCanteens { get; set; }
         public DbSet<CanteenId> mstCanteenIds { get; set; }
+        public DbSet<mstTimetable> mstTimetable { get; set; }
+
 
         public DbSet<mstFaculty> Faculties { get; set; }
 

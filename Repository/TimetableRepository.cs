@@ -177,7 +177,7 @@ namespace ksi.Repository
             return await _context.mstSubject
                 .Select(x => new TimetableDTO
                 {
-                    subjectId = x.subjectId,
+                    id = x.subjectId,
                     name = x.subjectName,
                     isActive = x.isActive
                 })
@@ -191,6 +191,73 @@ namespace ksi.Repository
 
             entity.isActive = isActive;
             return await _context.SaveChangesAsync() > 0;
+        }
+        // ================= ACTIVE SUBJECTS =================
+        public async Task<List<TimetableDTO>> getActiveSubjectsAsync()
+        {
+            return await _context.mstSubject
+                .Where(x => x.isActive)
+                .Select(x => new TimetableDTO
+                {
+                    id = x.subjectId,
+                    name = x.subjectName
+                })
+                .ToListAsync();
+        }
+
+        // ================= ACTIVE FACULTIES =================
+        public async Task<List<TimetableDTO>> getActiveFacultiesAsync()
+        {
+            return await _context.Faculties
+                .Where(x => x.IsActive)
+                .Select(x => new TimetableDTO
+                {
+                    id = x.FacultyID,
+                    name = x.FacultyName   // ✅ THIS LINE IS CRITICAL
+                })
+                .ToListAsync();
+        }
+
+        public async Task<bool> addTimetableAsync(TimetableDTO dto, int createdBy)
+        {
+            var entity = new mstTimetable
+            {
+                batchId = dto.batchId.Value,
+                departmentId = dto.departmentId.Value,
+                sectionId = dto.sectionId.Value,
+                subjectId = dto.subjectId.Value,
+                facultyId = dto.facultyId.Value,
+                hourNo = dto.hourNo.Value,
+
+                createdBy = createdBy,
+                createdDate = DateTime.Now,
+                isActive = true
+            };
+
+            await _context.mstTimetable.AddAsync(entity);
+            return await _context.SaveChangesAsync() > 0;
+        }
+        public async Task<List<object>> getTimetableListAsync()
+        {
+            var data =
+                from t in _context.mstTimetable
+                join b in _context.mstBatch on t.batchId equals b.batchId
+                join d in _context.mstDepartment on t.departmentId equals d.departmentId
+                join s in _context.mstSection on t.sectionId equals s.sectionId
+                join sub in _context.mstSubject on t.subjectId equals sub.subjectId
+                join f in _context.Faculties on t.facultyId equals f.FacultyID
+                where t.isActive
+                select new
+                {
+                    batch = b.batchName,
+                    department = d.departmentName,
+                    section = s.sectionName,
+                    subject = sub.subjectName,
+                    hour = t.hourNo,
+                    faculty = f.FacultyName
+                };
+
+            return await data.ToListAsync<object>();
         }
 
     }

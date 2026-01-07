@@ -20,11 +20,17 @@ namespace ksi.Interfaces
         Task<List<TimetableDTO>> getActiveBatchesAsync();
         Task<List<TimetableDTO>> getActiveDepartmentsAsync();
         Task<List<TimetableDTO>> getActiveSectionsAsync();
+        Task<bool> addTimetableAsync(TimetableDTO dto, int createdBy);
+
 
         // TOGGLE
         Task<bool> toggleBatchAsync(int id, bool isActive);
         Task<bool> toggleDepartmentAsync(int id, bool isActive);
         Task<bool> toggleSectionAsync(int id, bool isActive);
         Task<bool> toggleSubjectAsync(int id, bool isActive);
+        Task<List<TimetableDTO>> getActiveFacultiesAsync();
+        Task<List<TimetableDTO>> getActiveSubjectsAsync();
+        Task<List<object>> getTimetableListAsync();
+
     }
 }

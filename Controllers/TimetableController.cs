@@ -6,135 +6,114 @@ namespace ksi.Controllers
 {
     public class TimetableController : Controller
     {
+        #region Constructor and DI
         private readonly ITimetableRepository _repository;
 
         public TimetableController(ITimetableRepository repository)
         {
             _repository = repository;
         }
+        #endregion
 
-        // ================= VIEWS =================
-        [HttpGet] public IActionResult AddDetails() => View();
-        [HttpGet] public IActionResult AddTimetable() => View();
+        // ===================== PAGE LOAD =====================
 
-        // ================= ADD =================
-        [HttpPost("api/timetable/batch")]
-        public async Task<ApiResponseDTO> addBatch([FromBody] TimetableDTO dto)
+        #region Load Add Details Page
+        public IActionResult AddDetails()
         {
-            try
-            {
-                var result = await _repository.addBatchAsync(dto, 1);
-                return new ApiResponseDTO { statusCode = 200, success = result, message = "Batch added successfully" };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponseDTO { statusCode = 500, success = false, message = "Error adding batch", errorDetails = ex.Message };
-            }
+            return View();
         }
+        #endregion
 
-        [HttpPost("api/timetable/department")]
-        public async Task<ApiResponseDTO> addDepartment([FromBody] TimetableDTO dto)
+        #region Load Add Timetable Page
+        public IActionResult AddTimetable()
         {
-            try
-            {
-                var result = await _repository.addDepartmentAsync(dto, 1);
-                return new ApiResponseDTO { statusCode = 200, success = result, message = "Department added successfully" };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponseDTO { statusCode = 500, success = false, message = "Error adding department", errorDetails = ex.Message };
-            }
+            return View();
         }
+        #endregion
 
-        [HttpPost("api/timetable/section")]
-        public async Task<ApiResponseDTO> addSection([FromBody] TimetableDTO dto)
-        {
-            try
-            {
-                var result = await _repository.addSectionAsync(dto, 1);
-                return new ApiResponseDTO { statusCode = 200, success = result, message = "Section added successfully" };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponseDTO { statusCode = 500, success = false, message = "Error adding section", errorDetails = ex.Message };
-            }
-        }
+        // ===================== DROPDOWNS =====================
 
-        // ================= GET =================
-        [HttpGet("api/timetable/dropdowns")]
-        public async Task<ApiResponseDTO> getDropdowns()
+        #region Get Dropdown Data
+        [HttpGet]
+        public async Task<ApiResponseDTO> GetDropdowns()
         {
             var data = new
             {
-                batches = await _repository.getBatchesAsync(),
-                departments = await _repository.getDepartmentsAsync(),
-                sections = await _repository.getSectionsAsync(),
-                subjects = await _repository.getSubjectsAsync()
+                batches = await _repository.getActiveBatchesAsync(),
+                departments = await _repository.getActiveDepartmentsAsync(),
+                sections = await _repository.getActiveSectionsAsync(),
+                subjects = await _repository.getActiveSubjectsAsync(),
+                faculties = await _repository.getActiveFacultiesAsync()
             };
 
-            return new ApiResponseDTO { statusCode = 200, success = true, data = data };
+            return new ApiResponseDTO
+            {
+                statusCode = 200,
+                success = true,
+                data = data
+            };
         }
+        #endregion
 
-        // ================= SUBJECT =================
-        [HttpPost("api/timetable/subject")]
-        public async Task<ApiResponseDTO> addSubject([FromBody] SubjectAddDTO dto)
+        // ===================== ADD MASTER =====================
+
+        #region Add Batch
+        [HttpPost]
+        public async Task<ApiResponseDTO> AddBatch([FromBody] TimetableDTO dto)
         {
-            try
+            var result = await _repository.addBatchAsync(dto, 1);
+            return new ApiResponseDTO
             {
-                var result = await _repository.addSubjectAsync(dto);
-                return new ApiResponseDTO { statusCode = 200, success = result, message = "Subject added successfully" };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponseDTO { statusCode = 500, success = false, message = "Error adding subject", errorDetails = ex.Message };
-            }
+                success = result,
+                message = result ? "Batch added successfully" : "Failed"
+            };
         }
+        #endregion
 
-        // ================= TOGGLE =================
-        [HttpPost("api/timetable/toggle")]
-        public async Task<IActionResult> ToggleStatus([FromBody] TimetableDTO dto)
+        #region Add Department
+        [HttpPost]
+        public async Task<ApiResponseDTO> AddDepartment([FromBody] TimetableDTO dto)
         {
-            try
+            var result = await _repository.addDepartmentAsync(dto, 1);
+            return new ApiResponseDTO
             {
-                bool result = false;
-
-                if (dto.batchId.HasValue)
-                    result = await _repository.toggleBatchAsync(dto.batchId.Value, dto.isActive);
-                else if (dto.departmentId.HasValue)
-                    result = await _repository.toggleDepartmentAsync(dto.departmentId.Value, dto.isActive);
-                else if (dto.sectionId.HasValue)
-                    result = await _repository.toggleSectionAsync(dto.sectionId.Value, dto.isActive);
-
-                return Ok(new ApiResponseDTO { success = result, message = result ? "Status updated" : "Failed to update" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponseDTO { success = false, message = "Error updating status", errorDetails = ex.Message });
-            }
+                success = result,
+                message = result ? "Department added successfully" : "Failed"
+            };
         }
-        [HttpGet("api/timetable/active-dropdowns")]
-        public async Task<ApiResponseDTO> getActiveDropdowns()
+        #endregion
+
+        #region Add Section
+        [HttpPost]
+        public async Task<ApiResponseDTO> AddSection([FromBody] TimetableDTO dto)
         {
-            try
+            var result = await _repository.addSectionAsync(dto, 1);
+            return new ApiResponseDTO
             {
-                var data = new
-                {
-                    batches = await _repository.getActiveBatchesAsync(),
-                    departments = await _repository.getActiveDepartmentsAsync(),
-                    sections = await _repository.getActiveSectionsAsync()
-                };
-
-                return new ApiResponseDTO { statusCode = 200, success = true, data = data };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponseDTO { statusCode = 500, success = false, message = "Error loading active dropdowns", errorDetails = ex.Message };
-            }
+                success = result,
+                message = result ? "Section added successfully" : "Failed"
+            };
         }
-        
+        #endregion
 
-        [HttpPost("api/timetable/toggle")]
-        public async Task<ApiResponseDTO> toggleStatus([FromBody] TimetableDTO dto)
+        #region Add Subject
+        [HttpPost]
+        public async Task<ApiResponseDTO> AddSubject([FromBody] SubjectAddDTO dto)
+        {
+            var result = await _repository.addSubjectAsync(dto);
+            return new ApiResponseDTO
+            {
+                success = result,
+                message = result ? "Subject added successfully" : "Failed"
+            };
+        }
+        #endregion
+
+        // ===================== TOGGLE =====================
+
+        #region Toggle Status
+        [HttpPost]
+        public async Task<ApiResponseDTO> ToggleStatus([FromBody] TimetableDTO dto)
         {
             bool result = false;
 
@@ -149,11 +128,46 @@ namespace ksi.Controllers
 
             return new ApiResponseDTO
             {
-                statusCode = 200,
                 success = result,
                 message = result ? "Status updated" : "Update failed"
             };
         }
+        #endregion
 
+        // ===================== TIMETABLE SAVE =====================
+
+        #region Save Timetable
+        [HttpPost]
+        public async Task<ApiResponseDTO> SaveTimetable([FromBody] TimetableDTO dto)
+        {
+            if (dto.hourNo < 1 || dto.hourNo > 7)
+            {
+                return new ApiResponseDTO
+                {
+                    success = false,
+                    message = "Hour must be between 1 and 7"
+                };
+            }
+
+            var result = await _repository.addTimetableAsync(dto, 1);
+
+            return new ApiResponseDTO
+            {
+                success = result,
+                message = result ? "Timetable saved successfully" : "Save failed"
+            };
+        }
+        [HttpGet]
+        public async Task<ApiResponseDTO> GetTimetableList()
+        {
+            var data = await _repository.getTimetableListAsync();
+            return new ApiResponseDTO
+            {
+                success = true,
+                data = data
+            };
+        }
+
+        #endregion
     }
 }

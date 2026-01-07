@@ -10,6 +10,10 @@
         public int? sectionId { get; set; }
         public int? subjectId { get; set; }
 
+        // ✅ ADD THESE FOR TIMETABLE SAVE
+        public int? facultyId { get; set; }
+        public int? hourNo { get; set; }
+
         public bool isActive { get; set; }
     }
 

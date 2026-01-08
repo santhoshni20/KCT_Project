@@ -1,129 +1,19 @@
 ﻿@{
+    Layout = "_Layout";
     ViewData["Title"] = "Add Timetable";
 }
 
-<style>
-    body {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        min-height: 100vh;
-        font-family: 'Segoe UI', sans-serif;
-    }
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="fw-bold">Timetable Details</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#timetableModal">
+        <i class="bx bx-plus"></i> Add Timetable
+    </button>
+</div>
 
-    .page-container {
-        max-width: 1200px;
-        margin: 40px auto;
-        padding: 30px;
-    }
-
-    .card {
-        background: white;
-        border-radius: 18px;
-        padding: 25px;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-    }
-
-    .table-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .add-btn {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        padding: 10px 18px;
-        border-radius: 25px;
-        font-size: 15px;
-        cursor: pointer;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th {
-        background: #667eea;
-        color: white;
-        padding: 12px;
-        text-align: center;
-    }
-
-    td {
-        padding: 12px;
-        text-align: center;
-        border-bottom: 1px solid #ddd;
-    }
-
-    th:not(:last-child),
-    td:not(:last-child) {
-        border-right: 1px solid #e0e0e0;
-    }
-
-    .modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-    .modal-content {
-        background: white;
-        padding: 25px;
-        border-radius: 18px;
-        width: 500px;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    select, input {
-        width: 100%;
-        padding: 10px;
-        border-radius: 20px;
-        border: 1px solid #ccc;
-        outline: none;
-    }
-
-    .modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .btn-cancel {
-        background: #ccc;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 20px;
-    }
-
-    .btn-save {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        padding: 8px 18px;
-        border-radius: 20px;
-    }
-</style>
-
-<div class="page-container">
-    <div class="card">
-
-        <div class="table-header">
-            <h3>📅 Timetable List</h3>
-            <button class="add-btn" onclick="openModal()">+ Add</button>
-        </div>
-
-        <table>
-            <thead>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-primary text-center">
                 <tr>
                     <th>Batch</th>
                     <th>Department</th>
@@ -133,136 +23,156 @@
                     <th>Faculty</th>
                 </tr>
             </thead>
-            <tbody id="timetableBody"></tbody>
+            <tbody id="timetableBody" class="text-center"></tbody>
         </table>
-
     </div>
 </div>
 
-<div class="modal" id="addModal">
-    <div class="modal-content">
-        <h3>Add Timetable</h3>
+<!-- MODAL -->
+<div class="modal fade" id="timetableModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
 
-        <div class="form-group">
-            <select id="batch"></select>
-        </div>
+            <div class="modal-header">
+                <h5 class="modal-title">Add Timetable</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
-        <div class="form-group">
-            <select id="department"></select>
-        </div>
+            <div class="modal-body">
+                <form id="timetableForm">
+                    <div class="row g-3">
 
-        <div class="form-group">
-            <select id="section"></select>
-        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Batch</label>
+                            <select id="batch" class="form-control"></select>
+                        </div>
 
-        <div class="form-group">
-            <select id="subject"></select>
-        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Department</label>
+                            <select id="department" class="form-control"></select>
+                        </div>
 
-        <div class="form-group">
-            <input type="number" id="hour" min="1" max="7" placeholder="Hour (1 - 7)" />
-        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Section</label>
+                            <select id="section" class="form-control"></select>
+                        </div>
 
-        <div class="form-group">
-            <select id="faculty"></select>
-        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Subject</label>
+                            <select id="subject" class="form-control"></select>
+                        </div>
 
-        <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-            <button class="btn-save" onclick="saveTimetable()">Save</button>
+                        <div class="col-md-3">
+                            <label class="form-label">Hour (1 - 7)</label>
+                            <input type="number" id="hour" min="1" max="7" class="form-control" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Faculty</label>
+                            <select id="faculty" class="form-control"></select>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTimetable()">Save</button>
+            </div>
+
         </div>
     </div>
 </div>
 
-<script>
-    //document.addEventListener('DOMContentLoaded', loadDropdowns);
-    document.addEventListener('DOMContentLoaded', () => {
-        loadDropdowns();
-        loadTimetable();
-    });
-
-    function openModal() {
-        document.getElementById('addModal').style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('addModal').style.display = 'none';
-    }
-
-    function loadDropdowns() {
-        fetch('/Timetable/GetDropdowns')
-            .then(r => r.json())
-            .then(res => {
-                if (!res.success) return;
-
-                fill('batch', res.data.batches);
-                fill('department', res.data.departments);
-                fill('section', res.data.sections);
-                fill('subject', res.data.subjects);
-                fill('faculty', res.data.faculties);
-            });
-    }
-
-    function fill(id, data) {
-        const ddl = document.getElementById(id);
-        ddl.innerHTML = '<option value="">Select</option>';
-
-        data.forEach(x => {
-            ddl.innerHTML += `<option value="${x.id}">${x.name}</option>`;
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDropdowns();
+            loadTimetable();
         });
-    }
 
-    function saveTimetable() {
-        const hour = document.getElementById('hour').value;
+        function loadDropdowns() {
+            fetch('/Timetable/GetDropdowns')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) return;
 
-        if (hour < 1 || hour > 7) {
-            alert("Hour must be between 1 and 7");
-            return;
+                    fill('batch', res.data.batches);
+                    fill('department', res.data.departments);
+                    fill('section', res.data.sections);
+                    fill('subject', res.data.subjects);
+                    fill('faculty', res.data.faculties);
+                });
         }
 
-        const payload = {
-            batchId: batch.value,
-            departmentId: department.value,
-            sectionId: section.value,
-            subjectId: subject.value,
-            hourNo: hour,
-            facultyId: faculty.value
-        };
+        function fill(id, data) {
+            const ddl = document.getElementById(id);
+            ddl.innerHTML = '<option value="">Select</option>';
+            data.forEach(x => {
+                ddl.innerHTML += `<option value="${x.id}">${x.name}</option>`;
+            });
+        }
 
-        fetch('/Timetable/SaveTimetable', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(r => r.json())
-        .then(res => {
-            alert(res.message);
-            if (res.success) {
-                closeModal();
-                loadTimetable(); 
+        function saveTimetable() {
+            const hour = document.getElementById('hour').value;
+
+            if (hour < 1 || hour > 7) {
+                alert("Hour must be between 1 and 7");
+                return;
             }
-        });
-    }
-    function loadTimetable() {
-        fetch('/Timetable/GetTimetableList')
+
+            const payload = {
+                batchId: batch.value,
+                departmentId: department.value,
+                sectionId: section.value,
+                subjectId: subject.value,
+                hourNo: hour,
+                facultyId: faculty.value
+            };
+
+            fetch('/Timetable/SaveTimetable', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
             .then(r => r.json())
             .then(res => {
-                if (!res.success) return;
-
-                const body = document.getElementById('timetableBody');
-                body.innerHTML = '';
-
-                res.data.forEach(x => {
-                    body.innerHTML += `
-                        <tr>
-                            <td>${x.batch}</td>
-                            <td>${x.department}</td>
-                            <td>${x.section}</td>
-                            <td>${x.subject}</td>
-                            <td>${x.hour}</td>
-                            <td>${x.faculty}</td>
-                        </tr>`;
-                });
+                alert(res.message);
+                if (res.success) {
+                    document.getElementById('timetableForm').reset();
+                    $('#timetableModal').modal('hide');
+                    loadTimetable();
+                }
             });
-    }
-</script>
+        }
+
+        function loadTimetable() {
+            fetch('/Timetable/GetTimetableList')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) return;
+
+                    const body = document.getElementById('timetableBody');
+                    body.innerHTML = '';
+
+                    res.data.forEach(x => {
+                        body.innerHTML += `
+                            <tr>
+                                <td>${x.batch}</td>
+                                <td>${x.department}</td>
+                                <td>${x.section}</td>
+                                <td>${x.subject}</td>
+                                <td>${x.hour}</td>
+                                <td>${x.faculty}</td>
+                            </tr>`;
+                    });
+                });
+        }
+
+        // Clear form when modal closes
+        $('#timetableModal').on('hidden.bs.modal', function () {
+            document.getElementById('timetableForm').reset();
+        });
+    </script>
+}

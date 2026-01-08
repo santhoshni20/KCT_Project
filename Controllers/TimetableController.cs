@@ -140,6 +140,20 @@ namespace ksi.Controllers
         [HttpPost]
         public async Task<ApiResponseDTO> SaveTimetable([FromBody] TimetableDTO dto)
         {
+            if (!dto.batchId.HasValue ||
+                !dto.departmentId.HasValue ||
+                !dto.sectionId.HasValue ||
+                !dto.subjectId.HasValue ||
+                !dto.facultyId.HasValue ||
+                !dto.hourNo.HasValue)
+            {
+                return new ApiResponseDTO
+                {
+                    success = false,
+                    message = "All fields are required"
+                };
+            }
+
             if (dto.hourNo < 1 || dto.hourNo > 7)
             {
                 return new ApiResponseDTO
@@ -157,6 +171,7 @@ namespace ksi.Controllers
                 message = result ? "Timetable saved successfully" : "Save failed"
             };
         }
+
         [HttpGet]
         public async Task<ApiResponseDTO> GetTimetableList()
         {
@@ -169,5 +184,38 @@ namespace ksi.Controllers
         }
 
         #endregion
+        //[HttpGet]
+        //public async Task<ApiResponseDTO> GetMasterData()
+        //{
+        //    var data = new
+        //    {
+        //        batches = await _repository.getBatchesAsync(),
+        //        departments = await _repository.getDepartmentsAsync(),
+        //        sections = await _repository.getSectionsAsync(),
+        //        subjects = await _repository.getSubjectsAsync()
+        //    };
+
+        //    return new ApiResponseDTO
+        //    {
+        //        success = true,
+        //        data = data
+        //    };
+        //}
+        [HttpGet]
+        public async Task<ApiResponseDTO> GetMasterData()
+        {
+            return new ApiResponseDTO
+            {
+                success = true,
+                data = new
+                {
+                    batches = await _repository.getBatchesAsync(),
+                    departments = await _repository.getDepartmentsAsync(),
+                    sections = await _repository.getSectionsAsync(),
+                    subjects = await _repository.getSubjectsAsync()
+                }
+            };
+        }
+
     }
 }

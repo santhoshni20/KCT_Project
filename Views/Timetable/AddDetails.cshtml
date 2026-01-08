@@ -1,304 +1,187 @@
 ﻿@{
-    ViewData["Title"] = "Add Details";
+    Layout = "_Layout";
+    ViewData["Title"] = "Master Details";
 }
 
-<style>
-    *, *::before, *::after {
-        box-sizing: border-box;
-    }
+<h4 class="fw-bold mb-3">Master Details</h4>
 
-    body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow-x: hidden;
-    }
+<!-- INLINE ADD BAR -->
+<div class="card p-3 mb-4">
+    <div class="d-flex gap-3 align-items-center flex-wrap">
 
-    .page-container {
-        max-width: 1350px;
-        margin: 40px auto;
-        padding: 30px;
-    }
-
-    .page-header {
-        text-align: center;
-        margin-bottom: 35px;
-        color: white;
-    }
-
-    .input-card {
-        background: #fff;
-        border-radius: 18px;
-        padding: 25px 30px;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-        margin-bottom: 30px;
-    }
-
-    .input-row {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
-    }
-
-    /* INPUT BOX – VERTICAL */
-    .input-box {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
-
-        /* REDUCED WIDTH INPUT */
-        .input-box input {
-            width: 85%;
-            height: 42px;
-            padding: 0 16px;
-            border-radius: 22px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-    .icon-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        border: none;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-    }
-
-    .table-card {
-        background: #fff;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-    }
-
-    th {
-        background: #667eea;
-        color: white;
-        padding: 12px;
-        text-align: center;
-    }
-
-        /* Vertical line after each STATUS header */
-        th:nth-child(2),
-        th:nth-child(4),
-        th:nth-child(6) {
-            border-right: 1px solid rgba(255,255,255,0.4);
-        }
-
-    td {
-        padding: 12px;
-        text-align: center;
-        border-bottom: 1px solid #ddd;
-    }
-
-        /* ADD vertical lines ONLY after each STATUS column */
-        td:nth-child(2),
-        td:nth-child(4),
-        td:nth-child(6) {
-            border-right: 1px solid #e0e0e0;
-        }
-
-    /* SMALL TOGGLE */
-    .toggle-switch {
-        position: relative;
-        width: 34px;
-        height: 18px;
-        display: inline-block;
-    }
-
-        .toggle-switch input {
-            display: none;
-        }
-
-    .toggle-slider {
-        position: absolute;
-        inset: 0;
-        cursor: pointer;
-        background-color: #cfcfcf;
-        border-radius: 20px;
-        transition: background 0.3s;
-    }
-
-        .toggle-slider::before {
-            content: "";
-            position: absolute;
-            height: 12px;
-            width: 12px;
-            left: 3px;
-            top: 3px;
-            background-color: #fff;
-            border-radius: 50%;
-            transition: transform 0.3s;
-        }
-
-    .toggle-switch input:checked + .toggle-slider {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-    }
-
-        .toggle-switch input:checked + .toggle-slider::before {
-            transform: translateX(16px);
-        }
-</style>
-
-<div class="page-container">
-
-    <div class="page-header">
-        <h1>📅 Timetable – Add Details</h1>
-        <p>Batch | Department | Section | Subject</p>
-    </div>
-
-    <!-- ADD INPUTS -->
-    <div class="input-card">
-        <div class="input-row">
-
-            <div class="input-box">
-                <input type="text" id="batchName" placeholder="Batch" />
-                <button class="icon-btn" onclick="saveBatch()">+</button>
-            </div>
-
-            <div class="input-box">
-                <input type="text" id="departmentName" placeholder="Department" />
-                <button class="icon-btn" onclick="saveDepartment()">+</button>
-            </div>
-
-            <div class="input-box">
-                <input type="text" id="sectionName" placeholder="Section" />
-                <button class="icon-btn" onclick="saveSection()">+</button>
-            </div>
-
-            <div class="input-box">
-                <input type="text" id="subjectName" placeholder="Subject" />
-                <button class="icon-btn" onclick="saveSubject()">+</button>
-            </div>
-
+        <!-- Batch -->
+        <div class="d-flex align-items-center master-input">
+            <input type="text" id="batchName" class="form-control rounded-pill" placeholder="Batch" />
+            <button class="btn btn-primary rounded-circle ms-2"
+                    onclick="addBatch()">
+                <i class="bx bx-plus"></i>
+            </button>
         </div>
-    </div>
 
-    <!-- COMBINED TABLE -->
-    <div class="table-card">
-        <h4>Details List</h4>
-        <table>
-            <thead>
-                <tr>
-                    <th>Batch</th>
-                    <th>Status</th>
-                    <th>Department</th>
-                    <th>Status</th>
-                    <th>Section</th>
-                    <th>Status</th>
-                    <th>Subject</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="mainTable"></tbody>
-        </table>
-    </div>
+        <!-- Department -->
+        <div class="d-flex align-items-center master-input">
+            <input type="text" id="departmentName" class="form-control rounded-pill" placeholder="Department" />
+            <button class="btn btn-primary rounded-circle ms-2"
+                    onclick="addDepartment()">
+                <i class="bx bx-plus"></i>
+            </button>
+        </div>
 
+        <!-- Section -->
+        <div class="d-flex align-items-center master-input">
+            <input type="text" id="sectionName" class="form-control rounded-pill" placeholder="Section" />
+            <button class="btn btn-primary rounded-circle ms-2"
+                    onclick="addSection()">
+                <i class="bx bx-plus"></i>
+            </button>
+        </div>
+
+        <!-- Subject -->
+        <div class="d-flex align-items-center master-input">
+            <input type="text" id="subjectName" class="form-control rounded-pill" placeholder="Subject" />
+            <button class="btn btn-primary rounded-circle ms-2"
+                    onclick="addSubject()">
+                <i class="bx bx-plus"></i>
+            </button>
+        </div>
+
+    </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', loadTables);
+<!-- MASTER TABLE -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>Batch</th>
+                    <th>Department</th>
+                    <th>Section</th>
+                    <th>Subject</th>
+                </tr>
+            </thead>
+            <tbody id="masterBody"></tbody>
+        </table>
+    </div>
+</div>
 
-    function loadTables() {
-        fetch('/api/timetable/dropdowns')
+@section Scripts {
+    <script>
+
+        document.addEventListener('DOMContentLoaded', loadMasterData);
+
+        function loadMasterData() {
+            fetch('/Timetable/GetMasterData')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) return;
+
+                    const b = res.data.batches;
+                    const d = res.data.departments;
+                    const s = res.data.sections;
+                    const sub = res.data.subjects;
+
+                    const max = Math.max(b.length, d.length, s.length, sub.length);
+                    let rows = '';
+
+                    for (let i = 0; i < max; i++) {
+                        rows += `<tr>
+                            <td>${cell(b[i], 'batch')}</td>
+                            <td>${cell(d[i], 'department')}</td>
+                            <td>${cell(s[i], 'section')}</td>
+                            <td>${cell(sub[i], 'subject')}</td>
+                        </tr>`;
+                    }
+
+                    document.getElementById('masterBody').innerHTML = rows;
+                });
+        }
+
+        function cell(item, type) {
+            if (!item) return '';
+            return `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${item.name}</span>
+                    <input type="checkbox"
+                           ${item.isActive ? 'checked' : ''}
+                           onchange="toggleStatus('${type}', ${item.id}, this.checked)">
+                </div>`;
+        }
+
+        function toggleStatus(type, id, status) {
+            let payload = { isActive: status };
+            payload[type + 'Id'] = id;
+
+            fetch('/Timetable/ToggleStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => loadMasterData());
+        }
+
+        /* ========== ADD ========= */
+
+        function addBatch() {
+            addSimple('/Timetable/AddBatch', 'batchName');
+        }
+
+        function addDepartment() {
+            addSimple('/Timetable/AddDepartment', 'departmentName');
+        }
+
+        function addSection() {
+            addSimple('/Timetable/AddSection', 'sectionName');
+        }
+
+        function addSubject() {
+            const name = document.getElementById('subjectName').value.trim();
+            if (!name) {
+                alert('Enter subject name');
+                return;
+            }
+
+            // TEMP DEFAULT IDs (until you add dropdowns)
+            fetch('/Timetable/AddSubject', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subjectName: name,
+                    batchId: 1,
+                    departmentId: 1,
+                    sectionId: 1,
+                    createdBy: 1
+                })
+            })
             .then(r => r.json())
             .then(res => {
-                if (!res.success) return;
-
-                const b = res.data.batches;
-                const d = res.data.departments;
-                const s = res.data.sections;
-                const sub = res.data.subjects;
-
-                const max = Math.max(b.length, d.length, s.length, sub.length);
-                const tbody = document.getElementById('mainTable');
-                tbody.innerHTML = '';
-
-                for (let i = 0; i < max; i++) {
-                    tbody.innerHTML += `
-                    <tr>
-                        <td>${b[i]?.name ?? ''}</td>
-                        <td>${b[i] ? toggleHTML(b[i], 'batch') : ''}</td>
-
-                        <td>${d[i]?.name ?? ''}</td>
-                        <td>${d[i] ? toggleHTML(d[i], 'department') : ''}</td>
-
-                        <td>${s[i]?.name ?? ''}</td>
-                        <td>${s[i] ? toggleHTML(s[i], 'section') : ''}</td>
-
-                        <td>${sub[i]?.name ?? ''}</td>
-                        <td>${sub[i] ? toggleHTML(sub[i], 'subject') : ''}</td>
-                    </tr>`;
+                if (res.success) {
+                    document.getElementById('subjectName').value = '';
+                    loadMasterData();
+                } else {
+                    alert(res.message);
                 }
             });
-    }
+        }
 
-    function toggleHTML(x, type) {
-        return `
-        <label class="toggle-switch">
-            <input type="checkbox" ${x.isActive ? 'checked' : ''}
-                onchange="toggleStatus(${x.id}, this.checked, '${type}')">
-            <span class="toggle-slider"></span>
-        </label>`;
-    }
+        function addSimple(url, inputId) {
+            const name = document.getElementById(inputId).value.trim();
+            if (!name) return;
 
-    function toggleStatus(id, isActive, type) {
-        let payload = { isActive };
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    document.getElementById(inputId).value = '';
+                    loadMasterData();
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
 
-        if (type === 'batch') payload.batchId = id;
-        if (type === 'department') payload.departmentId = id;
-        if (type === 'section') payload.sectionId = id;
-        if (type === 'subject') payload.subjectId = id;
-
-        fetch('/api/timetable/toggle', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-    }
-
-    function saveBatch() {
-        postData('/api/timetable/batch', { name: batchName.value });
-        batchName.value = '';
-    }
-
-    function saveDepartment() {
-        postData('/api/timetable/department', { name: departmentName.value });
-        departmentName.value = '';
-    }
-
-    function saveSection() {
-        postData('/api/timetable/section', { name: sectionName.value });
-        sectionName.value = '';
-    }
-
-    function saveSubject() {
-        postData('/api/timetable/subject', { name: subjectName.value });
-        subjectName.value = '';
-    }
-
-    function postData(url, data) {
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        })
-        .then(r => r.json())
-        .then(res => {
-            alert(res.message);
-            if (res.success) loadTables();
-        });
-    }
-</script>
+    </script>
+}

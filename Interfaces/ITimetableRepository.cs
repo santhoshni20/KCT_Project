@@ -31,6 +31,16 @@ namespace ksi.Interfaces
         Task<List<TimetableDTO>> getActiveFacultiesAsync();
         Task<List<TimetableDTO>> getActiveSubjectsAsync();
         Task<List<object>> getTimetableListAsync();
+        Task<bool> addBlockAsync(TimetableDTO dto, int createdBy);
+        Task<bool> addRoomAsync(TimetableDTO dto, int createdBy);
+
+        Task<List<TimetableDTO>> getBlocksAsync();
+        Task<List<TimetableDTO>> getRoomsAsync();
+
+        Task<bool> toggleBlockAsync(int id, bool isActive);
+        Task<bool> toggleRoomAsync(int id, bool isActive);
+        Task<List<TimetableDTO>> getActiveBlocksAsync();
+        Task<List<TimetableDTO>> getActiveRoomsAsync();
 
     }
 }

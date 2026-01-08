@@ -1,5 +1,6 @@
 ﻿using ksi.Interfaces;
 using ksi.Models.DTOs;
+using ksi.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ksi.Controllers
@@ -43,7 +44,9 @@ namespace ksi.Controllers
                 departments = await _repository.getActiveDepartmentsAsync(),
                 sections = await _repository.getActiveSectionsAsync(),
                 subjects = await _repository.getActiveSubjectsAsync(),
-                faculties = await _repository.getActiveFacultiesAsync()
+                faculties = await _repository.getActiveFacultiesAsync(),
+                blocks = await _repository.getActiveBlocksAsync(),   // ✅
+                rooms = await _repository.getActiveRoomsAsync()      // ✅
             };
 
             return new ApiResponseDTO
@@ -125,6 +128,10 @@ namespace ksi.Controllers
                 result = await _repository.toggleSectionAsync(dto.sectionId.Value, dto.isActive);
             else if (dto.subjectId.HasValue)
                 result = await _repository.toggleSubjectAsync(dto.subjectId.Value, dto.isActive);
+            else if (dto.blockId.HasValue)
+                result = await _repository.toggleBlockAsync(dto.blockId.Value, dto.isActive);
+            else if (dto.roomId.HasValue)
+                result = await _repository.toggleRoomAsync(dto.roomId.Value, dto.isActive);
 
             return new ApiResponseDTO
             {
@@ -141,11 +148,14 @@ namespace ksi.Controllers
         public async Task<ApiResponseDTO> SaveTimetable([FromBody] TimetableDTO dto)
         {
             if (!dto.batchId.HasValue ||
-                !dto.departmentId.HasValue ||
-                !dto.sectionId.HasValue ||
-                !dto.subjectId.HasValue ||
-                !dto.facultyId.HasValue ||
-                !dto.hourNo.HasValue)
+            !dto.departmentId.HasValue ||
+            !dto.sectionId.HasValue ||
+            !dto.subjectId.HasValue ||
+            !dto.facultyId.HasValue ||
+            !dto.hourNo.HasValue ||
+            string.IsNullOrEmpty(dto.day) ||
+            !dto.blockId.HasValue ||
+            !dto.roomId.HasValue)
             {
                 return new ApiResponseDTO
                 {
@@ -173,34 +183,20 @@ namespace ksi.Controllers
         }
 
         [HttpGet]
-        public async Task<ApiResponseDTO> GetTimetableList()
+        public async Task<IActionResult> GetTimetableList()
         {
             var data = await _repository.getTimetableListAsync();
-            return new ApiResponseDTO
+
+            return Json(new
             {
                 success = true,
                 data = data
-            };
+            });
         }
 
-        #endregion
-        //[HttpGet]
-        //public async Task<ApiResponseDTO> GetMasterData()
-        //{
-        //    var data = new
-        //    {
-        //        batches = await _repository.getBatchesAsync(),
-        //        departments = await _repository.getDepartmentsAsync(),
-        //        sections = await _repository.getSectionsAsync(),
-        //        subjects = await _repository.getSubjectsAsync()
-        //    };
 
-        //    return new ApiResponseDTO
-        //    {
-        //        success = true,
-        //        data = data
-        //    };
-        //}
+        #endregion
+
         [HttpGet]
         public async Task<ApiResponseDTO> GetMasterData()
         {
@@ -212,9 +208,24 @@ namespace ksi.Controllers
                     batches = await _repository.getBatchesAsync(),
                     departments = await _repository.getDepartmentsAsync(),
                     sections = await _repository.getSectionsAsync(),
-                    subjects = await _repository.getSubjectsAsync()
+                    subjects = await _repository.getSubjectsAsync(),
+                    blocks = await _repository.getBlocksAsync(),
+                    rooms = await _repository.getRoomsAsync()
                 }
             };
+        }
+        [HttpPost]
+        public async Task<ApiResponseDTO> AddBlock([FromBody] TimetableDTO dto)
+        {
+            var result = await _repository.addBlockAsync(dto, 1);
+            return new ApiResponseDTO { success = result };
+        }
+
+        [HttpPost]
+        public async Task<ApiResponseDTO> AddRoom([FromBody] TimetableDTO dto)
+        {
+            var result = await _repository.addRoomAsync(dto, 1);
+            return new ApiResponseDTO { success = result };
         }
 
     }

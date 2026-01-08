@@ -26,7 +26,8 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<CanteenId> mstCanteenIds { get; set; }
         public DbSet<mstTimetable> mstTimetable { get; set; }
 
-
+        public DbSet<mstBlock> mstBlock { get; set; }
+        public DbSet<mstRoom> mstRoom { get; set; }
         public DbSet<mstFaculty> Faculties { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

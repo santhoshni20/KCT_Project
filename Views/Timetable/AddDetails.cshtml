@@ -44,6 +44,23 @@
                 <i class="bx bx-plus"></i>
             </button>
         </div>
+        <!-- Block -->
+        <div class="d-flex align-items-center master-input">
+            <input type="text" id="blockName" class="form-control rounded-pill" placeholder="Block" />
+            <button class="btn btn-primary rounded-circle ms-2"
+                    onclick="addBlock()">
+                <i class="bx bx-plus"></i>
+            </button>
+        </div>
+
+        <!-- Room -->
+        <div class="d-flex align-items-center master-input">
+            <input type="text" id="roomNumber" class="form-control rounded-pill" placeholder="Room No" />
+            <button class="btn btn-primary rounded-circle ms-2"
+                    onclick="addRoom()">
+                <i class="bx bx-plus"></i>
+            </button>
+        </div>
 
     </div>
 </div>
@@ -58,6 +75,8 @@
                     <th>Department</th>
                     <th>Section</th>
                     <th>Subject</th>
+                    <th>Block</th>
+                    <th>Room</th>
                 </tr>
             </thead>
             <tbody id="masterBody"></tbody>
@@ -80,8 +99,13 @@
                     const d = res.data.departments;
                     const s = res.data.sections;
                     const sub = res.data.subjects;
+                    const bl = res.data.blocks;
+                    const rm = res.data.rooms;
 
-                    const max = Math.max(b.length, d.length, s.length, sub.length);
+                    const max = Math.max(
+                        b.length, d.length, s.length, sub.length, bl.length, rm.length
+                    );
+                    //const max = Math.max(b.length, d.length, s.length, sub.length);
                     let rows = '';
 
                     for (let i = 0; i < max; i++) {
@@ -90,6 +114,8 @@
                             <td>${cell(d[i], 'department')}</td>
                             <td>${cell(s[i], 'section')}</td>
                             <td>${cell(sub[i], 'subject')}</td>
+                            <td>${cell(bl[i], 'block')}</td>
+                            <td>${cell(rm[i], 'room')}</td>
                         </tr>`;
                     }
 
@@ -131,6 +157,13 @@
 
         function addSection() {
             addSimple('/Timetable/AddSection', 'sectionName');
+        }
+        function addBlock() {
+            addSimple('/Timetable/AddBlock', 'blockName');
+        }
+
+        function addRoom() {
+            addSimple('/Timetable/AddRoom', 'roomNumber');
         }
 
         function addSubject() {

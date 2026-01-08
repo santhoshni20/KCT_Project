@@ -17,6 +17,9 @@ namespace ksi.Models.Entity
         public int sectionId { get; set; }
         public int subjectId { get; set; }
         public int facultyId { get; set; }
+        public string day { get; set; }   // Sunday–Saturday
+        public int blockId { get; set; }
+        public int roomId { get; set; }
 
         // ⏱ Hour (1–7)
         public int hourNo { get; set; }

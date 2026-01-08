@@ -12,18 +12,21 @@
 
 <div class="card">
     <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-            <thead class="table-primary text-center">
+        <table class="table table-bordered">
+            <thead>
                 <tr>
+                    <th>Day</th>
                     <th>Batch</th>
                     <th>Department</th>
                     <th>Section</th>
-                    <th>Subject</th>
+                    <th>Subject</th>   
+                    <th>Block</th>   
+                    <th>Room</th>     
                     <th>Hour</th>
                     <th>Faculty</th>
                 </tr>
             </thead>
-            <tbody id="timetableBody" class="text-center"></tbody>
+            <tbody id="timetableBody"></tbody>
         </table>
     </div>
 </div>
@@ -60,6 +63,29 @@
                         <div class="col-md-6">
                             <label class="form-label">Subject</label>
                             <select id="subject" class="form-control"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Day</label>
+                            <select id="day" class="form-control">
+                                <option value="">Select Day</option>
+                                <option>Sunday</option>
+                                <option>Monday</option>
+                                <option>Tuesday</option>
+                                <option>Wednesday</option>
+                                <option>Thursday</option>
+                                <option>Friday</option>
+                                <option>Saturday</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Block</label>
+                            <select id="block" class="form-control"></select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Room</label>
+                            <select id="room" class="form-control"></select>
                         </div>
 
                         <div class="col-md-3">
@@ -103,6 +129,8 @@
                     fill('section', res.data.sections);
                     fill('subject', res.data.subjects);
                     fill('faculty', res.data.faculties);
+                    fill('block', res.data.blocks);   // ✅
+                    fill('room', res.data.rooms);     // ✅
                 });
         }
 
@@ -115,10 +143,8 @@
         }
 
         function saveTimetable() {
-            const hour = document.getElementById('hour').value;
-
-            if (hour < 1 || hour > 7) {
-                alert("Hour must be between 1 and 7");
+            if (!day.value || !block.value || !room.value) {
+                alert("Please select Day, Block and Room");
                 return;
             }
 
@@ -127,8 +153,11 @@
                 departmentId: department.value,
                 sectionId: section.value,
                 subjectId: subject.value,
-                hourNo: hour,
-                facultyId: faculty.value
+                facultyId: faculty.value,
+                hourNo: hour.value,
+                day: day.value,
+                blockId: block.value,
+                roomId: room.value
             };
 
             fetch('/Timetable/SaveTimetable', {
@@ -140,7 +169,7 @@
             .then(res => {
                 alert(res.message);
                 if (res.success) {
-                    document.getElementById('timetableForm').reset();
+                    timetableForm.reset();
                     $('#timetableModal').modal('hide');
                     loadTimetable();
                 }
@@ -149,7 +178,7 @@
 
         function loadTimetable() {
             fetch('/Timetable/GetTimetableList')
-                .then(r => r.json())
+                .then(res => res.json())
                 .then(res => {
                     if (!res.success) return;
 
@@ -159,20 +188,20 @@
                     res.data.forEach(x => {
                         body.innerHTML += `
                             <tr>
+                                <td>${x.day}</td>
                                 <td>${x.batch}</td>
                                 <td>${x.department}</td>
                                 <td>${x.section}</td>
-                                <td>${x.subject}</td>
+                                <td>${x.subject}</td>   <!-- ✅ -->
+                                <td>${x.block}</td>     <!-- ✅ -->
+                                <td>${x.room}</td>      <!-- ✅ -->
                                 <td>${x.hour}</td>
                                 <td>${x.faculty}</td>
-                            </tr>`;
+                            </tr>
+                        `;
                     });
                 });
         }
 
-        // Clear form when modal closes
-        $('#timetableModal').on('hidden.bs.modal', function () {
-            document.getElementById('timetableForm').reset();
-        });
     </script>
 }

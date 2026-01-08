@@ -229,6 +229,10 @@ namespace ksi.Repository
                 facultyId = dto.facultyId.Value,
                 hourNo = dto.hourNo.Value,
 
+                day = dto.day,              // ✅
+                blockId = dto.blockId.Value,
+                roomId = dto.roomId.Value,
+
                 createdBy = createdBy,
                 createdDate = DateTime.Now,
                 isActive = true
@@ -239,25 +243,132 @@ namespace ksi.Repository
         }
         public async Task<List<object>> getTimetableListAsync()
         {
-            var data =
+            var result =
                 from t in _context.mstTimetable
-                join b in _context.mstBatch on t.batchId equals b.batchId
-                join d in _context.mstDepartment on t.departmentId equals d.departmentId
-                join s in _context.mstSection on t.sectionId equals s.sectionId
-                join sub in _context.mstSubject on t.subjectId equals sub.subjectId
-                join f in _context.Faculties on t.facultyId equals f.FacultyID
-                where t.isActive
+
+                join b in _context.mstBatch
+                    on t.batchId equals b.batchId
+
+                join d in _context.mstDepartment
+                    on t.departmentId equals d.departmentId
+
+                join s in _context.mstSection
+                    on t.sectionId equals s.sectionId
+
+                join sub in _context.mstSubject
+                    on t.subjectId equals sub.subjectId
+
+                join bl in _context.mstBlock
+                    on t.blockId equals bl.blockId
+
+                join r in _context.mstRoom
+                    on t.roomId equals r.roomId
+
+                join f in _context.Faculties
+                    on t.facultyId equals f.FacultyID
+
+                where t.isActive == true
+
                 select new
                 {
+                    day = t.day,
                     batch = b.batchName,
                     department = d.departmentName,
                     section = s.sectionName,
-                    subject = sub.subjectName,
+                    subject = sub.subjectName,   // ✅ SUBJECT
+                    block = bl.blockName,        // ✅ BLOCK
+                    room = r.roomNumber,         // ✅ ROOM
                     hour = t.hourNo,
                     faculty = f.FacultyName
                 };
 
-            return await data.ToListAsync<object>();
+            return await result.ToListAsync<object>();
+        }
+
+
+        public async Task<bool> addBlockAsync(TimetableDTO dto, int createdBy)
+        {
+            var entity = new mstBlock
+            {
+                blockName = dto.name,
+                createdBy = createdBy,
+                createdDate = DateTime.Now,
+                isActive = true
+            };
+            await _context.mstBlock.AddAsync(entity);
+            return await _context.SaveChangesAsync() > 0;
+        }
+        public async Task<bool> addRoomAsync(TimetableDTO dto, int createdBy)
+        {
+            var entity = new mstRoom
+            {
+                roomNumber = dto.name,
+                createdBy = createdBy,
+                createdDate = DateTime.Now,
+                isActive = true
+            };
+            await _context.mstRoom.AddAsync(entity);
+            return await _context.SaveChangesAsync() > 0;
+        }
+        public async Task<List<TimetableDTO>> getBlocksAsync()
+        {
+            return await _context.mstBlock
+                .Select(x => new TimetableDTO
+                {
+                    id = x.blockId,
+                    name = x.blockName,
+                    isActive = x.isActive
+                })
+                .ToListAsync();
+        }
+        public async Task<List<TimetableDTO>> getRoomsAsync()
+        {
+            return await _context.mstRoom
+                .Select(x => new TimetableDTO
+                {
+                    id = x.roomId,
+                    name = x.roomNumber,
+                    isActive = x.isActive
+                })
+                .ToListAsync();
+        }
+        public async Task<bool> toggleBlockAsync(int id, bool isActive)
+        {
+            var entity = await _context.mstBlock.FindAsync(id);
+            if (entity == null) return false;
+
+            entity.isActive = isActive;
+            return await _context.SaveChangesAsync() > 0;
+        }
+        public async Task<bool> toggleRoomAsync(int id, bool isActive)
+        {
+            var entity = await _context.mstRoom.FindAsync(id);
+            if (entity == null) return false;
+
+            entity.isActive = isActive;
+            return await _context.SaveChangesAsync() > 0;
+        }
+        public async Task<List<TimetableDTO>> getActiveBlocksAsync()
+        {
+            return await _context.mstBlock
+                .Where(x => x.isActive)
+                .Select(x => new TimetableDTO
+                {
+                    id = x.blockId,
+                    name = x.blockName
+                })
+                .ToListAsync();
+        }
+        public async Task<List<TimetableDTO>> getActiveRoomsAsync()
+        {
+            return await _context.mstRoom
+                .Where(x => x.isActive)
+                .Select(x => new TimetableDTO
+                {
+                    id = x.roomId,
+                    name = x.roomNumber
+                })
+                .ToListAsync();
         }
 
     }

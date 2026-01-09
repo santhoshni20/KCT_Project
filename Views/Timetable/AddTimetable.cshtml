@@ -116,11 +116,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadDropdowns();
             loadTimetable();
-            department.addEventListener('change', loadSubjects);
-            section.addEventListener('change', loadSubjects);
-            batch.addEventListener('change', loadSubjects);
         });
 
+        // Load all dropdowns including subjects
         function loadDropdowns() {
             fetch('/Timetable/GetDropdowns')
                 .then(r => r.json())
@@ -133,12 +131,11 @@
                     fill('faculty', res.data.faculties);
                     fill('block', res.data.blocks);
                     fill('room', res.data.rooms);
-
-                    // ❌ REMOVE THIS LINE
-                    // fill('subject', res.data.subjects);
+                    fill('subject', res.data.subjects); // ✅ Load all subjects here
                 });
         }
 
+        // Helper function to fill dropdown
         function fill(id, data) {
             const ddl = document.getElementById(id);
             ddl.innerHTML = '<option value="">Select</option>';
@@ -147,20 +144,7 @@
             });
         }
 
-        function loadSubjects() {
-            if (!batch.value || !department.value || !section.value) {
-                subject.innerHTML = '<option value="">Select</option>';
-                return;
-            }
-
-            fetch(`/Timetable/GetSubjects?batchId=${batch.value}&departmentId=${department.value}&sectionId=${section.value}`)
-                .then(r => r.json())
-                .then(res => {
-                    if (!res.success) return;
-                    fill('subject', res.data);
-                });
-        }
-
+        // Save timetable
         function saveTimetable() {
             if (!day.value || !block.value || !room.value) {
                 alert("Please select Day, Block and Room");
@@ -197,6 +181,7 @@
             });
         }
 
+        // Load timetable table
         function loadTimetable() {
             fetch('/Timetable/GetTimetableList')
                 .then(res => res.json())
@@ -213,9 +198,9 @@
                                 <td>${x.batch}</td>
                                 <td>${x.department}</td>
                                 <td>${x.section}</td>
-                                <td>${x.subject}</td>   <!-- ✅ -->
-                                <td>${x.block}</td>     <!-- ✅ -->
-                                <td>${x.room}</td>      <!-- ✅ -->
+                                <td>${x.subject}</td>
+                                <td>${x.block}</td>
+                                <td>${x.room}</td>
                                 <td>${x.hour}</td>
                                 <td>${x.faculty}</td>
                             </tr>
@@ -223,6 +208,5 @@
                     });
                 });
         }
-
     </script>
 }

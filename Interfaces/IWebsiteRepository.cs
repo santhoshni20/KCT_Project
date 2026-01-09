@@ -1,5 +1,4 @@
-﻿// Interfaces/IWebsiteRepository.cs
-using ksi.Models;
+﻿using ksi.Models;
 using ksi.Models.DTOs;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
@@ -27,5 +26,15 @@ namespace ksi.Interfaces
         Task<List<FacultyDTO>> GetFacultiesByDepartmentAsync(string department);
         Task<FacultyDTO> GetFacultyByIdAsync(int facultyId);
         #endregion
+
+        #region Timetable View
+        Task<object> GetTimetableDropdownsAsync();
+        Task<List<TimetableViewDTO>> GetTimetableByClassAsync(
+            int batchId,
+            int departmentId,
+            int sectionId
+        );
+        #endregion
+
     }
 }

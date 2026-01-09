@@ -32,4 +32,20 @@
         public int sectionId { get; set; }
         public int createdBy { get; set; }
     }
+    public class DropdownItemDTO
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+    }
+
+    public class TimetableViewDTO
+    {
+        public string day { get; set; }
+        public int hour { get; set; }
+        public string block { get; set; }
+        public string room { get; set; }
+        public string subject { get; set; }
+        public string faculty { get; set; }
+    }
+
 }

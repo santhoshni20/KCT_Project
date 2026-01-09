@@ -129,10 +129,11 @@ namespace ksi.Repository
                 batchId = dto.batchId,
                 departmentId = dto.departmentId,
                 sectionId = dto.sectionId,
-                createdBy = dto.createdBy,
+                createdBy = 1,                 // ✅ FIXED
                 createdDate = DateTime.Now,
                 isActive = true
             };
+
             await _context.mstSubject.AddAsync(entity);
             return await _context.SaveChangesAsync() > 0;
         }
@@ -220,27 +221,42 @@ namespace ksi.Repository
 
         public async Task<bool> addTimetableAsync(TimetableDTO dto, int createdBy)
         {
+            // 🔴 STEP 1: CHECK FOR CLASH
+            bool exists = await _context.mstTimetable.AnyAsync(x =>
+                x.isActive &&
+                x.day == dto.day &&
+                x.hourNo == dto.hourNo &&
+                x.blockId == dto.blockId &&
+                x.roomId == dto.roomId
+            );
+
+            if (exists)
+                return false;   // ❌ Clash found (controller will handle response)
+
+            // ✅ STEP 2: CREATE ENTITY
             var entity = new mstTimetable
             {
-                batchId = dto.batchId.Value,
-                departmentId = dto.departmentId.Value,
-                sectionId = dto.sectionId.Value,
-                subjectId = dto.subjectId.Value,
-                facultyId = dto.facultyId.Value,
-                hourNo = dto.hourNo.Value,
+                batchId = dto.batchId!.Value,
+                departmentId = dto.departmentId!.Value,
+                sectionId = dto.sectionId!.Value,
+                subjectId = dto.subjectId!.Value,
+                facultyId = dto.facultyId!.Value,
+                hourNo = dto.hourNo!.Value,
 
-                day = dto.day,              // ✅
-                blockId = dto.blockId.Value,
-                roomId = dto.roomId.Value,
+                day = dto.day,
+                blockId = dto.blockId!.Value,
+                roomId = dto.roomId!.Value,
 
-                createdBy = createdBy,
+                createdBy = createdBy == 0 ? 1 : createdBy, // ✅ SAFE DEFAULT
                 createdDate = DateTime.Now,
                 isActive = true
             };
 
+            // ✅ STEP 3: SAVE
             await _context.mstTimetable.AddAsync(entity);
             return await _context.SaveChangesAsync() > 0;
         }
+
         public async Task<List<object>> getTimetableListAsync()
         {
             var result =
@@ -275,9 +291,9 @@ namespace ksi.Repository
                     batch = b.batchName,
                     department = d.departmentName,
                     section = s.sectionName,
-                    subject = sub.subjectName,   // ✅ SUBJECT
-                    block = bl.blockName,        // ✅ BLOCK
-                    room = r.roomNumber,         // ✅ ROOM
+                    subject = sub.subjectName,   
+                    block = bl.blockName,        
+                    room = r.roomNumber,     
                     hour = t.hourNo,
                     faculty = f.FacultyName
                 };
@@ -367,6 +383,81 @@ namespace ksi.Repository
                 {
                     id = x.roomId,
                     name = x.roomNumber
+                })
+                .ToListAsync();
+        }
+        public async Task<object> getMasterDataAsync()
+        {
+            var batches = await _context.mstBatch
+                .Select(x => new TimetableDTO
+                {
+                    id = x.batchId,
+                    name = x.batchName,
+                    isActive = x.isActive
+                }).ToListAsync();
+
+            var departments = await _context.mstDepartment
+                .Select(x => new TimetableDTO
+                {
+                    id = x.departmentId,
+                    name = x.departmentName,
+                    isActive = x.isActive
+                }).ToListAsync();
+
+            var sections = await _context.mstSection
+                .Select(x => new TimetableDTO
+                {
+                    id = x.sectionId,
+                    name = x.sectionName,
+                    isActive = x.isActive
+                }).ToListAsync();
+
+            var subjects = await _context.mstSubject
+                .Select(x => new TimetableDTO
+                {
+                    id = x.subjectId,
+                    name = x.subjectName,
+                    isActive = x.isActive
+                }).ToListAsync();
+
+            var blocks = await _context.mstBlock
+                .Select(x => new TimetableDTO
+                {
+                    id = x.blockId,
+                    name = x.blockName,
+                    isActive = x.isActive
+                }).ToListAsync();
+
+            var rooms = await _context.mstRoom
+                .Select(x => new TimetableDTO
+                {
+                    id = x.roomId,
+                    name = x.roomNumber,
+                    isActive = x.isActive
+                }).ToListAsync();
+
+            return new
+            {
+                batches,
+                departments,
+                sections,
+                subjects,
+                blocks,
+                rooms
+            };
+        }
+        public async Task<List<TimetableDTO>> getSubjectsByClassAsync(int batchId, int departmentId, int sectionId)
+        {
+            return await _context.mstSubject
+                .Where(x =>
+                    x.isActive &&
+                    x.batchId == batchId &&
+                    x.departmentId == departmentId &&
+                    x.sectionId == sectionId)
+                .Select(x => new TimetableDTO
+                {
+                    id = x.subjectId,
+                    name = x.subjectName
                 })
                 .ToListAsync();
         }

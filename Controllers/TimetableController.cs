@@ -185,35 +185,18 @@ namespace ksi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTimetableList()
         {
-            var data = await _repository.getTimetableListAsync();
+            var list = await _repository.getTimetableListAsync();
 
             return Json(new
             {
                 success = true,
-                data = data
+                data = list
             });
         }
 
 
         #endregion
 
-        [HttpGet]
-        public async Task<ApiResponseDTO> GetMasterData()
-        {
-            return new ApiResponseDTO
-            {
-                success = true,
-                data = new
-                {
-                    batches = await _repository.getBatchesAsync(),
-                    departments = await _repository.getDepartmentsAsync(),
-                    sections = await _repository.getSectionsAsync(),
-                    subjects = await _repository.getSubjectsAsync(),
-                    blocks = await _repository.getBlocksAsync(),
-                    rooms = await _repository.getRoomsAsync()
-                }
-            };
-        }
         [HttpPost]
         public async Task<ApiResponseDTO> AddBlock([FromBody] TimetableDTO dto)
         {
@@ -227,6 +210,36 @@ namespace ksi.Controllers
             var result = await _repository.addRoomAsync(dto, 1);
             return new ApiResponseDTO { success = result };
         }
+        [HttpGet]
+        public async Task<IActionResult> GetMasterData()
+        {
+            try
+            {
+                var data = await _repository.getMasterDataAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    data
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message); // IMPORTANT
+            }
+        }
+        [HttpGet]
+        public async Task<ApiResponseDTO> GetSubjects(int batchId, int departmentId, int sectionId)
+        {
+            var data = await _repository.getSubjectsByClassAsync(batchId, departmentId, sectionId);
+
+            return new ApiResponseDTO
+            {
+                success = true,
+                data = data
+            };
+        }
+
 
     }
 }

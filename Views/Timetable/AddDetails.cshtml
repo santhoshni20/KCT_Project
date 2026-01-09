@@ -100,12 +100,17 @@
                     const s = res.data.sections;
                     const sub = res.data.subjects;
                     const bl = res.data.blocks;
-                    const rm = res.data.rooms;
+                    const r = res.data.rooms;
 
                     const max = Math.max(
-                        b.length, d.length, s.length, sub.length, bl.length, rm.length
+                        b.length,
+                        d.length,
+                        s.length,
+                        sub.length,
+                        bl.length,
+                        r.length
                     );
-                    //const max = Math.max(b.length, d.length, s.length, sub.length);
+
                     let rows = '';
 
                     for (let i = 0; i < max; i++) {
@@ -115,11 +120,12 @@
                             <td>${cell(s[i], 'section')}</td>
                             <td>${cell(sub[i], 'subject')}</td>
                             <td>${cell(bl[i], 'block')}</td>
-                            <td>${cell(rm[i], 'room')}</td>
+                            <td>${cell(r[i], 'room')}</td>
                         </tr>`;
                     }
 
                     document.getElementById('masterBody').innerHTML = rows;
+
                 });
         }
 

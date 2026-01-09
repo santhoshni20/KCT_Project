@@ -41,6 +41,9 @@ namespace ksi.Interfaces
         Task<bool> toggleRoomAsync(int id, bool isActive);
         Task<List<TimetableDTO>> getActiveBlocksAsync();
         Task<List<TimetableDTO>> getActiveRoomsAsync();
+        Task<object> getMasterDataAsync();
+        Task<List<TimetableDTO>> getSubjectsByClassAsync(int batchId, int departmentId, int sectionId);
+
 
     }
 }

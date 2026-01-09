@@ -116,6 +116,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadDropdowns();
             loadTimetable();
+            department.addEventListener('change', loadSubjects);
+            section.addEventListener('change', loadSubjects);
+            batch.addEventListener('change', loadSubjects);
         });
 
         function loadDropdowns() {
@@ -127,10 +130,12 @@
                     fill('batch', res.data.batches);
                     fill('department', res.data.departments);
                     fill('section', res.data.sections);
-                    fill('subject', res.data.subjects);
                     fill('faculty', res.data.faculties);
-                    fill('block', res.data.blocks);   // ✅
-                    fill('room', res.data.rooms);     // ✅
+                    fill('block', res.data.blocks);
+                    fill('room', res.data.rooms);
+
+                    // ❌ REMOVE THIS LINE
+                    // fill('subject', res.data.subjects);
                 });
         }
 
@@ -140,6 +145,20 @@
             data.forEach(x => {
                 ddl.innerHTML += `<option value="${x.id}">${x.name}</option>`;
             });
+        }
+
+        function loadSubjects() {
+            if (!batch.value || !department.value || !section.value) {
+                subject.innerHTML = '<option value="">Select</option>';
+                return;
+            }
+
+            fetch(`/Timetable/GetSubjects?batchId=${batch.value}&departmentId=${department.value}&sectionId=${section.value}`)
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) return;
+                    fill('subject', res.data);
+                });
         }
 
         function saveTimetable() {
@@ -170,7 +189,9 @@
                 alert(res.message);
                 if (res.success) {
                     timetableForm.reset();
-                    $('#timetableModal').modal('hide');
+                    bootstrap.Modal.getInstance(
+                        document.getElementById('timetableModal')
+                    ).hide();
                     loadTimetable();
                 }
             });

@@ -185,13 +185,16 @@ namespace ksi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTimetableList()
         {
-            var list = await _repository.getTimetableListAsync();
-
-            return Json(new
+            try
             {
-                success = true,
-                data = list
-            });
+                var list = await _repository.getTimetableListAsync();
+                return Json(new { success = true, data = list });
+            }
+            catch (Exception ex)
+            {
+                // consider logging ex
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
 

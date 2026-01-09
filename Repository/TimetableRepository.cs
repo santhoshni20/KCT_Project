@@ -224,7 +224,7 @@ namespace ksi.Repository
             // 🔴 STEP 1: CHECK FOR CLASH
             bool exists = await _context.mstTimetable.AnyAsync(x =>
                 x.isActive &&
-                x.day == dto.day &&
+                x.day == dto.day &&            // <-- use dayOfWeek
                 x.hourNo == dto.hourNo &&
                 x.blockId == dto.blockId &&
                 x.roomId == dto.roomId
@@ -243,7 +243,7 @@ namespace ksi.Repository
                 facultyId = dto.facultyId!.Value,
                 hourNo = dto.hourNo!.Value,
 
-                day = dto.day,
+                day = dto.day,                 // <-- set dayOfWeek
                 blockId = dto.blockId!.Value,
                 roomId = dto.roomId!.Value,
 
@@ -263,45 +263,50 @@ namespace ksi.Repository
                 from t in _context.mstTimetable
 
                 join b in _context.mstBatch
-                    on t.batchId equals b.batchId
+                    on t.batchId equals b.batchId into bgrp
+                from b in bgrp.DefaultIfEmpty()
 
                 join d in _context.mstDepartment
-                    on t.departmentId equals d.departmentId
+                    on t.departmentId equals d.departmentId into dgrp
+                from d in dgrp.DefaultIfEmpty()
 
                 join s in _context.mstSection
-                    on t.sectionId equals s.sectionId
+                    on t.sectionId equals s.sectionId into sgrp
+                from s in sgrp.DefaultIfEmpty()
 
                 join sub in _context.mstSubject
-                    on t.subjectId equals sub.subjectId
+                    on t.subjectId equals sub.subjectId into subgrp
+                from sub in subgrp.DefaultIfEmpty()
 
                 join bl in _context.mstBlock
-                    on t.blockId equals bl.blockId
+                    on t.blockId equals bl.blockId into blgrp
+                from bl in blgrp.DefaultIfEmpty()
 
                 join r in _context.mstRoom
-                    on t.roomId equals r.roomId
+                    on t.roomId equals r.roomId into rgrp
+                from r in rgrp.DefaultIfEmpty()
 
                 join f in _context.Faculties
-                    on t.facultyId equals f.FacultyID
+                    on t.facultyId equals f.FacultyID into fgrp
+                from f in fgrp.DefaultIfEmpty()
 
                 where t.isActive == true
 
                 select new
                 {
-                    day = t.day,
-                    batch = b.batchName,
-                    department = d.departmentName,
-                    section = s.sectionName,
-                    subject = sub.subjectName,   
-                    block = bl.blockName,        
-                    room = r.roomNumber,     
+                    day = t.day,                 // <-- use dayOfWeek
+                    batch = b != null ? b.batchName : null,
+                    department = d != null ? d.departmentName : null,
+                    section = s != null ? s.sectionName : null,
+                    subject = sub != null ? sub.subjectName : null,
+                    block = bl != null ? bl.blockName : null,
+                    room = r != null ? r.roomNumber : null,
                     hour = t.hourNo,
-                    faculty = f.FacultyName
+                    faculty = f != null ? f.FacultyName : null
                 };
 
             return await result.ToListAsync<object>();
         }
-
-
         public async Task<bool> addBlockAsync(TimetableDTO dto, int createdBy)
         {
             var entity = new mstBlock

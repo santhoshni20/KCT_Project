@@ -137,30 +137,51 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            loadDropdown("@Url.Action("getBatches", "Syllabus")", "batchDropdown");
-            loadDropdown("@Url.Action("getDepartments", "Syllabus")", "deptDropdown", true);
+            // Controller is Website (actions defined in WebsiteController)
+            loadDropdown("@Url.Action("getBatches", "Website")", "batchDropdown");
+            loadDropdown("@Url.Action("getDepartments", "Website")", "deptDropdown", true);
         });
 
         function loadDropdown(url, dropdownId, enableOnLoad = false) {
             fetch(url, { credentials: 'same-origin' })
                 .then(res => res.json())
                 .then(result => {
-                    if (result && result.success) {
-                        const dropdown = document.getElementById(dropdownId);
-                        // Clear existing (preserve first placeholder)
-                        dropdown.options.length = 1;
-                        result.data.forEach(item => {
-                            const opt = document.createElement('option');
-                            opt.value = item.id;
-                            opt.text = item.name;
-                            dropdown.appendChild(opt);
-                        });
+                    if (!result) {
+                        console.error('No response for', dropdownId);
+                        return;
+                    }
 
-                        if (enableOnLoad) {
-                            dropdown.disabled = false;
+                    // ApiResponseDTO shape: { statusCode, success, message, data }
+                    const data = result.data ?? result; // fallback if raw array is returned
+                    if (!Array.isArray(data)) {
+                        console.error('Unexpected data format for', dropdownId, data);
+                        return;
+                    }
+
+                    const dropdown = document.getElementById(dropdownId);
+                    // Clear existing (preserve first placeholder)
+                    dropdown.options.length = 1;
+
+                    data.forEach(item => {
+                        // backend returns different shapes depending on endpoint:
+                        // Timetable endpoints return { id, name }, syllabus endpoints return { batchId, batchName } or { departmentId, departmentName }
+                        const value = item.id ?? item.batchId ?? item.departmentId ?? item.batchID ?? item.departmentID;
+                        const text = item.name ?? item.batchName ?? item.departmentName ?? item.batchName;
+
+                        if (value === undefined || text === undefined) {
+                            // skip malformed items but log for debugging
+                            console.warn('Skipping dropdown item with missing fields', item);
+                            return;
                         }
-                    } else {
-                        console.error('Failed to load', dropdownId, result);
+
+                        const opt = document.createElement('option');
+                        opt.value = value;
+                        opt.text = text;
+                        dropdown.appendChild(opt);
+                    });
+
+                    if (enableOnLoad) {
+                        dropdown.disabled = false;
                     }
                 })
                 .catch(err => console.error('Error loading dropdown', dropdownId, err));

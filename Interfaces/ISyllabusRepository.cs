@@ -1,6 +1,10 @@
-﻿namespace ksi.Interfaces
+﻿using ksi.Models.DTOs;
+
+namespace ksi.Interfaces
 {
-    public interface ISyllabusRepository
+    public interface iSyllabusRepository
     {
+        List<syllabusDTO> getActiveBatches();
+        List<syllabusDTO> getActiveDepartments();
     }
 }

@@ -36,5 +36,9 @@ namespace ksi.Interfaces
         );
         #endregion
 
+        #region Syllabus
+        List<syllabusDTO> getActiveBatches();
+        List<syllabusDTO> getActiveDepartments();
+        #endregion
     }
 }

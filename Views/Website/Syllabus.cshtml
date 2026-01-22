@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
 
 <style>
-    /* ✅ Only affects syllabus section, not entire body */
     .syllabus-container {
         background: linear-gradient(135deg, #007bff, #6610f2);
         color: #fff;
@@ -102,7 +101,6 @@
     }
 </style>
 
-<!-- ✅ Gradient background confined to syllabus area only -->
 <div class="syllabus-container">
     <div class="page-container">
         <h2><i class="fas fa-book-open"></i> Syllabus Portal</h2>
@@ -112,10 +110,6 @@
             <label class="batch-label"><i class="fas fa-users"></i> Select Batch</label>
             <select class="form-select" id="batchDropdown">
                 <option value="">-- Select Batch --</option>
-                <option value="2022-2026">2022 - 2026</option>
-                <option value="2023-2027">2023 - 2027</option>
-                <option value="2024-2028">2024 - 2028</option>
-                <option value="2025-2029">2025 - 2029</option>
             </select>
         </div>
 
@@ -142,60 +136,50 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const deptOptions = [
-            { value: "AI_DS", text: "Artificial Intelligence and Data Science" },
-            { value: "CSE", text: "Computer Science and Engineering" },
-            { value: "IT", text: "Information Technology" }
-        ];
-
-        document.getElementById("batchDropdown").addEventListener("change", function () {
-            var batch = this.value;
-            var deptDropdown = document.getElementById("deptDropdown");
-            deptDropdown.innerHTML = "<option value=''>-- Select Department --</option>";
-
-            if (batch) {
-                deptOptions.forEach(d => {
-                    var opt = document.createElement("option");
-                    opt.value = d.value;
-                    opt.text = d.text;
-                    deptDropdown.appendChild(opt);
-                });
-                deptDropdown.disabled = false;
-            } else {
-                deptDropdown.disabled = true;
-            }
+        document.addEventListener("DOMContentLoaded", () => {
+            loadDropdown("@Url.Action("getBatches", "Syllabus")", "batchDropdown");
+            loadDropdown("@Url.Action("getDepartments", "Syllabus")", "deptDropdown", true);
         });
 
-        document.getElementById("downloadBtn").addEventListener("click", function () {
-            var batch = document.getElementById("batchDropdown").value;
-            var dept = document.getElementById("deptDropdown").value;
+        function loadDropdown(url, dropdownId, enableOnLoad = false) {
+            fetch(url, { credentials: 'same-origin' })
+                .then(res => res.json())
+                .then(result => {
+                    if (result && result.success) {
+                        const dropdown = document.getElementById(dropdownId);
+                        // Clear existing (preserve first placeholder)
+                        dropdown.options.length = 1;
+                        result.data.forEach(item => {
+                            const opt = document.createElement('option');
+                            opt.value = item.id;
+                            opt.text = item.name;
+                            dropdown.appendChild(opt);
+                        });
 
-            if (!batch) {
-                alert("Please select a batch before downloading!");
-                return;
-            }
-            if (!dept) {
-                alert("Please select a department before downloading!");
-                return;
-            }
-
-            fetch(`/Syllabus/DownloadSyllabus?batch=${batch}&dept=${dept}`)
-                .then(response => {
-                    if (response.redirected) {
-                        window.open(response.url, "_blank");
+                        if (enableOnLoad) {
+                            dropdown.disabled = false;
+                        }
                     } else {
-                        return response.json();
+                        console.error('Failed to load', dropdownId, result);
                     }
                 })
-                .then(data => {
-                    if (data && data.statusCode !== 200) {
-                        alert(data.message || "Syllabus not found!");
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Error downloading syllabus.");
-                });
+                .catch(err => console.error('Error loading dropdown', dropdownId, err));
+        }
+
+        document.getElementById("downloadBtn").addEventListener("click", () => {
+            const batchId = document.getElementById("batchDropdown").value;
+            const departmentId = document.getElementById("deptDropdown").value;
+
+            if (!batchId || !departmentId) {
+                alert("Please select batch and department");
+                return;
+            }
+
+            window.open(
+                `/Syllabus/DownloadSyllabus?batchId=${batchId}&departmentId=${departmentId}`,
+                "_blank"
+            );
         });
     </script>
+
 }

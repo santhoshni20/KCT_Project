@@ -1,6 +1,7 @@
 ﻿using ksi.Interfaces;
 using ksi.Models;
 using ksi.Models.DTOs;
+using ksi.Repositories;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 using Microsoft.AspNetCore.Mvc;
@@ -214,6 +215,67 @@ namespace ksi.Controllers
                 success = true,
                 data
             });
+        }
+        #endregion
+
+        #region Syllabus
+        public IActionResult Syllabus()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult getBatches()
+        {
+            try
+            {
+                var data = _repo.getActiveBatches();
+
+                return Json(new ApiResponseDTO
+                {
+                    statusCode = 200,
+                    success = true,
+                    message = "Batches fetched successfully",
+                    data = data
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new ApiResponseDTO
+                {
+                    statusCode = 500,
+                    success = false,
+                    message = "Failed to fetch batches",
+                    errorDetails = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult getDepartments()
+        {
+            try
+            {
+                var data = _repo.getActiveDepartments();
+
+                return Json(new ApiResponseDTO
+                {
+                    statusCode = 200,
+                    success = true,
+                    message = "Departments fetched successfully",
+                    data = data
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new ApiResponseDTO
+                {
+                    statusCode = 500,
+                    success = false,
+                    message = "Failed to fetch departments",
+                    errorDetails = ex.Message
+                });
+            }
         }
         #endregion
     }

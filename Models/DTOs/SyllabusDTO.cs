@@ -1,11 +1,8 @@
 ﻿namespace ksi.Models.DTOs
 {
-    public class SyllabusDTO
+    public class syllabusDTO
     {
-        public int syllabusId { get; set; }
-        public string batch { get; set; }
-        public string department { get; set; }
-        public string syllabusLink { get; set; }
-        public bool isActive { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
     }
 }

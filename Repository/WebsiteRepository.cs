@@ -5,6 +5,7 @@ using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace ksi.Repository
 {
@@ -266,6 +267,32 @@ namespace ksi.Repository
         }
 
 
+        #endregion
+
+        #region Syllabus
+        public List<syllabusDTO> getActiveBatches()
+        {
+            return _context.mstBatch
+                .Where(b => b.isActive)
+                .Select(b => new syllabusDTO
+                {
+                    id = b.batchId,
+                    name = b.batchName
+                })
+                .ToList();
+        }
+
+        public List<syllabusDTO> getActiveDepartments()
+        {
+            return _context.mstDepartment
+                .Where(d => d.isActive)
+                .Select(d => new syllabusDTO
+                {
+                    id = d.departmentId,
+                    name = d.departmentName
+                })
+                .ToList();
+        }
         #endregion
 
     }

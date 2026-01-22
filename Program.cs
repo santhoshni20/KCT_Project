@@ -1,4 +1,5 @@
 ﻿using ksi.Interfaces;
+using ksi.Repositories;
 using ksi.Repository;
 using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Models.Entity;
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();
 builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
+builder.Services.AddScoped<iSyllabusRepository, SyllabusRepository>();
 
 // Add MVC
 builder.Services.AddControllersWithViews();

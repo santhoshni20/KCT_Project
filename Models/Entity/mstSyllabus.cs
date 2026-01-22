@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace ksi.Models.Entity
@@ -11,7 +12,28 @@ namespace ksi.Models.Entity
         public int departmentId { get; set; }
         public string syllabusDriveLink { get; set; }
         public bool isActive { get; set; } = true;
+
         public int createdBy { get; set; }
         public DateTime createdDate { get; set; }
+
+        public int? updatedBy { get; set; }
+        public DateTime? updatedDate { get; set; }
+
+        public int? deletedBy { get; set; }
+        public DateTime? deletedDate { get; set; }
     }
 }
+
+//CREATE TABLE mstSyllabus (
+//    syllabusId INT AUTO_INCREMENT PRIMARY KEY,
+//    batchId INT NOT NULL,
+//    departmentId INT NOT NULL,
+//    syllabusDriveLink VARCHAR(500) NOT NULL,
+//    isActive TINYINT(1) NOT NULL DEFAULT 1,
+//    createdBy INT NOT NULL,
+//    createdDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+//    updatedBy INT NULL,
+//    updatedDate DATETIME NULL,
+//    deletedBy INT NULL,
+//    deletedDate DATETIME NULL
+//);

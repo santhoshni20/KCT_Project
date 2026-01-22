@@ -29,7 +29,6 @@
 		<Folder Include="Views\Cgpa\" />
 		<Folder Include="Views\Dashboard\" />
 		<Folder Include="Views\Id balance\" />
-		<Folder Include="Views\Syllabus\" />
 		<Folder Include="Views\Placement Support\" />
 		<Folder Include="wwwroot\uploads\" />
 	</ItemGroup>

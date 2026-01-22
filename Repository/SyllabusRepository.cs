@@ -5,37 +5,67 @@ using KSI_Project.Helpers.DbContexts;
 
 namespace ksi.Repositories
 {
-    public class syllabusRepository : iSyllabusRepository
+    public class SyllabusRepository : iSyllabusRepository
     {
-        private readonly ksiDbContext context;
+        private readonly ksiDbContext _context;
 
-        public syllabusRepository(ksiDbContext context)
+        public SyllabusRepository(ksiDbContext context)
         {
-            this.context = context;
+            _context = context;
         }
 
-        public List<syllabusDTO> getActiveBatches()
+        public List<syllabusDTO> getAllSyllabus()
         {
-            return context.mstBatch
-                .Where(b => b.isActive)
-                .Select(b => new syllabusDTO
-                {
-                    id = b.batchId,
-                    name = b.batchName
-                })
-                .ToList();
+            return (from s in _context.mstSyllabus
+                    join b in _context.mstBatch on s.batchId equals b.batchId
+                    join d in _context.mstDepartment on s.departmentId equals d.departmentId
+                    where s.isActive
+                    select new syllabusDTO
+                    {
+                        syllabusId = s.syllabusId,
+                        batchId = b.batchId,
+                        batchName = b.batchName,
+                        departmentId = d.departmentId,
+                        departmentName = d.departmentName,
+                        syllabusDriveLink = s.syllabusDriveLink
+                    }).ToList();
         }
 
-        public List<syllabusDTO> getActiveDepartments()
+        public List<syllabusDTO> getBatchList()
         {
-            return context.mstDepartment
-                .Where(d => d.isActive)
-                .Select(d => new syllabusDTO
+            return _context.mstBatch
+                .Where(x => x.isActive)
+                .Select(x => new syllabusDTO
                 {
-                    id = d.departmentId,
-                    name = d.departmentName
-                })
-                .ToList();
+                    batchId = x.batchId,
+                    batchName = x.batchName
+                }).ToList();
+        }
+
+        public List<syllabusDTO> getDepartmentList()
+        {
+            return _context.mstDepartment
+                .Where(x => x.isActive)
+                .Select(x => new syllabusDTO
+                {
+                    departmentId = x.departmentId,
+                    departmentName = x.departmentName
+                }).ToList();
+        }
+
+        public bool addSyllabus(syllabusDTO dto, int createdBy)
+        {
+            var entity = new mstSyllabus
+            {
+                batchId = dto.batchId,
+                departmentId = dto.departmentId,
+                syllabusDriveLink = dto.syllabusDriveLink,
+                createdBy = createdBy,
+                createdDate = DateTime.Now
+            };
+
+            _context.mstSyllabus.Add(entity);
+            return _context.SaveChanges() > 0;
         }
     }
 }

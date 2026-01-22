@@ -1,0 +1,109 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add Syllabus";
+}
+
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="fw-bold">Syllabus Details</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#syllabusModal">
+        <i class="bx bx-plus"></i> Add Syllabus
+    </button>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table" id="syllabusTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Batch</th>
+                    <th>Department</th>
+                    <th>Drive Link</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="syllabusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Syllabus</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="syllabusForm">
+                    <div class="mb-2">
+                        <label>Batch</label>
+                        <select id="batchId" class="form-control"></select>
+                    </div>
+                    <div class="mb-2">
+                        <label>Department</label>
+                        <select id="departmentId" class="form-control"></select>
+                    </div>
+                    <div class="mb-2">
+                        <label>Syllabus Drive Link</label>
+                        <input id="syllabusDriveLink" class="form-control" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="saveSyllabus()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadSyllabus() {
+            $.get('@Url.Action("getAllSyllabus", "Syllabus")', function (res) {
+                let rows = '';
+                res.data.forEach((x, i) => {
+                    rows += `<tr>
+                        <td>${i + 1}</td>
+                        <td>${x.batchName}</td>
+                        <td>${x.departmentName}</td>
+                        <td><a href="${x.syllabusDriveLink}" target="_blank">View</a></td>
+                    </tr>`;
+                });
+                $('#syllabusTable tbody').html(rows);
+            });
+        }
+
+        function loadDropdowns() {
+            $.get('@Url.Action("getBatchList", "Syllabus")', res => {
+                let opt = '<option value="">Select</option>';
+                res.data.forEach(x => opt += `<option value="${x.batchId}">${x.batchName}</option>`);
+                $('#batchId').html(opt);
+            });
+
+            $.get('@Url.Action("getDepartmentList", "Syllabus")', res => {
+                let opt = '<option value="">Select</option>';
+                res.data.forEach(x => opt += `<option value="${x.departmentId}">${x.departmentName}</option>`);
+                $('#departmentId').html(opt);
+            });
+        }
+
+        function saveSyllabus() {
+            $.post('@Url.Action("addSyllabus", "Syllabus")', {
+                batchId: $('#batchId').val(),
+                departmentId: $('#departmentId').val(),
+                syllabusDriveLink: $('#syllabusDriveLink').val()
+            }, function (res) {
+                if (res.statusCode === 200) {
+                    $('#syllabusModal').modal('hide');
+                    $('#syllabusForm')[0].reset();
+                    loadSyllabus();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            loadSyllabus();
+            loadDropdowns();
+        });
+    </script>
+}

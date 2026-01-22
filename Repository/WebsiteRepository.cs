@@ -276,8 +276,8 @@ namespace ksi.Repository
                 .Where(b => b.isActive)
                 .Select(b => new syllabusDTO
                 {
-                    id = b.batchId,
-                    name = b.batchName
+                    batchId = b.batchId,
+                    batchName = b.batchName
                 })
                 .ToList();
         }
@@ -288,8 +288,8 @@ namespace ksi.Repository
                 .Where(d => d.isActive)
                 .Select(d => new syllabusDTO
                 {
-                    id = d.departmentId,
-                    name = d.departmentName
+                    departmentId = d.departmentId,
+                    departmentName = d.departmentName
                 })
                 .ToList();
         }

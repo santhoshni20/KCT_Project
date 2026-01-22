@@ -1,75 +1,67 @@
-﻿using ksi.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc;
+using ksi.Interfaces;
 using ksi.Models.DTOs;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ksi.Controllers
 {
     public class SyllabusController : Controller
     {
-        private readonly iSyllabusRepository syllabusRepository;
+        private readonly iSyllabusRepository _repo;
 
-        public SyllabusController(iSyllabusRepository syllabusRepository)
+        public SyllabusController(iSyllabusRepository repo)
         {
-            this.syllabusRepository = syllabusRepository;
+            _repo = repo;
         }
 
-        public IActionResult Index()
+        public IActionResult AddSyllabus()
         {
             return View();
         }
 
         [HttpGet]
-        public ApiResponseDTO getBatches()
+        public ApiResponseDTO getAllSyllabus()
         {
-            try
+            return new ApiResponseDTO
             {
-                var data = syllabusRepository.getActiveBatches();
-
-                return new ApiResponseDTO
-                {
-                    statusCode = 200,
-                    success = true,
-                    message = "Batches fetched successfully",
-                    data = data
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponseDTO
-                {
-                    statusCode = 500,
-                    success = false,
-                    message = "Failed to fetch batches",
-                    errorDetails = ex.Message
-                };
-            }
+                statusCode = 200,
+                success = true,
+                data = _repo.getAllSyllabus()
+            };
         }
 
         [HttpGet]
-        public ApiResponseDTO getDepartments()
+        public ApiResponseDTO getBatchList()
         {
-            try
+            return new ApiResponseDTO
             {
-                var data = syllabusRepository.getActiveDepartments();
+                statusCode = 200,
+                success = true,
+                data = _repo.getBatchList()
+            };
+        }
 
-                return new ApiResponseDTO
-                {
-                    statusCode = 200,
-                    success = true,
-                    message = "Departments fetched successfully",
-                    data = data
-                };
-            }
-            catch (Exception ex)
+        [HttpGet]
+        public ApiResponseDTO getDepartmentList()
+        {
+            return new ApiResponseDTO
             {
-                return new ApiResponseDTO
-                {
-                    statusCode = 500,
-                    success = false,
-                    message = "Failed to fetch departments",
-                    errorDetails = ex.Message
-                };
-            }
+                statusCode = 200,
+                success = true,
+                data = _repo.getDepartmentList()
+            };
+        }
+
+        [HttpPost]
+        public ApiResponseDTO addSyllabus(syllabusDTO dto)
+        {
+            bool result = _repo.addSyllabus(dto, 1);
+
+            return new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 400,
+                success = result,
+                message = result ? "Syllabus added successfully" : "Failed to add syllabus"
+            };
         }
     }
 }

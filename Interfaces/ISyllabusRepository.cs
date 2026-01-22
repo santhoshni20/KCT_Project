@@ -1,10 +1,13 @@
 ﻿using ksi.Models.DTOs;
 
+
 namespace ksi.Interfaces
 {
     public interface iSyllabusRepository
     {
-        List<syllabusDTO> getActiveBatches();
-        List<syllabusDTO> getActiveDepartments();
+        List<syllabusDTO> getAllSyllabus();
+        List<syllabusDTO> getBatchList();
+        List<syllabusDTO> getDepartmentList();
+        bool addSyllabus(syllabusDTO dto, int createdBy);
     }
 }

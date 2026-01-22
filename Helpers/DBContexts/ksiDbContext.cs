@@ -29,7 +29,7 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<mstBlock> mstBlock { get; set; }
         public DbSet<mstRoom> mstRoom { get; set; }
         public DbSet<mstFaculty> Faculties { get; set; }
-
+        public DbSet<mstSyllabus> mstSyllabus { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

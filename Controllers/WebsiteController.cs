@@ -325,5 +325,11 @@ namespace ksi.Controllers
             }
         }
         #endregion
+        #region CGPA
+        public IActionResult Cgpa()
+        {
+            return View();
+        }
+        #endregion
     }
 }

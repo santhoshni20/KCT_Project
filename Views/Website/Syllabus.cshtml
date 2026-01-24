@@ -146,30 +146,26 @@
             fetch(url, { credentials: 'same-origin' })
                 .then(res => res.json())
                 .then(result => {
+                    console.log('loadDropdown result for', dropdownId, result);
                     if (!result) {
                         console.error('No response for', dropdownId);
                         return;
                     }
 
-                    // ApiResponseDTO shape: { statusCode, success, message, data }
-                    const data = result.data ?? result; // fallback if raw array is returned
+                    const data = result.data ?? result;
                     if (!Array.isArray(data)) {
                         console.error('Unexpected data format for', dropdownId, data);
                         return;
                     }
 
                     const dropdown = document.getElementById(dropdownId);
-                    // Clear existing (preserve first placeholder)
                     dropdown.options.length = 1;
 
                     data.forEach(item => {
-                        // backend returns different shapes depending on endpoint:
-                        // Timetable endpoints return { id, name }, syllabus endpoints return { batchId, batchName } or { departmentId, departmentName }
                         const value = item.id ?? item.batchId ?? item.departmentId ?? item.batchID ?? item.departmentID;
-                        const text = item.name ?? item.batchName ?? item.departmentName ?? item.batchName;
+                        const text = item.name ?? item.batchName ?? item.departmentName;
 
                         if (value === undefined || text === undefined) {
-                            // skip malformed items but log for debugging
                             console.warn('Skipping dropdown item with missing fields', item);
                             return;
                         }
@@ -180,9 +176,7 @@
                         dropdown.appendChild(opt);
                     });
 
-                    if (enableOnLoad) {
-                        dropdown.disabled = false;
-                    }
+                    if (enableOnLoad) dropdown.disabled = false;
                 })
                 .catch(err => console.error('Error loading dropdown', dropdownId, err));
         }
@@ -191,15 +185,31 @@
             const batchId = document.getElementById("batchDropdown").value;
             const departmentId = document.getElementById("deptDropdown").value;
 
+            console.log('Download click - batchId:', batchId, 'departmentId:', departmentId);
+
             if (!batchId || !departmentId) {
                 alert("Please select batch and department");
                 return;
             }
 
-            window.open(
-                `/Syllabus/DownloadSyllabus?batchId=${batchId}&departmentId=${departmentId}`,
-                "_blank"
-            );
+            // quick debug: call debug endpoint first (returns matching rows)
+            const debugUrl = '@Url.Action("DebugSyllabus", "Website")';
+            fetch(`${debugUrl}?batchId=${encodeURIComponent(batchId)}&departmentId=${encodeURIComponent(departmentId)}`, { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(debugResp => {
+                    console.log('DebugSyllabus response:', debugResp);
+                    // if server reports matching rows, open the redirecting endpoint
+                    if (debugResp && debugResp.count > 0) {
+                        const downloadUrl = '@Url.Action("DownloadSyllabus", "Website")';
+                        window.open(`${downloadUrl}?batchId=${batchId}&departmentId=${departmentId}`, "_blank");
+                    } else {
+                        alert('Syllabus not found for selected batch/department. See console for details.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Debug call failed', err);
+                    alert('Error while checking syllabus. See console.');
+                });
         });
     </script>
 

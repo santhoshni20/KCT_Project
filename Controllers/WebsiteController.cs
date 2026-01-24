@@ -5,16 +5,20 @@ using ksi.Repositories;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq; // added
+using System;
 
 namespace ksi.Controllers
 {
     public class WebsiteController : Controller
     {
         private readonly IWebsiteRepository _repo;
+        private readonly iSyllabusRepository _syllabusRepo; // added
 
-        public WebsiteController(IWebsiteRepository repo)
+        public WebsiteController(IWebsiteRepository repo, iSyllabusRepository syllabusRepo) // updated ctor
         {
             _repo = repo;
+            _syllabusRepo = syllabusRepo;
         }
 
         #region Dashboard
@@ -275,6 +279,49 @@ namespace ksi.Controllers
                     message = "Failed to fetch departments",
                     errorDetails = ex.Message
                 });
+            }
+        }
+
+        // New: DownloadSyllabus action
+        [HttpGet]
+        public IActionResult DownloadSyllabus(int batchId, int departmentId)
+        {
+            try
+            {
+                var all = _syllabusRepo.getAllSyllabus() ?? new List<syllabusDTO>();
+                var entry = all.FirstOrDefault(s => s.batchId == batchId && s.departmentId == departmentId);
+
+                if (entry == null || string.IsNullOrEmpty(entry.syllabusDriveLink))
+                {
+                    return NotFound("Syllabus not found for selected batch/department.");
+                }
+
+                // Redirect to the drive link (opens in new tab from the view)
+                return Redirect(entry.syllabusDriveLink);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        // add inside WebsiteController (Syllabus region)
+        [HttpGet]
+        public IActionResult DebugSyllabus(int batchId, int departmentId)
+        {
+            try
+            {
+                var all = _syllabusRepo.getAllSyllabus() ?? new List<syllabusDTO>();
+                var matches = all.Where(s => s.batchId == batchId && s.departmentId == departmentId).ToList();
+                return Json(new
+                {
+                    success = true,
+                    count = matches.Count,
+                    matches
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = ex.Message });
             }
         }
         #endregion

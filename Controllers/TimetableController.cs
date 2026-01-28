@@ -34,30 +34,6 @@ namespace ksi.Controllers
 
         // ===================== DROPDOWNS =====================
 
-        #region Get Dropdown Data
-        [HttpGet]
-        public async Task<ApiResponseDTO> GetDropdowns()
-        {
-            var data = new
-            {
-                batches = await _repository.getActiveBatchesAsync(),
-                departments = await _repository.getActiveDepartmentsAsync(),
-                sections = await _repository.getActiveSectionsAsync(),
-                subjects = await _repository.getActiveSubjectsAsync(),
-                faculties = await _repository.getActiveFacultiesAsync(),
-                blocks = await _repository.getActiveBlocksAsync(),   // ✅
-                rooms = await _repository.getActiveRoomsAsync()      // ✅
-            };
-
-            return new ApiResponseDTO
-            {
-                statusCode = 200,
-                success = true,
-                data = data
-            };
-        }
-        #endregion
-
         // ===================== ADD MASTER =====================
 
         #region Add Batch
@@ -242,7 +218,60 @@ namespace ksi.Controllers
                 data = data
             };
         }
+        #region Add subject
+        public IActionResult AddSubjects()
+        {
+            return View();
+        }
 
+        [HttpGet]
+        public IActionResult getDropdowns()
+        {
+            try
+            {
+                var data = _repository.getDropdownData();
+                return Ok(new ApiResponseDTO(200, "Success", data));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500,
+                    new ApiResponseDTO(500, "Error", null, ex.Message));
+            }
+        }
+
+        [HttpPost]
+        public IActionResult saveSubject([FromBody] subjectDTO subjectDto)
+        {
+            try
+            {
+                // 🔐 Example: get logged-in userId
+                int userId = 1; // replace with session / claims later
+
+                var result = _repository.saveSubject(subjectDto, userId);
+                return Ok(new ApiResponseDTO(200, "Subject saved successfully", result));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500,
+                    new ApiResponseDTO(500, "Error", null, ex.Message));
+            }
+        }
+
+        [HttpGet]
+        public IActionResult getSubjectList()
+        {
+            try
+            {
+                var data = _repository.getSubjects();
+                return Ok(new ApiResponseDTO(200, "Success", data));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500,
+                    new ApiResponseDTO(500, "Error", null, ex.Message));
+            }
+        }
+        #endregion
 
     }
 }

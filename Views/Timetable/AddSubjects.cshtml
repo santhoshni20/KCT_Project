@@ -1,0 +1,181 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add Subjects";
+}
+
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="fw-bold">Subject Details</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#subjectModal">
+        <i class="bx bx-plus"></i> Add Subject
+    </button>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Batch</th>
+                    <th>Department</th>
+                    <th>Subject</th>
+                    <th>Credits</th>
+                </tr>
+            </thead>
+            <tbody id="subjectTableBody">
+                <!-- data loaded via JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ADD SUBJECT MODAL -->
+<div class="modal fade" id="subjectModal" tabindex="-1">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Add Subject</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="subjectForm">
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Batch</label>
+                            <select id="batch" class="form-control">
+                                <option value="">Select Batch</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Department</label>
+                            <select id="department" class="form-control">
+                                <option value="">Select Department</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Subject Name</label>
+                            <input type="text"
+                                   id="subjectName"
+                                   class="form-control"
+                                   placeholder="Enter subject name" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Number of Credits</label>
+                            <input type="number"
+                                   id="credits"
+                                   min="1"
+                                   class="form-control"
+                                   placeholder="Credits" />
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSubject()">Save</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            loadDropdowns();
+            loadSubjects();
+        });
+
+        /* ---------------- DROPDOWNS ---------------- */
+
+        function loadDropdowns() {
+            fetch('/Timetable/getDropdowns') // ✅ correct controller
+            .then(res => res.json())
+            .then(res => {
+            if (res.statusCode !== 200) return;
+
+
+            fillDropdown('batch', res.data.batches); // ✅ correct key
+            fillDropdown('department', res.data.departments);
+            });
+            }
+
+        function fillDropdown(id, data) {
+            const ddl = document.getElementById(id);
+            ddl.innerHTML = '<option value="">Select</option>';
+
+            data.forEach(x => {
+                ddl.innerHTML += `<option value="${x.id}">${x.name}</option>`;
+            });
+        }
+
+        /* ---------------- SAVE SUBJECT ---------------- */
+
+        function saveSubject() {
+
+            if (!batch.value || !department.value || !subjectName.value || !credits.value) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const payload = {
+                batchId: batch.value,
+                departmentId: department.value,
+                subjectName: subjectName.value,
+                numberOfCredits: credits.value
+            };
+
+            fetch('/Timetable/saveSubject', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(res => {
+                alert(res.message);
+
+                if (res.statusCode === 200) {
+                    subjectForm.reset();
+
+                    const modal = bootstrap.Modal.getInstance(
+                        document.getElementById('subjectModal')
+                    );
+                    modal.hide();
+
+                    loadSubjects();
+                }
+            });
+        }
+
+        /* ---------------- LOAD SUBJECT TABLE ---------------- */
+
+        function loadSubjects() {
+            fetch('/Timetable/getSubjectList')
+                .then(response => response.json())
+                .then(res => {
+                    if (res.statusCode !== 200) return;
+
+                    const body = document.getElementById('subjectTableBody');
+                    body.innerHTML = '';
+
+                    res.data.forEach(x => {
+                        body.innerHTML += `
+                            <tr>
+                                <td>${x.batchName}</td>
+                                <td>${x.departmentName}</td>
+                                <td>${x.subjectName}</td>
+                                <td>${x.numberOfCredits}</td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+    </script>
+}

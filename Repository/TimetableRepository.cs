@@ -394,9 +394,11 @@ namespace ksi.Repository
                 .ToListAsync();
         }
         // Replace the existing getMasterDataAsync implementation with this updated version
+        // Replace the existing getMasterDataAsync with this version
         public async Task<object> getMasterDataAsync()
         {
             var batches = await _context.mstBatch
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.batchId,
@@ -405,6 +407,7 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var departments = await _context.mstDepartment
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.departmentId,
@@ -413,6 +416,7 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var sections = await _context.mstSection
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.sectionId,
@@ -421,6 +425,7 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var subjects = await _context.mstSubject
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.subjectId,
@@ -429,6 +434,7 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var blocks = await _context.mstBlock
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.blockId,
@@ -437,6 +443,7 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var rooms = await _context.mstRoom
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.roomId,
@@ -464,10 +471,7 @@ namespace ksi.Repository
                 faculties
             };
         }
-        public async Task<List<TimetableDTO>> getSubjectsByClassAsync(
-    int batchId,
-    int departmentId,
-    int sectionId) // kept for interface compatibility
+        public async Task<List<TimetableDTO>> getSubjectsByClassAsync(int batchId,int departmentId,int sectionId) // kept for interface compatibility
         {
             return await _context.mstSubject
                 .Where(x =>

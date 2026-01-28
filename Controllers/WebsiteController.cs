@@ -356,6 +356,54 @@ namespace ksi.Controllers
                 });
             }
         }
+        [HttpPost]
+        public async Task<ApiResponseDTO> calculateCgpa([FromBody] cgpaCalculationRequestDTO request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return new ApiResponseDTO
+                    {
+                        statusCode = 400,
+                        success = false,
+                        message = "Invalid request"
+                    };
+                }
+
+                if (request.batchId <= 0 || request.departmentId <= 0)
+                {
+                    return new ApiResponseDTO
+                    {
+                        statusCode = 400,
+                        success = false,
+                        message = "Batch and Department are required"
+                    };
+                }
+
+                // Delegate business logic to repository
+                var result = await _repo.calculateCgpaAsync(request.batchId, request.departmentId, request.grades ?? new List<gradeEntryDTO>());
+
+                return new ApiResponseDTO
+                {
+                    statusCode = 200,
+                    success = true,
+                    message = "CGPA calculated successfully",
+                    data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                // Do not swallow exception — return error details for dev environment
+                return new ApiResponseDTO
+                {
+                    statusCode = 500,
+                    success = false,
+                    message = "Failed to calculate CGPA",
+                    errorDetails = ex.Message
+                };
+            }
+        }
         #endregion
     }
 }

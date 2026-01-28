@@ -131,6 +131,8 @@
     </div>
 
 </div>
+<!-- Add this right after the table (inside the same cgpa-card) -->
+<div id="cgpaResult" class="mt-3"></div>
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -145,9 +147,9 @@
                 loadSubjectsForCgpa();
             });
 
-            // optional: calculate button handler (placeholder)
-            $("#btnCalculate").on("click", function () {
-                alert("Calculation not implemented in this change. Subjects will be loaded above.");
+            // calculate handler
+            $("#btnCalculate").off("click").on("click", function () {
+                calculateCgpa();
             });
         });
 
@@ -167,8 +169,7 @@
                         );
                     });
                 },
-                error: function (err) {
-                    console.error(err);
+                error: function () {
                     alert("Error loading batches");
                 }
             });
@@ -190,8 +191,7 @@
                         );
                     });
                 },
-                error: function (err) {
-                    console.error(err);
+                error: function () {
                     alert("Error loading departments");
                 }
             });
@@ -203,6 +203,7 @@
 
             if (!batchId || !departmentId) {
                 $("#cgpaSubjectsBody").html('<tr><td colspan="2" class="text-center text-muted">Select batch and department to load subjects</td></tr>');
+                $("#cgpaResult").empty();
                 return;
             }
 
@@ -211,16 +212,8 @@
                 type: 'GET',
                 data: { batchId: batchId, departmentId: departmentId },
                 success: function (res) {
-                    // controller returns ApiResponseDTO { statusCode, success, message, data }
-                    if (!res) {
-                        console.error("Invalid response from server", res);
-                        $("#cgpaSubjectsBody").html('<tr><td colspan="2" class="text-center text-danger">Error loading subjects</td></tr>');
-                        return;
-                    }
-
-                    if (!res.success) {
-                        console.warn("Server returned failure", res.message);
-                        $("#cgpaSubjectsBody").html(`<tr><td colspan="2" class="text-center text-warning">${res.message || 'No subjects'}</td></tr>`);
+                    if (!res || !res.success) {
+                        $("#cgpaSubjectsBody").html('<tr><td colspan="2" class="text-center text-muted">No subjects found</td></tr>');
                         return;
                     }
 
@@ -233,8 +226,9 @@
                     let html = '';
                     list.forEach(s => {
                         const credits = s.numberOfCredits ?? 0;
+                        // include subjectId in data attribute so calculate can read it
                         html += `
-                            <tr>
+                            <tr data-subjectid="${s.subjectId}">
                                 <td class="text-start">
                                     ${s.subjectName}
                                     <small class="text-muted ms-2">(${credits} cr)</small>
@@ -257,11 +251,121 @@
                     });
 
                     $("#cgpaSubjectsBody").html(html);
+                    $("#cgpaResult").empty(); // clear previous result
                 },
-                error: function (err) {
-                    console.error(err);
+                error: function () {
                     $("#cgpaSubjectsBody").html('<tr><td colspan="2" class="text-center text-danger">Error loading subjects</td></tr>');
                 }
+            });
+        }
+
+        function calculateCgpa() {
+            const batchId = parseInt($("#ddlBatch").val(), 10) || 0;
+            const departmentId = parseInt($("#ddlDepartment").val(), 10) || 0;
+
+            if (!batchId || !departmentId) {
+                alert("Please select batch and department");
+                return;
+            }
+
+            // collect grades from table
+            const grades = [];
+            let missing = false;
+            $("#cgpaSubjectsBody tr").each(function () {
+                const tr = $(this);
+                const subjectId = tr.data("subjectid");
+                // skip placeholder rows that do not have subjectId
+                if (!subjectId) return;
+
+                const grade = tr.find(".grade-select").val();
+                if (!grade) {
+                    missing = true;
+                    return false; // break out of each
+                }
+
+                grades.push({ subjectId: parseInt(subjectId, 10), grade: grade });
+            });
+
+            if (missing) {
+                alert("Please select grade for all subjects");
+                return;
+            }
+
+            if (grades.length === 0) {
+                alert("No subjects to calculate");
+                return;
+            }
+
+            const payload = {
+                batchId: batchId,
+                departmentId: departmentId,
+                grades: grades
+            };
+
+            // show spinner / disable button
+            $("#btnCalculate").prop("disabled", true).text("Calculating...");
+
+            fetch('@Url.Action("calculateCgpa", "Website")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(res => {
+                $("#btnCalculate").prop("disabled", false).text("Calculate CGPA");
+
+                if (!res) {
+                    $("#cgpaResult").html('<div class="text-danger">Unexpected server response</div>');
+                    return;
+                }
+
+                // ApiResponseDTO { statusCode, success, message, data }
+                if (!res || !res.success || res.statusCode !== 200) {
+                    $("#cgpaResult").html(`<div class="text-warning">${res.message || 'Calculation failed'}</div>`);
+                    return;
+                }
+
+                const data = res.data;
+                if (!data) {
+                    $("#cgpaResult").html('<div class="text-warning">No result returned</div>');
+                    return;
+                }
+
+                const cgpa = data.cgpa ?? 0;
+                const totalCredits = data.totalCredits ?? 0;
+                const totalPoints = data.totalPoints ?? 0;
+
+                let detailHtml = `
+                    <div class="card p-3">
+                        <div><strong>CGPA:</strong> ${cgpa.toFixed(2)}</div>
+                        <div><strong>Total Credits:</strong> ${totalCredits}</div>
+                        <div><strong>Total Points:</strong> ${totalPoints}</div>
+                        <hr />
+                        <h6>Subject details</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead><tr><th>Subject</th><th>Credits</th><th>Grade</th><th>Grade Point</th><th>Points</th></tr></thead>
+                                <tbody>
+                `;
+
+                (data.subjects || []).forEach(s => {
+                    detailHtml += `<tr>
+                        <td>${s.subjectName || ''}</td>
+                        <td>${s.numberOfCredits || 0}</td>
+                        <td>${s.grade || ''}</td>
+                        <td>${s.gradePoint || 0}</td>
+                        <td>${(s.pointsObtained || 0).toFixed(2)}</td>
+                    </tr>`;
+                });
+
+                detailHtml += `</tbody></table></div></div>`;
+
+                $("#cgpaResult").html(detailHtml);
+            })
+            .catch(err => {
+                console.error(err);
+                $("#btnCalculate").prop("disabled", false).text("Calculate CGPA");
+                $("#cgpaResult").html('<div class="text-danger">Error calculating CGPA</div>');
             });
         }
     </script>

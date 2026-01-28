@@ -43,6 +43,7 @@ namespace ksi.Interfaces
 
         #region CGPA
         List<subjectDTO> getSubjectsForCgpa(int batchId, int departmentId);
+        Task<cgpaResultDTO> calculateCgpaAsync(int batchId, int departmentId, List<gradeEntryDTO> grades);
         #endregion
     }
 }

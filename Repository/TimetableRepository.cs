@@ -393,6 +393,7 @@ namespace ksi.Repository
                 })
                 .ToListAsync();
         }
+        // Replace the existing getMasterDataAsync implementation with this updated version
         public async Task<object> getMasterDataAsync()
         {
             var batches = await _context.mstBatch
@@ -443,6 +444,15 @@ namespace ksi.Repository
                     isActive = x.isActive
                 }).ToListAsync();
 
+            var faculties = await _context.Faculties
+                .Where(x => x.IsActive)
+                .Select(x => new TimetableDTO
+                {
+                    id = x.FacultyID,
+                    name = x.FacultyName,
+                    isActive = x.IsActive
+                }).ToListAsync();
+
             return new
             {
                 batches,
@@ -450,7 +460,8 @@ namespace ksi.Repository
                 sections,
                 subjects,
                 blocks,
-                rooms
+                rooms,
+                faculties
             };
         }
         public async Task<List<TimetableDTO>> getSubjectsByClassAsync(

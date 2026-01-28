@@ -295,5 +295,38 @@ namespace ksi.Repository
         }
         #endregion
 
+        #region CGPA
+        public List<subjectDTO> getSubjectsForCgpa(int batchId, int departmentId)
+        {
+            try
+            {
+                return _context.mstSubject
+                    .Where(s =>
+                        s.batchId == batchId &&
+                        s.departmentId == departmentId &&
+                        s.isActive &&
+                        s.deletedDate == null)
+                    .OrderBy(s => s.subjectName)
+                    .Select(s => new subjectDTO
+                    {
+                        subjectId = s.subjectId,
+                        batchId = s.batchId,
+                        departmentId = s.departmentId,
+                        subjectName = s.subjectName,
+                        numberOfCredits = s.numberOfCredits,
+
+                        // Not required for CGPA screen
+                        batchName = null,
+                        departmentName = null
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error fetching CGPA subjects: {ex.Message}", ex);
+            }
+        }
+        #endregion
+
     }
 }

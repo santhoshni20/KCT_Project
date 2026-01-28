@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace YourProject.Entities
 {
@@ -9,6 +10,10 @@ namespace YourProject.Entities
 
         public int batchId { get; set; }
         public int departmentId { get; set; }
+
+        // make section optional
+        public int? sectionId { get; set; }
+
         public string subjectName { get; set; }
         public int numberOfCredits { get; set; }
 

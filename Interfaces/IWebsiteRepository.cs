@@ -40,5 +40,9 @@ namespace ksi.Interfaces
         List<syllabusDTO> getActiveBatches();
         List<syllabusDTO> getActiveDepartments();
         #endregion
+
+        #region CGPA
+        List<subjectDTO> getSubjectsForCgpa(int batchId, int departmentId);
+        #endregion
     }
 }

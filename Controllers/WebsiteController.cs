@@ -330,6 +330,32 @@ namespace ksi.Controllers
         {
             return View();
         }
+        [HttpGet]
+        public IActionResult getSubjectsForCgpa(int batchId, int departmentId)
+        {
+            try
+            {
+                var data = _repo.getSubjectsForCgpa(batchId, departmentId);
+
+                return Json(new ApiResponseDTO
+                {
+                    statusCode = 200,
+                    success = true,
+                    message = "Subjects fetched successfully",
+                    data = data
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new ApiResponseDTO
+                {
+                    statusCode = 500,
+                    success = false,
+                    message = "Failed to fetch subjects",
+                    errorDetails = ex.Message
+                });
+            }
+        }
         #endregion
     }
 }

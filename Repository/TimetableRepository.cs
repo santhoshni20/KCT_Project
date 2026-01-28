@@ -497,26 +497,48 @@ namespace ksi.Repository
             return new { batches, departments };
         }
 
+        // Modified saveSubject to update when subjectId > 0, otherwise insert
         public bool saveSubject(subjectDTO subjectDto, int userId)
         {
-            var subject = new mstSubject
+            if (subjectDto == null) return false;
+
+            if (subjectDto.subjectId > 0)
             {
-                batchId = subjectDto.batchId,
-                departmentId = subjectDto.departmentId,
-                subjectName = subjectDto.subjectName,
-                numberOfCredits = subjectDto.numberOfCredits,
+                // Update existing subject
+                var existing = _context.mstSubject.Find(subjectDto.subjectId);
+                if (existing == null) return false;
 
-                // ✅ Audit fields handled ONLY here
-                isActive = true,
-                createdBy = userId,
-                createdDate = DateTime.Now,
-                updatedBy = null,
-                updatedDate = null,
-                deletedBy = null,
-                deletedDate = null
-            };
+                existing.batchId = subjectDto.batchId;
+                existing.departmentId = subjectDto.departmentId;
+                existing.subjectName = subjectDto.subjectName;
+                existing.numberOfCredits = subjectDto.numberOfCredits;
+                existing.updatedBy = userId;
+                existing.updatedDate = DateTime.Now;
 
-            _context.mstSubject.Add(subject);
+                _context.mstSubject.Update(existing);
+            }
+            else
+            {
+                // Insert new
+                var subject = new mstSubject
+                {
+                    batchId = subjectDto.batchId,
+                    departmentId = subjectDto.departmentId,
+                    subjectName = subjectDto.subjectName,
+                    numberOfCredits = subjectDto.numberOfCredits,
+
+                    isActive = true,
+                    createdBy = userId,
+                    createdDate = DateTime.Now,
+                    updatedBy = null,
+                    updatedDate = null,
+                    deletedBy = null,
+                    deletedDate = null
+                };
+
+                _context.mstSubject.Add(subject);
+            }
+
             _context.SaveChanges();
             return true;
         }
@@ -526,14 +548,17 @@ namespace ksi.Repository
             return (from s in _context.mstSubject
                     join b in _context.mstBatch on s.batchId equals b.batchId
                     join d in _context.mstDepartment on s.departmentId equals d.departmentId
-                    where s.isActive
+                    // do not filter by s.isActive here so UI can show all rows if needed.
                     select new subjectDTO
                     {
                         subjectId = s.subjectId,
                         subjectName = s.subjectName,
                         numberOfCredits = s.numberOfCredits,
+                        batchId = s.batchId,
+                        departmentId = s.departmentId,
                         batchName = b.batchName,
-                        departmentName = d.departmentName
+                        departmentName = d.departmentName,
+                        isActive = s.isActive
                     }).ToList();
         }
         #endregion

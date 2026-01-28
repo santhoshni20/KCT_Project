@@ -2,6 +2,7 @@
 using ksi.Models.DTOs;
 using ksi.Repository;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace ksi.Controllers
 {
@@ -239,39 +240,55 @@ namespace ksi.Controllers
             }
         }
 
+        // Update saveSubject action so it supports both create and update and returns meaningful message.
         [HttpPost]
         public IActionResult saveSubject([FromBody] subjectDTO subjectDto)
-        {
-            try
-            {
-                // 🔐 Example: get logged-in userId
-                int userId = 1; // replace with session / claims later
+                {
+                    try
+                    {
+                        if (subjectDto == null)
+                            return BadRequest(new ApiResponseDTO(400, "Invalid request", null));
 
-                var result = _repository.saveSubject(subjectDto, userId);
-                return Ok(new ApiResponseDTO(200, "Subject saved successfully", result));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500,
-                    new ApiResponseDTO(500, "Error", null, ex.Message));
+                        int userId = 1; // TODO: replace with actual user id retrieval
+
+                        var isUpdate = subjectDto.subjectId > 0;
+                        var result = _repository.saveSubject(subjectDto, userId);
+
+                        return Ok(new ApiResponseDTO
+                        {
+                            statusCode = 200,
+                            success = result,
+                            message = result ? (isUpdate ? "Subject updated successfully" : "Subject saved successfully") : "Failed"
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500,
+                            new ApiResponseDTO
+                            {
+                                statusCode = 500,
+                                success = false,
+                                message = "Error",
+                                errorDetails = ex.Message
+                            });
+                    }
+                }
+
+                [HttpGet]
+                public IActionResult getSubjectList()
+                {
+                    try
+                    {
+                        var data = _repository.getSubjects();
+                        return Ok(new ApiResponseDTO(200, "Success", data));
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(500,
+                            new ApiResponseDTO(500, "Error", null, ex.Message));
+                    }
+                }
+                #endregion
+
             }
         }
-
-        [HttpGet]
-        public IActionResult getSubjectList()
-        {
-            try
-            {
-                var data = _repository.getSubjects();
-                return Ok(new ApiResponseDTO(200, "Success", data));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500,
-                    new ApiResponseDTO(500, "Error", null, ex.Message));
-            }
-        }
-        #endregion
-
-    }
-}

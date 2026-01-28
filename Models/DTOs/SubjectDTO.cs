@@ -1,4 +1,6 @@
-﻿namespace ksi.Models.DTOs
+﻿using System;
+
+namespace ksi.Models.DTOs
 {
     public class subjectDTO
     {
@@ -13,5 +15,8 @@
         // table display
         public string batchName { get; set; }
         public string departmentName { get; set; }
+
+        // expose active flag so UI can render toggle correctly
+        public bool isActive { get; set; }
     }
 }

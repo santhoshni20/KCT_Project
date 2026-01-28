@@ -115,47 +115,16 @@
                         <th style="width:30%">Grade</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Subjects will be auto-loaded later -->
+                <tbody id="cgpaSubjectsBody">
                     <tr>
-                        <td></td>
-                        <td>
-                            <select class="form-select">
-                                <option selected disabled>-- Select --</option>
-                                <option>O</option>
-                                <option>A+</option>
-                                <option>A</option>
-                                <option>B+</option>
-                                <option>B</option>
-                                <option>C+</option>
-                                <option>C</option>
-                                <option>U</option>
-                            </select>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td></td>
-                        <td>
-                            <select class="form-select">
-                                <option selected disabled>-- Select --</option>
-                                <option>O</option>
-                                <option>A+</option>
-                                <option>A</option>
-                                <option>B+</option>
-                                <option>B</option>
-                                <option>C+</option>
-                                <option>C</option>
-                                <option>U</option>
-                            </select>
-                        </td>
+                        <td colspan="2" class="text-center text-muted">Select batch and department to load subjects</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
         <div class="text-center mt-4">
-            <button class="btn-calc">
+            <button id="btnCalculate" class="btn-calc">
                 <i class="fa-solid fa-calculator me-2"></i> Calculate CGPA
             </button>
         </div>
@@ -170,6 +139,16 @@
         $(document).ready(function () {
             loadBatches();
             loadDepartments();
+
+            // wire change handlers
+            $("#ddlBatch, #ddlDepartment").on("change", function () {
+                loadSubjectsForCgpa();
+            });
+
+            // optional: calculate button handler (placeholder)
+            $("#btnCalculate").on("click", function () {
+                alert("Calculation not implemented in this change. Subjects will be loaded above.");
+            });
         });
 
         function loadBatches() {
@@ -184,9 +163,7 @@
 
                     $.each(res.data, function (i, item) {
                         $("#ddlBatch").append(
-                            `<option value="${item.batchId}">
-                                ${item.batchName ?? item.batchYear ?? ''}
-                            </option>`
+                            `<option value="${item.batchId}">${item.batchName ?? item.batchYear ?? ''}</option>`
                         );
                     });
                 },
@@ -209,15 +186,81 @@
 
                     $.each(res.data, function (i, item) {
                         $("#ddlDepartment").append(
-                            `<option value="${item.departmentId}">
-                                ${item.departmentName}
-                            </option>`
+                            `<option value="${item.departmentId}">${item.departmentName}</option>`
                         );
                     });
                 },
                 error: function (err) {
                     console.error(err);
                     alert("Error loading departments");
+                }
+            });
+        }
+
+        function loadSubjectsForCgpa() {
+            const batchId = parseInt($("#ddlBatch").val(), 10) || 0;
+            const departmentId = parseInt($("#ddlDepartment").val(), 10) || 0;
+
+            if (!batchId || !departmentId) {
+                $("#cgpaSubjectsBody").html('<tr><td colspan="2" class="text-center text-muted">Select batch and department to load subjects</td></tr>');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("getSubjectsForCgpa", "Website")',
+                type: 'GET',
+                data: { batchId: batchId, departmentId: departmentId },
+                success: function (res) {
+                    // controller returns ApiResponseDTO { statusCode, success, message, data }
+                    if (!res) {
+                        console.error("Invalid response from server", res);
+                        $("#cgpaSubjectsBody").html('<tr><td colspan="2" class="text-center text-danger">Error loading subjects</td></tr>');
+                        return;
+                    }
+
+                    if (!res.success) {
+                        console.warn("Server returned failure", res.message);
+                        $("#cgpaSubjectsBody").html(`<tr><td colspan="2" class="text-center text-warning">${res.message || 'No subjects'}</td></tr>`);
+                        return;
+                    }
+
+                    const list = res.data || [];
+                    if (list.length === 0) {
+                        $("#cgpaSubjectsBody").html('<tr><td colspan="2" class="text-center text-muted">No subjects found for selected batch/department</td></tr>');
+                        return;
+                    }
+
+                    let html = '';
+                    list.forEach(s => {
+                        const credits = s.numberOfCredits ?? 0;
+                        html += `
+                            <tr>
+                                <td class="text-start">
+                                    ${s.subjectName}
+                                    <small class="text-muted ms-2">(${credits} cr)</small>
+                                </td>
+                                <td>
+                                    <select class="form-select grade-select">
+                                        <option value="" selected disabled>-- Select --</option>
+                                        <option>O</option>
+                                        <option>A+</option>
+                                        <option>A</option>
+                                        <option>B+</option>
+                                        <option>B</option>
+                                        <option>C+</option>
+                                        <option>C</option>
+                                        <option>U</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    $("#cgpaSubjectsBody").html(html);
+                },
+                error: function (err) {
+                    console.error(err);
+                    $("#cgpaSubjectsBody").html('<tr><td colspan="2" class="text-center text-danger">Error loading subjects</td></tr>');
                 }
             });
         }

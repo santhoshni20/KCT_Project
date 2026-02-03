@@ -3,6 +3,8 @@ using ksi.Models.DTOs;
 using ksi.Models.Entity;
 using KSI_Project.Helpers.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using System;
+using YourProject.Entities;
 
 namespace ksi.Repository
 {
@@ -128,7 +130,7 @@ namespace ksi.Repository
                 subjectName = dto.subjectName,
                 batchId = dto.batchId,
                 departmentId = dto.departmentId,
-                sectionId = dto.sectionId,
+                //sectionId = dto.sectionId,
                 createdBy = 1,                 // ✅ FIXED
                 createdDate = DateTime.Now,
                 isActive = true
@@ -391,9 +393,12 @@ namespace ksi.Repository
                 })
                 .ToListAsync();
         }
+        // Replace the existing getMasterDataAsync implementation with this updated version
+        // Replace the existing getMasterDataAsync with this version
         public async Task<object> getMasterDataAsync()
         {
             var batches = await _context.mstBatch
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.batchId,
@@ -402,6 +407,7 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var departments = await _context.mstDepartment
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.departmentId,
@@ -410,6 +416,7 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var sections = await _context.mstSection
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.sectionId,
@@ -418,6 +425,7 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var subjects = await _context.mstSubject
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.subjectId,
@@ -426,6 +434,7 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var blocks = await _context.mstBlock
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.blockId,
@@ -434,11 +443,21 @@ namespace ksi.Repository
                 }).ToListAsync();
 
             var rooms = await _context.mstRoom
+                .Where(x => x.isActive)
                 .Select(x => new TimetableDTO
                 {
                     id = x.roomId,
                     name = x.roomNumber,
                     isActive = x.isActive
+                }).ToListAsync();
+
+            var faculties = await _context.Faculties
+                .Where(x => x.IsActive)
+                .Select(x => new TimetableDTO
+                {
+                    id = x.FacultyID,
+                    name = x.FacultyName,
+                    isActive = x.IsActive
                 }).ToListAsync();
 
             return new
@@ -448,17 +467,17 @@ namespace ksi.Repository
                 sections,
                 subjects,
                 blocks,
-                rooms
+                rooms,
+                faculties
             };
         }
-        public async Task<List<TimetableDTO>> getSubjectsByClassAsync(int batchId, int departmentId, int sectionId)
+        public async Task<List<TimetableDTO>> getSubjectsByClassAsync(int batchId,int departmentId,int sectionId) // kept for interface compatibility
         {
             return await _context.mstSubject
                 .Where(x =>
                     x.isActive &&
                     x.batchId == batchId &&
-                    x.departmentId == departmentId &&
-                    x.sectionId == sectionId)
+                    x.departmentId == departmentId)
                 .Select(x => new TimetableDTO
                 {
                     id = x.subjectId,
@@ -466,6 +485,86 @@ namespace ksi.Repository
                 })
                 .ToListAsync();
         }
+        #region Add subject
+        public object getDropdownData()
+        {
+            var batches = _context.mstBatch
+                .Where(x => x.isActive)
+                .Select(x => new { id = x.batchId, name = x.batchName })
+                .ToList();
 
+            var departments = _context.mstDepartment
+                .Where(x => x.isActive)
+                .Select(x => new { id = x.departmentId, name = x.departmentName })
+                .ToList();
+
+            return new { batches, departments };
+        }
+
+        // Modified saveSubject to update when subjectId > 0, otherwise insert
+        public bool saveSubject(subjectDTO subjectDto, int userId)
+        {
+            if (subjectDto == null) return false;
+
+            if (subjectDto.subjectId > 0)
+            {
+                // Update existing subject
+                var existing = _context.mstSubject.Find(subjectDto.subjectId);
+                if (existing == null) return false;
+
+                existing.batchId = subjectDto.batchId;
+                existing.departmentId = subjectDto.departmentId;
+                existing.subjectName = subjectDto.subjectName;
+                existing.numberOfCredits = subjectDto.numberOfCredits;
+                existing.updatedBy = userId;
+                existing.updatedDate = DateTime.Now;
+
+                _context.mstSubject.Update(existing);
+            }
+            else
+            {
+                // Insert new
+                var subject = new mstSubject
+                {
+                    batchId = subjectDto.batchId,
+                    departmentId = subjectDto.departmentId,
+                    subjectName = subjectDto.subjectName,
+                    numberOfCredits = subjectDto.numberOfCredits,
+
+                    isActive = true,
+                    createdBy = userId,
+                    createdDate = DateTime.Now,
+                    updatedBy = null,
+                    updatedDate = null,
+                    deletedBy = null,
+                    deletedDate = null
+                };
+
+                _context.mstSubject.Add(subject);
+            }
+
+            _context.SaveChanges();
+            return true;
+        }
+
+        public List<subjectDTO> getSubjects()
+        {
+            return (from s in _context.mstSubject
+                    join b in _context.mstBatch on s.batchId equals b.batchId
+                    join d in _context.mstDepartment on s.departmentId equals d.departmentId
+                    // do not filter by s.isActive here so UI can show all rows if needed.
+                    select new subjectDTO
+                    {
+                        subjectId = s.subjectId,
+                        subjectName = s.subjectName,
+                        numberOfCredits = s.numberOfCredits,
+                        batchId = s.batchId,
+                        departmentId = s.departmentId,
+                        batchName = b.batchName,
+                        departmentName = d.departmentName,
+                        isActive = s.isActive
+                    }).ToList();
+        }
+        #endregion
     }
 }

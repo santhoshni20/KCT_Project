@@ -1,53 +1,40 @@
-﻿namespace ksi.Models.DTOs
+﻿using System;
+using System.Collections.Generic;
+
+namespace ksi.Models.DTOs
 {
-    public class CgpaDTO
+    // Request DTO sent from the frontend when calculating CGPA
+    public class cgpaCalculationRequestDTO
     {
-        public class CourseDTO
-        {
-            public string CourseCode { get; set; }
-            public string CourseName { get; set; }
-            public decimal Credits { get; set; }
-        }
+        public int batchId { get; set; }
+        public int departmentId { get; set; }
+        public List<gradeEntryDTO> grades { get; set; } = new List<gradeEntryDTO>();
+    }
 
-        // 🔹 Request DTO for fetching courses
-        public class CourseRequestDTO
-        {
-            public string Department { get; set; }
-            public string Batch { get; set; }
-            public int Semester { get; set; }
-        }
+    // Individual grade entry for a subject
+    public class gradeEntryDTO
+    {
+        public int subjectId { get; set; }
+        public string grade { get; set; }
+    }
 
-        // 🔹 DTO for holding individual course grades
-        public class CourseGradeDTO
-        {
-            public string CourseCode { get; set; }
-            public decimal Credits { get; set; }
-            public decimal GradePoint { get; set; }
-        }
+    // Per-subject result returned by repository
+    public class subjectGradeResultDTO
+    {
+        public int subjectId { get; set; }
+        public string subjectName { get; set; }
+        public int numberOfCredits { get; set; }
+        public string grade { get; set; }
+        public int gradePoint { get; set; }
+        public decimal pointsObtained { get; set; }
+    }
 
-        // 🔹 Request DTO for calculating SGPA
-        public class CalculateSGPARequestDTO
-        {
-            public string RollNo { get; set; } // Optional field
-            public string Department { get; set; }
-            public string Batch { get; set; }
-            public int Semester { get; set; }
-            public List<CourseGradeDTO> Courses { get; set; }
-        }
-
-        // 🔹 Response DTO for SGPA result
-        public class SGPAResultDTO
-        {
-            public decimal Sgpa { get; set; }
-        }
-
-        // 🔹 Standard API Response wrapper
-        public class APIResponseDTO
-        {
-            public int StatusCode { get; set; }
-            public string Message { get; set; }
-            public object Data { get; set; }
-            public string ErrorDetails { get; set; }
-        }
+    // Final CGPA result returned by repository/controller
+    public class cgpaResultDTO
+    {
+        public decimal cgpa { get; set; }
+        public int totalCredits { get; set; }
+        public decimal totalPoints { get; set; }
+        public List<subjectGradeResultDTO> subjects { get; set; } = new List<subjectGradeResultDTO>();
     }
 }

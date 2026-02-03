@@ -1,0 +1,255 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add Subjects";
+}
+
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="fw-bold">Subject Details</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#subjectModal">
+        <i class="bx bx-plus"></i> Add Subject
+    </button>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Batch</th>
+                    <th>Department</th>
+                    <th>Subject</th>
+                    <th>Credits</th>
+                    <th style="width:180px">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="subjectTableBody">
+                <!-- data loaded via JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ADD / EDIT SUBJECT MODAL -->
+<div class="modal fade" id="subjectModal" tabindex="-1">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="subjectModalTitle">Add Subject</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="subjectForm" onsubmit="return false;">
+                    <input type="hidden" id="subjectId" value="0" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Batch</label>
+                            <select id="batch" class="form-control"><option value="">Select</option></select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Department</label>
+                            <select id="department" class="form-control"><option value="">Select</option></select>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Subject Name</label>
+                            <input type="text" id="subjectName" class="form-control" placeholder="Enter subject name" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Number of Credits</label>
+                            <input type="number" id="credits" min="0" class="form-control" placeholder="Credits" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" id="subjectSaveBtn">Save</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentEditingId = 0;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadDropdowns();
+            loadSubjects();
+
+            // Save handler
+            document.getElementById('subjectSaveBtn').addEventListener('click', function () {
+                saveSubject();
+            });
+
+            // Reset modal when hidden
+            const subjectModalEl = document.getElementById('subjectModal');
+            subjectModalEl.addEventListener('hidden.bs.modal', function () {
+                resetSubjectModal();
+            });
+        });
+
+        function loadDropdowns() {
+            fetch('/Timetable/getDropdowns')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res || res.statusCode !== 200) return;
+
+                    fillDropdown('batch', res.data.batches);
+                    fillDropdown('department', res.data.departments);
+                })
+                .catch(err => console.error(err));
+        }
+
+        function fillDropdown(id, data) {
+            const ddl = document.getElementById(id);
+            if (!ddl) return;
+            ddl.innerHTML = '<option value="">Select</option>';
+            (data || []).forEach(x => {
+                ddl.innerHTML += `<option value="${x.id}">${x.name}</option>`;
+            });
+        }
+
+        function loadSubjects() {
+            fetch('/Timetable/getSubjectList')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res || res.statusCode !== 200) return;
+                    const body = document.getElementById('subjectTableBody');
+                    body.innerHTML = '';
+                    (res.data || []).forEach(s => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${s.batchName || ''}</td>
+                            <td>${s.departmentName || ''}</td>
+                            <td>${s.subjectName || ''}</td>
+                            <td>${s.numberOfCredits ?? 0}</td>
+                            <td>
+                                <div class="d-flex gap-2 justify-content-center align-items-center">
+                                    <div class="form-check form-switch m-0">
+                                        <input class="form-check-input toggle-subject" type="checkbox" role="switch"
+                                            id="toggle_${s.subjectId}" ${s.isActive ? 'checked' : ''}
+                                            onchange="toggleSubject(${s.subjectId}, this.checked)" />
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="openEdit(${s.subjectId})">Edit</button>
+                                </div>
+                            </td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+
+        function toggleSubject(subjectId, isActive) {
+            const payload = {
+                subjectId: subjectId,
+                isActive: isActive
+            };
+
+            fetch('/Timetable/ToggleStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (!res) {
+                    alert('Failed to update status (no response)');
+                    document.getElementById(`toggle_${subjectId}`).checked = !isActive;
+                    return;
+                }
+
+                if (!res.success) {
+                    const errMsg = res.message || res.errorDetails || 'Failed to update status';
+                    alert(errMsg);
+                    document.getElementById(`toggle_${subjectId}`).checked = !isActive;
+                    return;
+                }
+
+                // success -> refresh list to reflect state (row may disappear if server hides inactive)
+                loadSubjects();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error toggling status');
+                document.getElementById(`toggle_${subjectId}`).checked = !isActive;
+            });
+        }
+
+        function openEdit(subjectId) {
+            fetch('/Timetable/getSubjectList')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res || res.statusCode !== 200) return;
+                    const found = (res.data || []).find(x => x.subjectId === subjectId);
+                    if (!found) return alert('Subject not found');
+
+                    // populate modal for edit
+                    currentEditingId = subjectId;
+                    document.getElementById('subjectId').value = found.subjectId;
+                    // ensure dropdowns are populated before setting values
+                    // loadDropdowns() already called on DOM ready; set values directly
+                    if (found.batchId) document.getElementById('batch').value = found.batchId;
+                    if (found.departmentId) document.getElementById('department').value = found.departmentId;
+                    document.getElementById('subjectName').value = found.subjectName ?? '';
+                    document.getElementById('credits').value = found.numberOfCredits ?? 0;
+
+                    document.getElementById('subjectModalTitle').textContent = 'Edit Subject';
+                    const modal = new bootstrap.Modal(document.getElementById('subjectModal'));
+                    modal.show();
+                })
+                .catch(err => console.error(err));
+        }
+
+        function resetSubjectModal() {
+            currentEditingId = 0;
+            document.getElementById('subjectId').value = 0;
+            document.getElementById('subjectModalTitle').textContent = 'Add Subject';
+            document.getElementById('subjectForm').reset();
+        }
+
+        function saveSubject() {
+            const subjectId = parseInt(document.getElementById('subjectId').value || 0, 10);
+            const payload = {
+                subjectId: subjectId,
+                batchId: parseInt(document.getElementById('batch').value || 0, 10),
+                departmentId: parseInt(document.getElementById('department').value || 0, 10),
+                subjectName: document.getElementById('subjectName').value.trim(),
+                numberOfCredits: parseInt(document.getElementById('credits').value || 0, 10)
+            };
+
+            if (!payload.batchId || !payload.departmentId || !payload.subjectName) {
+                alert('Batch, Department and Subject Name are required');
+                return;
+            }
+
+            fetch('/Timetable/saveSubject', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (!res) return alert('Unexpected response');
+                if (!res.success) return alert(res.message || res.errorDetails || 'Save failed');
+
+                // close modal and reload table
+                const modalEl = document.getElementById('subjectModal');
+                bootstrap.Modal.getInstance(modalEl)?.hide();
+                resetSubjectModal();
+                loadSubjects();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error saving subject');
+            });
+        }
+    </script>
+}

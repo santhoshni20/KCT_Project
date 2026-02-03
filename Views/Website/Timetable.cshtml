@@ -51,29 +51,77 @@
     <script>
         document.addEventListener('DOMContentLoaded', loadDropdowns);
 
-        function loadDropdowns() {
-            fetch('/Timetable/GetDropdowns')
-                .then(r => r.json())
-                .then(res => {
-                    if (!res.success) return;
-                    fill('batch', res.data.batches);
-                    fill('department', res.data.departments);
-                    fill('section', res.data.sections);
-                });
+        async function loadDropdowns() {
+            try {
+                const url = '@Url.Action("GetMasterData", "Timetable")';
+                console.debug('Fetching master data from', url);
+
+                const resp = await fetch(url, { credentials: 'same-origin' });
+                const json = await resp.json();
+
+                console.debug('GetMasterData response:', json);
+
+                // Support two shapes:
+                // 1) { success: true, data: { batches: [...], ... } }
+                // 2) { batches: [...], ... }  (raw)
+                const payload = (json && json.data) ? json.data : json;
+
+                if (!payload) {
+                    console.warn('No master-data payload received');
+                    return;
+                }
+
+                fill('batch', payload.batches);
+                fill('department', payload.departments);
+                fill('section', payload.sections);
+
+                // optional selects that may only exist on AddTimetable form
+                fillIfExists('subject', payload.subjects);
+                fillIfExists('block', payload.blocks);
+                fillIfExists('room', payload.rooms);
+                fillIfExists('faculty', payload.faculties);
+            } catch (err) {
+                console.error('Failed to load master data', err);
+            }
         }
 
         function fill(id, data) {
             const ddl = document.getElementById(id);
+            if (!ddl) {
+                console.debug(`select #${id} not found in DOM`);
+                return;
+            }
+
             ddl.innerHTML = '<option value="">Select</option>';
+
+            if (!data || !Array.isArray(data)) {
+                console.debug(`No array data for select #${id}`, data);
+                return;
+            }
+
             data.forEach(x => {
-                ddl.innerHTML += `<option value="${x.id}">${x.name}</option>`;
+                // support items with either { id, name } or { batchId, batchName } forms
+                const value = x.id ?? x.batchId ?? x.departmentId ?? x.sectionId ?? x.subjectId ?? x.blockId ?? x.roomId ?? x.FacultyID ?? x.facultyId;
+                const text = x.name ?? x.batchName ?? x.departmentName ?? x.sectionName ?? x.subjectName ?? x.blockName ?? x.roomNumber ?? x.FacultyName ?? x.facultyName;
+                ddl.insertAdjacentHTML('beforeend', `<option value="${value}">${text}</option>`);
             });
         }
 
+        function fillIfExists(id, data) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            fill(id, data);
+        }
+
+        // Keep existing loadTimetable function but use element reads robustly
         function loadTimetable() {
-            const batchId = batch.value;
-            const departmentId = department.value;
-            const sectionId = section.value;
+            const batchEl = document.getElementById('batch');
+            const deptEl = document.getElementById('department');
+            const sectionEl = document.getElementById('section');
+
+            const batchId = batchEl?.value;
+            const departmentId = deptEl?.value;
+            const sectionId = sectionEl?.value;
 
             if (!batchId || !departmentId || !sectionId) {
                 alert("Select Batch, Department and Section");
@@ -83,24 +131,27 @@
             fetch(`/Timetable/GetTimetableByClass?batchId=${batchId}&departmentId=${departmentId}&sectionId=${sectionId}`)
                 .then(r => r.json())
                 .then(res => {
-                    if (!res.success) return;
+                    // server returns { success: true, data } or direct object -> try both
+                    const payload = (res && res.data) ? res.data : res;
+                    if (!payload) return;
 
                     const body = document.getElementById('timetableBody');
                     body.innerHTML = '';
 
-                    res.data.forEach(x => {
+                    (payload || []).forEach(x => {
                         body.innerHTML += `
                             <tr>
-                                <td>${x.day}</td>
-                                <td>${x.hour}</td>
-                                <td>${x.block}</td>
-                                <td>${x.room}</td>
-                                <td>${x.subject}</td>
-                                <td>${x.faculty}</td>
+                                <td>${x.day ?? ''}</td>
+                                <td>${x.hour ?? ''}</td>
+                                <td>${x.block ?? ''}</td>
+                                <td>${x.room ?? ''}</td>
+                                <td>${x.subject ?? ''}</td>
+                                <td>${x.faculty ?? ''}</td>
                             </tr>
                         `;
                     });
-                });
+                })
+                .catch(e => console.error('loadTimetable failed', e));
         }
     </script>
 }

@@ -19,9 +19,9 @@
                     <th>Batch</th>
                     <th>Department</th>
                     <th>Section</th>
-                    <th>Subject</th>   
-                    <th>Block</th>   
-                    <th>Room</th>     
+                    <th>Subject</th>
+                    <th>Block</th>
+                    <th>Room</th>
                     <th>Hour</th>
                     <th>Faculty</th>
                 </tr>
@@ -42,7 +42,7 @@
             </div>
 
             <div class="modal-body">
-                <form id="timetableForm">
+                <form id="timetableForm" onsubmit="return false;">
                     <div class="row g-3">
 
                         <div class="col-md-4">
@@ -64,6 +64,7 @@
                             <label class="form-label">Subject</label>
                             <select id="subject" class="form-control"></select>
                         </div>
+
                         <div class="col-md-4">
                             <label class="form-label">Day</label>
                             <select id="day" class="form-control">
@@ -104,7 +105,7 @@
 
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-primary" onclick="saveTimetable()">Save</button>
+                <button id="btnSaveTimetable" class="btn btn-primary">Save</button>
             </div>
 
         </div>
@@ -113,100 +114,214 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            loadDropdowns();
-            loadTimetable();
-        });
+        (function () {
+            // cached master payload
+            let masterData = null;
 
-        // Load all dropdowns including subjects
-        function loadDropdowns() {
-            fetch('/Timetable/GetDropdowns')
-                .then(r => r.json())
-                .then(res => {
-                    if (!res.success) return;
-
-                    fill('batch', res.data.batches);
-                    fill('department', res.data.departments);
-                    fill('section', res.data.sections);
-                    fill('faculty', res.data.faculties);
-                    fill('block', res.data.blocks);
-                    fill('room', res.data.rooms);
-                    fill('subject', res.data.subjects); // ✅ Load all subjects here
-                });
-        }
-
-        // Helper function to fill dropdown
-        function fill(id, data) {
-            const ddl = document.getElementById(id);
-            ddl.innerHTML = '<option value="">Select</option>';
-            data.forEach(x => {
-                ddl.innerHTML += `<option value="${x.id}">${x.name}</option>`;
-            });
-        }
-
-        // Save timetable
-        function saveTimetable() {
-            if (!day.value || !block.value || !room.value) {
-                alert("Please select Day, Block and Room");
-                return;
+            // helper: prefer element inside modal, otherwise global
+            function getElementPreferModal(id) {
+                const modal = document.getElementById('timetableModal');
+                if (modal) {
+                    const inside = modal.querySelector(`#${id}`);
+                    if (inside) return inside;
+                }
+                return document.getElementById(id);
             }
 
-            const payload = {
-                batchId: batch.value,
-                departmentId: department.value,
-                sectionId: section.value,
-                subjectId: subject.value,
-                facultyId: faculty.value,
-                hourNo: hour.value,
-                day: day.value,
-                blockId: block.value,
-                roomId: room.value
-            };
+            document.addEventListener('DOMContentLoaded', () => {
+                // load everything once
+                loadMasterData();
+                loadTimetableList();
 
-            fetch('/Timetable/SaveTimetable', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(r => r.json())
-            .then(res => {
-                alert(res.message);
-                if (res.success) {
-                    timetableForm.reset();
-                    bootstrap.Modal.getInstance(
-                        document.getElementById('timetableModal')
-                    ).hide();
-                    loadTimetable();
-                }
+                // wire dynamic filtering: use elements found in modal (preferred)
+                const batchEl = getElementPreferModal('batch');
+                const deptEl = getElementPreferModal('department');
+                batchEl?.addEventListener('change', applySubjectFilter);
+                deptEl?.addEventListener('change', applySubjectFilter);
+
+                // save button (modal)
+                const saveBtn = getElementPreferModal('btnSaveTimetable') || document.getElementById('btnSaveTimetable');
+                saveBtn?.addEventListener('click', saveTimetable);
             });
-        }
 
-        // Load timetable table
-        function loadTimetable() {
-            fetch('/Timetable/GetTimetableList')
-                .then(res => res.json())
-                .then(res => {
-                    if (!res.success) return;
+            async function loadMasterData() {
+                const url = '@Url.Action("GetMasterData", "Timetable")';
+                try {
+                    const resp = await fetch(url, { credentials: 'same-origin' });
+                    if (!resp.ok) {
+                        console.error('GetMasterData HTTP error', resp.status);
+                        return;
+                    }
+                    const json = await resp.json();
+                    // support ApiResponseDTO { success, data } and raw payload
+                    const payload = (json && json.data) ? json.data : json;
+                    if (!payload) {
+                        console.warn('GetMasterData returned empty payload');
+                        return;
+                    }
+                    masterData = payload;
 
-                    const body = document.getElementById('timetableBody');
-                    body.innerHTML = '';
+                    // fill common selects, target modal-first to avoid clashes with other pages
+                    fillSelect('batch', payload.batches);
+                    fillSelect('department', payload.departments);
+                    fillSelect('section', payload.sections);
+                    fillSelect('block', payload.blocks);
+                    fillSelect('room', payload.rooms);
+                    fillSelect('faculty', payload.faculties);
 
-                    res.data.forEach(x => {
-                        body.innerHTML += `
-                            <tr>
-                                <td>${x.day}</td>
-                                <td>${x.batch}</td>
-                                <td>${x.department}</td>
-                                <td>${x.section}</td>
-                                <td>${x.subject}</td>
-                                <td>${x.block}</td>
-                                <td>${x.room}</td>
-                                <td>${x.hour}</td>
-                                <td>${x.faculty}</td>
-                            </tr>
-                        `;
-                    });
+                    // fill subject list initially (possibly filtered later)
+                    fillSubjects();
+                } catch (err) {
+                    console.error('Failed to load master data', err);
+                }
+            }
+
+            // robust fill: prefer modal-scoped select when present to avoid duplicate-id conflicts
+            function fillSelect(id, data) {
+                if (!Array.isArray(data)) return;
+
+                const modal = document.getElementById('timetableModal');
+                let el = modal?.querySelector(`#${id}`);
+                if (!el) el = document.getElementById(id);
+                if (!el) {
+                    console.debug(`Select #${id} not found (modal or global).`);
+                    return;
+                }
+
+                el.innerHTML = '<option value="">Select</option>';
+                data.forEach(item => {
+                    const value = item.id ?? item.batchId ?? item.departmentId ?? item.sectionId ?? item.subjectId ?? item.blockId ?? item.roomId ?? item.facultyId ?? item.FacultyID;
+                    const text = item.name ?? item.batchName ?? item.departmentName ?? item.sectionName ?? item.subjectName ?? item.blockName ?? item.roomNumber ?? item.FacultyName ?? item.facultyName;
+                    if (value === null || value === undefined) return;
+                    const opt = document.createElement('option');
+                    opt.value = value;
+                    opt.textContent = text;
+                    el.appendChild(opt);
                 });
-        }
+            }
+
+            // subjects filtering: show only subjects matching selected batch & department, if available
+            function applySubjectFilter() {
+                fillSubjects();
+            }
+
+            function fillSubjects() {
+                const modal = document.getElementById('timetableModal');
+                const subjectEl = modal?.querySelector('#subject') ?? document.getElementById('subject');
+                if (!subjectEl) return;
+                subjectEl.innerHTML = '<option value="">Select</option>';
+                if (!masterData || !Array.isArray(masterData.subjects)) return;
+
+                // read batch & dept preferring modal elements
+                const batchVal = modal?.querySelector('#batch')?.value ?? document.getElementById('batch')?.value;
+                const deptVal = modal?.querySelector('#department')?.value ?? document.getElementById('department')?.value;
+
+                // if batch/department selected, prefer filter; otherwise list all active subjects
+                const filtered = masterData.subjects.filter(s => {
+                    let matches = true;
+                    if (batchVal) {
+                        matches = matches && ((s.batchId === undefined) || s.batchId == null || s.batchId == batchVal || s.batchId == Number(batchVal));
+                    }
+                    if (deptVal) {
+                        matches = matches && ((s.departmentId === undefined) || s.departmentId == null || s.departmentId == deptVal || s.departmentId == Number(deptVal));
+                    }
+                    return matches;
+                });
+
+                const listToUse = filtered.length ? filtered : masterData.subjects;
+
+                listToUse.forEach(item => {
+                    const value = item.id ?? item.subjectId;
+                    const text = item.name ?? item.subjectName;
+                    if (value === null || value === undefined) return;
+                    const opt = document.createElement('option');
+                    opt.value = value;
+                    opt.textContent = text;
+                    subjectEl.appendChild(opt);
+                });
+            }
+
+            async function saveTimetable() {
+                const modal = document.getElementById('timetableModal');
+
+                const day = (modal?.querySelector('#day') ?? document.getElementById('day')).value;
+                const block = (modal?.querySelector('#block') ?? document.getElementById('block')).value;
+                const room = (modal?.querySelector('#room') ?? document.getElementById('room')).value;
+                const hour = (modal?.querySelector('#hour') ?? document.getElementById('hour')).value;
+
+                if (!day || !block || !room || !hour) {
+                    alert('Please select Day, Block, Room and Hour');
+                    return;
+                }
+
+                const payload = {
+                    batchId: parseInt((modal?.querySelector('#batch') ?? document.getElementById('batch')).value || 0, 10) || null,
+                    departmentId: parseInt((modal?.querySelector('#department') ?? document.getElementById('department')).value || 0, 10) || null,
+                    sectionId: parseInt((modal?.querySelector('#section') ?? document.getElementById('section')).value || 0, 10) || null,
+                    subjectId: parseInt((modal?.querySelector('#subject') ?? document.getElementById('subject')).value || 0, 10) || null,
+                    facultyId: parseInt((modal?.querySelector('#faculty') ?? document.getElementById('faculty')).value || 0, 10) || null,
+                    hourNo: parseInt(hour, 10),
+                    day: day,
+                    blockId: parseInt(block, 10),
+                    roomId: parseInt(room, 10)
+                };
+
+                try {
+                    const resp = await fetch('@Url.Action("SaveTimetable", "Timetable")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        credentials: 'same-origin'
+                    });
+
+                    const json = await resp.json();
+                    const ok = json && (json.success === true || json.statusCode === 200);
+                    alert(json?.message ?? (ok ? 'Saved' : 'Save failed'));
+
+                    if (ok) {
+                        document.getElementById('timetableForm').reset();
+                        const modalEl = document.getElementById('timetableModal');
+                        const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modalInstance.hide();
+                        loadTimetableList();
+                    }
+                } catch (err) {
+                    console.error('saveTimetable failed', err);
+                    alert('Error saving timetable');
+                }
+            }
+
+            // load timetable list table
+            async function loadTimetableList() {
+                try {
+                    const resp = await fetch('@Url.Action("GetTimetableList", "Timetable")', { credentials: 'same-origin' });
+                    const json = await resp.json();
+                    const payload = (json && json.data) ? json.data : json;
+                    const body = document.getElementById('timetableBody');
+                    if (!Array.isArray(payload)) {
+                        body.innerHTML = '<tr><td colspan="9" class="text-center">No timetable found</td></tr>';
+                        return;
+                    }
+                    body.innerHTML = '';
+                    payload.forEach(x => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${x.day ?? ''}</td>
+                            <td>${x.batch ?? ''}</td>
+                            <td>${x.department ?? ''}</td>
+                            <td>${x.section ?? ''}</td>
+                            <td>${x.subject ?? ''}</td>
+                            <td>${x.block ?? ''}</td>
+                            <td>${x.room ?? ''}</td>
+                            <td>${x.hour ?? ''}</td>
+                            <td>${x.faculty ?? ''}</td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                } catch (err) {
+                    console.error('loadTimetableList failed', err);
+                }
+            }
+        })();
     </script>
 }

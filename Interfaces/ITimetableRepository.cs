@@ -44,6 +44,10 @@ namespace ksi.Interfaces
         Task<object> getMasterDataAsync();
         Task<List<TimetableDTO>> getSubjectsByClassAsync(int batchId, int departmentId, int sectionId);
 
-
+        #region Add subjects
+        List<subjectDTO> getSubjects();
+        object getDropdownData();
+        bool saveSubject(subjectDTO subjectDto, int userId);
+        #endregion
     }
 }

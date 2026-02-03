@@ -6,6 +6,7 @@ using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 
 namespace ksi.Repository
 {
@@ -292,6 +293,132 @@ namespace ksi.Repository
                     departmentName = d.departmentName
                 })
                 .ToList();
+        }
+        #endregion
+
+        #region CGPA
+        public List<subjectDTO> getSubjectsForCgpa(int batchId, int departmentId)
+        {
+            try
+            {
+                return _context.mstSubject
+                    .Where(s =>
+                        s.batchId == batchId &&
+                        s.departmentId == departmentId &&
+                        s.isActive &&
+                        s.deletedDate == null)
+                    .OrderBy(s => s.subjectName)
+                    .Select(s => new subjectDTO
+                    {
+                        subjectId = s.subjectId,
+                        batchId = s.batchId,
+                        departmentId = s.departmentId,
+                        subjectName = s.subjectName,
+                        numberOfCredits = s.numberOfCredits,
+
+                        // Not required for CGPA screen
+                        batchName = null,
+                        departmentName = null
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error fetching CGPA subjects: {ex.Message}", ex);
+            }
+        }
+        public async Task<cgpaResultDTO> calculateCgpaAsync(int batchId, int departmentId, List<gradeEntryDTO> grades)
+        {
+            if (grades == null || grades.Count == 0)
+                return new cgpaResultDTO
+                {
+                    cgpa = 0m,
+                    totalCredits = 0,
+                    totalPoints = 0m,
+                    subjects = new List<subjectGradeResultDTO>()
+                };
+
+            // Extract unique subject ids from incoming grades
+            var subjectIds = grades.Select(g => g.subjectId).Distinct().ToList();
+
+            // Single DB call to fetch subjects and credits for the requested batch + department
+            var subjects = await _context.mstSubject
+                .Where(s => subjectIds.Contains(s.subjectId)
+                            && s.batchId == batchId
+                            && s.departmentId == departmentId
+                            && s.isActive
+                            && s.deletedDate == null)
+                .Select(s => new
+                {
+                    s.subjectId,
+                    s.subjectName,
+                    s.numberOfCredits
+                })
+                .ToListAsync();
+
+            // Build lookup for fast access
+            var creditsLookup = subjects.ToDictionary(s => s.subjectId, s => s.numberOfCredits);
+
+            var subjectResults = new List<subjectGradeResultDTO>();
+            decimal totalPoints = 0m;
+            int totalCredits = 0;
+
+            foreach (var g in grades)
+            {
+                // If subject not present in DB result (mismatch), skip but include an entry with gradePoint 0
+                creditsLookup.TryGetValue(g.subjectId, out var credits);
+
+                var gradePoint = mapGradeToPoint(g.grade);
+                var pointsObtained = credits * gradePoint;
+
+                subjectResults.Add(new subjectGradeResultDTO
+                {
+                    subjectId = g.subjectId,
+                    subjectName = subjects.FirstOrDefault(s => s.subjectId == g.subjectId)?.subjectName,
+                    numberOfCredits = credits,
+                    grade = g.grade,
+                    gradePoint = gradePoint,
+                    pointsObtained = pointsObtained
+                });
+
+                totalCredits += credits;
+                totalPoints += pointsObtained;
+            }
+
+            decimal cgpa = 0m;
+            if (totalCredits > 0)
+            {
+                cgpa = Math.Round(totalPoints / totalCredits, 2);
+            }
+
+            return new cgpaResultDTO
+            {
+                cgpa = cgpa,
+                totalCredits = totalCredits,
+                totalPoints = totalPoints,
+                subjects = subjectResults
+            };
+        }
+
+        // helper - map grade string to numeric grade point
+        private int mapGradeToPoint(string grade)
+        {
+            if (string.IsNullOrWhiteSpace(grade))
+                return 0;
+
+            grade = grade.Trim().ToUpperInvariant();
+
+            return grade switch
+            {
+                "O" => 10,
+                "A+" => 9,
+                "A" => 8,
+                "B+" => 7,
+                "B" => 6,
+                "C+" => 5,
+                "C" => 4,
+                _ => 0
+            };
         }
         #endregion
 

@@ -5,6 +5,7 @@ using ksi_project.Models.Entity;
 using KSI_Project.Models.Entity;
 using KsiProject.Entities;
 using Microsoft.EntityFrameworkCore;
+using YourProject.Entities;
 
 namespace KSI_Project.Helpers.DbContexts
 {
@@ -34,6 +35,9 @@ namespace KSI_Project.Helpers.DbContexts
         public DbSet<mstRoom> mstRoom { get; set; }
         public DbSet<HallLocatorEntities> HallSeating { get; set; }
 
+        public DbSet<mstFaculty> Faculties { get; set; }
+        public DbSet<mstSyllabus> mstSyllabus { get; set; }
+        //public DbSet<mstSubject> mstSubject { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -12,8 +12,7 @@
         <!-- Batch -->
         <div class="d-flex align-items-center master-input">
             <input type="text" id="batchName" class="form-control rounded-pill" placeholder="Batch" />
-            <button class="btn btn-primary rounded-circle ms-2"
-                    onclick="addBatch()">
+            <button class="btn btn-primary rounded-circle ms-2" onclick="addBatch()">
                 <i class="bx bx-plus"></i>
             </button>
         </div>
@@ -21,8 +20,7 @@
         <!-- Department -->
         <div class="d-flex align-items-center master-input">
             <input type="text" id="departmentName" class="form-control rounded-pill" placeholder="Department" />
-            <button class="btn btn-primary rounded-circle ms-2"
-                    onclick="addDepartment()">
+            <button class="btn btn-primary rounded-circle ms-2" onclick="addDepartment()">
                 <i class="bx bx-plus"></i>
             </button>
         </div>
@@ -30,25 +28,15 @@
         <!-- Section -->
         <div class="d-flex align-items-center master-input">
             <input type="text" id="sectionName" class="form-control rounded-pill" placeholder="Section" />
-            <button class="btn btn-primary rounded-circle ms-2"
-                    onclick="addSection()">
+            <button class="btn btn-primary rounded-circle ms-2" onclick="addSection()">
                 <i class="bx bx-plus"></i>
             </button>
         </div>
 
-        <!-- Subject -->
-        <div class="d-flex align-items-center master-input">
-            <input type="text" id="subjectName" class="form-control rounded-pill" placeholder="Subject" />
-            <button class="btn btn-primary rounded-circle ms-2"
-                    onclick="addSubject()">
-                <i class="bx bx-plus"></i>
-            </button>
-        </div>
         <!-- Block -->
         <div class="d-flex align-items-center master-input">
             <input type="text" id="blockName" class="form-control rounded-pill" placeholder="Block" />
-            <button class="btn btn-primary rounded-circle ms-2"
-                    onclick="addBlock()">
+            <button class="btn btn-primary rounded-circle ms-2" onclick="addBlock()">
                 <i class="bx bx-plus"></i>
             </button>
         </div>
@@ -56,8 +44,7 @@
         <!-- Room -->
         <div class="d-flex align-items-center master-input">
             <input type="text" id="roomNumber" class="form-control rounded-pill" placeholder="Room No" />
-            <button class="btn btn-primary rounded-circle ms-2"
-                    onclick="addRoom()">
+            <button class="btn btn-primary rounded-circle ms-2" onclick="addRoom()">
                 <i class="bx bx-plus"></i>
             </button>
         </div>
@@ -74,7 +61,6 @@
                     <th>Batch</th>
                     <th>Department</th>
                     <th>Section</th>
-                    <th>Subject</th>
                     <th>Block</th>
                     <th>Room</th>
                 </tr>
@@ -86,7 +72,6 @@
 
 @section Scripts {
     <script>
-
         document.addEventListener('DOMContentLoaded', loadMasterData);
 
         function loadMasterData() {
@@ -98,7 +83,6 @@
                     const b = res.data.batches;
                     const d = res.data.departments;
                     const s = res.data.sections;
-                    const sub = res.data.subjects;
                     const bl = res.data.blocks;
                     const r = res.data.rooms;
 
@@ -106,7 +90,6 @@
                         b.length,
                         d.length,
                         s.length,
-                        sub.length,
                         bl.length,
                         r.length
                     );
@@ -118,14 +101,12 @@
                             <td>${cell(b[i], 'batch')}</td>
                             <td>${cell(d[i], 'department')}</td>
                             <td>${cell(s[i], 'section')}</td>
-                            <td>${cell(sub[i], 'subject')}</td>
                             <td>${cell(bl[i], 'block')}</td>
                             <td>${cell(r[i], 'room')}</td>
                         </tr>`;
                     }
 
                     document.getElementById('masterBody').innerHTML = rows;
-
                 });
         }
 
@@ -151,7 +132,7 @@
             }).then(() => loadMasterData());
         }
 
-        /* ========== ADD ========= */
+        /* ===== ADD SIMPLE MASTERS ===== */
 
         function addBatch() {
             addSimple('/Timetable/AddBatch', 'batchName');
@@ -164,42 +145,13 @@
         function addSection() {
             addSimple('/Timetable/AddSection', 'sectionName');
         }
+
         function addBlock() {
             addSimple('/Timetable/AddBlock', 'blockName');
         }
 
         function addRoom() {
             addSimple('/Timetable/AddRoom', 'roomNumber');
-        }
-
-        function addSubject() {
-            const name = document.getElementById('subjectName').value.trim();
-            if (!name) {
-                alert('Enter subject name');
-                return;
-            }
-
-            // TEMP DEFAULT IDs (until you add dropdowns)
-            fetch('/Timetable/AddSubject', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    subjectName: name,
-                    batchId: 1,
-                    departmentId: 1,
-                    sectionId: 1,
-                    createdBy: 1
-                })
-            })
-            .then(r => r.json())
-            .then(res => {
-                if (res.success) {
-                    document.getElementById('subjectName').value = '';
-                    loadMasterData();
-                } else {
-                    alert(res.message);
-                }
-            });
         }
 
         function addSimple(url, inputId) {
@@ -221,6 +173,5 @@
                 }
             });
         }
-
     </script>
 }

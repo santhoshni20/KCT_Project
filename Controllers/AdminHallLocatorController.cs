@@ -3,6 +3,7 @@ using ksi.Data.Repository;
 using ksi.Models.DTO;
 using ksi.Models.Entity;
 using KSI_Project.Helpers.DbContexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace StudentPortal.Controllers
 {
@@ -17,105 +18,360 @@ namespace StudentPortal.Controllers
             _context = context;
         }
 
-        // GET: Index - Show block selection
+        // ════════════════════════════════════════════════════════════════
+        //  INDEX  –  single page : add hall + table + allocate + edit
+        // ════════════════════════════════════════════════════════════════
+
         public IActionResult Index()
         {
-            var blocks = _repo.GetBlocks();
-            return View(blocks);
+            var pageModel = BuildPageModel();
+            return View(pageModel);
         }
 
+        // ════════════════════════════════════════════════════════════════
+        //  ADD HALL  (POST)
+        // ════════════════════════════════════════════════════════════════
 
-        // POST: LocateHall - Show hall details
         [HttpPost]
-        public IActionResult LocateHall(int blockId, string hallNumber)
+        public IActionResult AddHall(int blockId, string roomNumber, int totalDesks, int seatsPerDesk)
         {
-            if (blockId <= 0 || string.IsNullOrWhiteSpace(hallNumber))
+            if (blockId <= 0 || string.IsNullOrWhiteSpace(roomNumber))
             {
-                TempData["Error"] = "Please provide valid block and hall number";
+                TempData["Error"] = "Please select a block and enter a hall number.";
                 return RedirectToAction("Index");
             }
 
-            var room = _repo.GetRoom(blockId, hallNumber.Trim());
-            if (room == null)
+            // Default desks = 30 if 0 or negative
+            if (totalDesks <= 0) totalDesks = 30;
+            // Default seats per desk = 2
+            if (seatsPerDesk <= 0 || seatsPerDesk > 4) seatsPerDesk = 2;
+
+            // Check duplicate
+            var existing = _repo.GetRoom(blockId, roomNumber.Trim());
+            if (existing != null)
             {
-                TempData["Error"] = $"Hall '{hallNumber}' not found in selected block";
+                TempData["Error"] = $"Hall '{roomNumber.Trim()}' already exists in this block.";
                 return RedirectToAction("Index");
             }
 
-            // Get block name
-            var block = _context.mstBlock.FirstOrDefault(b => b.blockId == blockId);
-
-            int totalSeats = room.totalDesks * room.seatsPerDesk;
-            int occupied = _repo.GetOccupiedSeats(room.roomId);
-
-            var dto = new HallLocatorDTO
+            var room = new mstRoom
             {
-                blockId = room.blockId,
-                blockName = block?.blockName ?? "Unknown", // FIX: Populate blockName
-                roomId = room.roomId,
-                roomNumber = room.roomNumber,
-                totalDesks = room.totalDesks,
-                seatsPerDesk = room.seatsPerDesk,
-                totalSeats = totalSeats,
-                occupiedSeats = occupied,
-                remainingSeats = totalSeats - occupied
+                blockId = blockId,
+                roomNumber = roomNumber.Trim(),
+                totalDesks = totalDesks,
+                seatsPerDesk = seatsPerDesk,
+                isActive = true,
+                createdBy = 1,                        // TODO: real user id
+                createdDate = DateTime.Now
             };
-
-            return View("HallResult", dto);
-        }
-
-        // GET: AddRoom - Show add hall form
-        public IActionResult AddRoom()
-        {
-            ViewBag.Blocks = _repo.GetBlocks();
-            return View();
-        }
-
-        // POST: AddRoom - Save new hall
-        [HttpPost]
-        public IActionResult AddRoom(mstRoom room)
-        {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Blocks = _repo.GetBlocks();
-                return View(room);
-            }
-
-            // FIX: Check if room already exists
-            var existingRoom = _context.mstRoom.FirstOrDefault(r =>
-                r.blockId == room.blockId &&
-                r.roomNumber.ToLower() == room.roomNumber.ToLower() &&
-                r.isActive);
-
-            if (existingRoom != null)
-            {
-                TempData["Error"] = $"Hall '{room.roomNumber}' already exists in this block";
-                ViewBag.Blocks = _repo.GetBlocks();
-                return View(room);
-            }
-
-            room.roomNumber = room.roomNumber.Trim(); // Trim whitespace
-            room.createdDate = DateTime.Now;
-            room.createdBy = 1; // TODO: Replace with actual user ID from session/auth
-            room.isActive = true;
 
             _context.mstRoom.Add(room);
             _context.SaveChanges();
 
-            TempData["Success"] = $"Hall '{room.roomNumber}' added successfully!";
+            TempData["Success"] = $"Hall '{room.roomNumber}' added successfully with {totalDesks} desks!";
             return RedirectToAction("Index");
         }
 
-        // GET: ViewAllHalls - Optional: View all halls by block
-        public IActionResult ViewAllHalls(int? blockId)
+        // ════════════════════════════════════════════════════════════════
+        //  ALLOCATE STUDENTS  (POST)
+        //  Two modes:
+        //    mode = "department"  →  generate roll nos from dept + batch + start/end
+        //    mode = "manual"      →  user pastes roll numbers (comma‑separated)
+        // ════════════════════════════════════════════════════════════════
+
+        [HttpPost]
+        public IActionResult AllocateStudents(
+            int roomId,
+            string mode,                          // "department" or "manual"
+            int departmentId,
+            int batchId,
+            string rollStart,
+            string rollEnd,
+            string manualRollNumbers)
         {
-            ViewBag.Blocks = _repo.GetBlocks();
+            if (roomId <= 0)
+            {
+                TempData["Error"] = "Invalid hall selected.";
+                return RedirectToAction("Index");
+            }
 
-            var rooms = blockId.HasValue
-                ? _context.mstRoom.Where(r => r.blockId == blockId.Value && r.isActive).ToList()
-                : _context.mstRoom.Where(r => r.isActive).ToList();
+            var room = _repo.GetRoomById(roomId);
+            if (room == null)
+            {
+                TempData["Error"] = "Hall not found.";
+                return RedirectToAction("Index");
+            }
 
-            return View(rooms);
+            List<string> rollNumbers = new();
+            string department = "";
+
+            if (mode == "department")
+            {
+                // ── Resolve department name ───────────────────────────
+                var dept = _context.mstDepartment.Find(departmentId);
+                if (dept == null)
+                {
+                    TempData["Error"] = "Invalid department selected.";
+                    return RedirectToAction("Index");
+                }
+                department = dept.departmentName;
+
+                if (string.IsNullOrWhiteSpace(rollStart) || string.IsNullOrWhiteSpace(rollEnd))
+                {
+                    TempData["Error"] = "Please enter both roll start and roll end.";
+                    return RedirectToAction("Index");
+                }
+
+                // Generate roll numbers from rollStart to rollEnd
+                rollNumbers = GenerateRollNumbers(rollStart.Trim(), rollEnd.Trim());
+                if (rollNumbers.Count == 0)
+                {
+                    TempData["Error"] = "Could not generate roll numbers. Check start/end format (e.g. 23bit001 – 23bit030).";
+                    return RedirectToAction("Index");
+                }
+            }
+            else // mode == "manual"
+            {
+                if (string.IsNullOrWhiteSpace(manualRollNumbers))
+                {
+                    TempData["Error"] = "Please enter at least one roll number.";
+                    return RedirectToAction("Index");
+                }
+
+                rollNumbers = manualRollNumbers
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(r => r.Trim())
+                    .Where(r => r.Length > 0)
+                    .ToList();
+
+                // Try to derive department from the first roll number prefix
+                department = Derivedepartment(rollNumbers.FirstOrDefault() ?? "");
+            }
+
+            int allocated = _repo.AllocateStudents(roomId, department, rollNumbers);
+
+            if (allocated > 0)
+                TempData["Success"] = $"{allocated} student(s) allocated to hall successfully.";
+            else
+                TempData["Error"] = "No students allocated. Room may be full or roll numbers already allocated.";
+
+            return RedirectToAction("Index");
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  REMOVE SINGLE ALLOCATION  (POST)
+        // ════════════════════════════════════════════════════════════════
+
+        [HttpPost]
+        public IActionResult RemoveAllocation(int hallSeatingId)
+        {
+            _repo.RemoveAllocation(hallSeatingId);
+            TempData["Success"] = "Student allocation removed successfully.";
+            return RedirectToAction("Index");
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  REALLOCATE SINGLE STUDENT  (POST)
+        // ════════════════════════════════════════════════════════════════
+
+        [HttpPost]
+        public IActionResult ReallocateStudent(int hallSeatingId, int newRoomId)
+        {
+            bool success = _repo.ReallocateStudent(hallSeatingId, newRoomId);
+
+            if (success)
+                TempData["Success"] = "Student reallocated to new hall successfully.";
+            else
+                TempData["Error"] = "Reallocation failed. Target hall may be full or invalid.";
+
+            return RedirectToAction("Index");
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  REALLOCATE ENTIRE DEPARTMENT from one hall to another  (POST)
+        // ════════════════════════════════════════════════════════════════
+
+        [HttpPost]
+        public IActionResult ReallocateDepartment(int fromRoomId, string department, int toRoomId)
+        {
+            if (fromRoomId == toRoomId)
+            {
+                TempData["Error"] = "Source and target halls are the same.";
+                return RedirectToAction("Index");
+            }
+
+            int moved = _repo.ReallocateDepartment(fromRoomId, department, toRoomId);
+
+            if (moved > 0)
+                TempData["Success"] = $"{moved} student(s) of '{department}' reallocated successfully.";
+            else
+                TempData["Error"] = "No students moved. Check department name or target hall capacity.";
+
+            return RedirectToAction("Index");
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  GET – Allocated students for a specific room (used via AJAX / partial)
+        // ════════════════════════════════════════════════════════════════
+
+        public IActionResult GetAllocationsForRoom(int roomId)
+        {
+            var room = _repo.GetRoomById(roomId);
+            if (room == null) return Json(new List<AllocationDetailDTO>());
+
+            var block = _context.mstBlock.Find(room.blockId);
+            var allocations = _repo.GetAllocationsForRoom(roomId);
+
+            var list = allocations.Select(a => new AllocationDetailDTO
+            {
+                hallSeatingId = a.hallSeatingId,
+                roomId = a.roomId,
+                roomNumber = room.roomNumber,
+                blockName = block?.blockName ?? "",
+                deskNumber = a.deskNumber,
+                seatNumber = a.seatNumber,
+                rollNumber = a.rollNumber,
+                department = a.department
+            }).ToList();
+
+            return Json(list);
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  PRIVATE HELPERS
+        // ════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Builds the full page model: all halls with seat counts, block / dept / batch lists.
+        /// </summary>
+        private HallLocatorPageDTO BuildPageModel()
+        {
+            var rooms = _context.mstRoom
+                .Where(r => r.isActive)
+                .OrderBy(r => r.blockId)
+                .ThenBy(r => r.roomNumber)
+                .ToList();
+
+            var blocks = _repo.GetBlocks();
+            var blockMap = blocks.ToDictionary(b => b.blockId, b => b.blockName);
+
+            var halls = rooms.Select(r =>
+            {
+                int totalSeats = r.totalDesks * r.seatsPerDesk;
+                int occupied = _repo.GetOccupiedSeats(r.roomId);
+
+                var depts = _context.mstHallSeating
+    .Where(s => s.roomId == r.roomId)
+    .Select(s => s.department)
+    .Distinct()
+    .ToList();
+
+
+                return new HallTableRowDTO
+                {
+                    roomId = r.roomId,
+                    blockId = r.blockId,
+                    blockName = blockMap.ContainsKey(r.blockId) ? blockMap[r.blockId] : "Unknown",
+                    roomNumber = r.roomNumber,
+                    totalDesks = r.totalDesks,
+                    seatsPerDesk = r.seatsPerDesk,
+                    totalSeats = totalSeats,
+                    occupiedSeats = occupied,
+                    remainingSeats = totalSeats - occupied,
+                    allocatedDepartments = depts
+                };
+            }).ToList();
+
+            return new HallLocatorPageDTO
+            {
+                halls = halls,
+                blocks = blocks,
+                departments = _repo.GetDepartments(),
+                batches = _repo.GetBatches()
+            };
+        }
+
+        /// <summary>
+        /// Generates roll numbers between start and end.
+        /// Example: "23bit001" to "23bit030"  →  ["23bit001","23bit002",…,"23bit030"]
+        /// The prefix (letters) is extracted from start; only the trailing numeric part increments.
+        /// </summary>
+        private static List<string> GenerateRollNumbers(string start, string end)
+        {
+            var result = new List<string>();
+
+            // Split prefix (non‑digit) and numeric suffix
+            string prefixStart = ExtractPrefix(start);
+            string prefixEnd = ExtractPrefix(end);
+
+            if (!prefixStart.Equals(prefixEnd, StringComparison.OrdinalIgnoreCase))
+            {
+                // Prefixes don't match – can't generate
+                return result;
+            }
+
+            if (!int.TryParse(ExtractNumber(start), out int numStart) ||
+                !int.TryParse(ExtractNumber(end), out int numEnd))
+                return result;
+
+            if (numEnd < numStart) return result;
+
+            // Determine zero‑pad width from the original string
+            int padWidth = ExtractNumber(start).Length;
+
+            for (int i = numStart; i <= numEnd; i++)
+            {
+                result.Add(prefixStart.ToLower() + i.ToString().PadLeft(padWidth, '0'));
+            }
+
+            return result;
+        }
+
+        /// <summary>Extracts the leading non‑digit prefix: "23bit001" → "23bit"</summary>
+        private static string ExtractPrefix(string roll)
+        {
+            // Find the position where the LAST continuous numeric block starts
+            int lastNumStart = roll.Length;
+            for (int i = roll.Length - 1; i >= 0; i--)
+            {
+                if (char.IsDigit(roll[i]))
+                    lastNumStart = i;
+                else
+                    break;
+            }
+            return roll.Substring(0, lastNumStart);
+        }
+
+        /// <summary>Extracts the trailing numeric part: "23bit001" → "001"</summary>
+        private static string ExtractNumber(string roll)
+        {
+            int lastNumStart = roll.Length;
+            for (int i = roll.Length - 1; i >= 0; i--)
+            {
+                if (char.IsDigit(roll[i]))
+                    lastNumStart = i;
+                else
+                    break;
+            }
+            return roll.Substring(lastNumStart);
+        }
+
+        /// <summary>
+        /// Tries to derive department short code from roll number prefix.
+        /// 23bit… → IT, 23bad… → AIDS, 23bcs… → CSE  etc.
+        /// </summary>
+        private static string Derivedepartment(string rollNumber)
+        {
+            if (string.IsNullOrEmpty(rollNumber)) return "";
+
+            string lower = rollNumber.ToLower();
+
+            if (lower.Contains("bit")) return "IT";
+            if (lower.Contains("bad")) return "AIDS";
+            if (lower.Contains("bcs")) return "CSE";
+
+            // fallback: return the prefix itself
+            return ExtractPrefix(rollNumber);
         }
     }
 }

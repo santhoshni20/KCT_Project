@@ -1,16 +1,39 @@
-﻿@model List<mstBlock>
+﻿@model ksi.Models.DTO.HallLocatorPageDTO
 @{
-    ViewData["Title"] = "Hall Locator - Admin";
+    ViewData["Title"] = "Hall Locator – Admin";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold">Hall Locator (Admin)</h4>
-        <a asp-action="AddRoom" class="btn btn-success">
-            <i class="bi bi-plus-circle"></i> Add New Hall
-        </a>
-    </div>
+<style>
+    /* ── Page‑level helpers ──────────────────────────────────────── */
+    .section-title { font-weight: 700; margin-bottom: 10px; }
+    .card-header-custom { background: #2c3e50; color: #fff; padding: 10px 16px; border-radius: 6px 6px 0 0; }
+    .card-custom { border: 1px solid #dee2e6; border-radius: 6px; margin-bottom: 22px; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+    .card-body-custom { padding: 18px; }
 
+    /* ── Allocation sub‑panel ────────────────────────────────────── */
+    .alloc-panel { display: none; margin-top: 12px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 14px; }
+    .alloc-panel.open { display: block; }
+    .alloc-panel .sub-title { font-weight: 600; font-size: .92rem; margin-bottom: 8px; }
+
+    /* ── Capacity bar ────────────────────────────────────────────── */
+    .capacity-bar { width: 100%; height: 12px; background: #e9ecef; border-radius: 6px; overflow: hidden; }
+    .capacity-bar .fill { height: 100%; border-radius: 6px; transition: width .3s; }
+    .capacity-bar .fill.safe   { background: #28a745; }
+    .capacity-bar .fill.warn   { background: #ffc107; }
+    .capacity-bar .fill.danger { background: #dc3545; }
+
+    /* ── Tables ──────────────────────────────────────────────────── */
+    .tbl-halls th, .tbl-alloc th { background: #34495e; color: #fff; text-align: center; }
+    .tbl-alloc { font-size: .88rem; }
+    .tbl-alloc td { text-align: center; vertical-align: middle; }
+
+    /* ── Inline select inside reallocate row ─────────────────────── */
+    .realloc-select { max-width: 200px; }
+</style>
+
+<div class="container-fluid mt-3 px-4">
+
+    <!-- ─── TOAST / ALERT ─────────────────────────────────────────────── -->
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -18,7 +41,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -27,33 +49,421 @@
         </div>
     }
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <form asp-action="LocateHall" method="post">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Select Block</label>
+    <!-- ─── PAGE HEADER ───────────────────────────────────────────────── -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0"><i class="bi bi-building"></i> Hall Locator (Admin)</h4>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SECTION 1 – ADD NEW HALL
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <i class="bi bi-plus-circle"></i> Add New Hall
+        </div>
+        <div class="card-body-custom">
+            <form asp-action="AddHall" method="post" class="row g-3">
+                <!-- Block -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Block <span class="text-danger">*</span></label>
                     <select name="blockId" class="form-select" required>
                         <option value="">-- Select Block --</option>
-                        @foreach (var block in Model)
+                        @foreach (var block in Model.blocks)
                         {
                             <option value="@block.blockId">@block.blockName</option>
                         }
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Hall Number</label>
-                    <input type="text"
-                           name="hallNumber"
-                           class="form-control"
-                           placeholder="e.g., C203"
-                           required />
+                <!-- Hall Number -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Hall Number <span class="text-danger">*</span></label>
+                    <input type="text" name="roomNumber" class="form-control" placeholder="e.g. C203" required />
                 </div>
 
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Locate Hall
-                </button>
+                <!-- Total Desks  (default 30) -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Total Desks <small class="text-muted">(default 30)</small></label>
+                    <input type="number" name="totalDesks" class="form-control" value="30" min="1" />
+                </div>
+
+                <!-- Seats Per Desk -->
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Seats / Desk</label>
+                    <select name="seatsPerDesk" class="form-select">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+
+                <!-- Submit -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-save"></i> Add Hall
+                    </button>
+                </div>
             </form>
         </div>
     </div>
-</div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SECTION 2 – ALL HALLS TABLE  +  per‑hall expand → allocate / edit
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <i class="bi bi-table"></i> All Halls
+        </div>
+        <div class="card-body-custom">
+
+            @if (Model.halls.Count == 0)
+            {
+                <div class="alert alert-info mb-0">No halls added yet. Add a hall above.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover tbl-halls mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Block</th>
+                                <th>Hall No</th>
+                                <th>Desks</th>
+                                <th>Seats/Desk</th>
+                                <th>Total Seats</th>
+                                <th>Occupied</th>
+                                <th>Remaining</th>
+                                <th>Capacity</th>
+                                <th>Departments</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{int sno = 1;}
+                            @foreach (var hall in Model.halls)
+                            {
+                                // capacity percentage for colour bar
+                                double pct = hall.totalSeats > 0
+                                    ? (double)hall.occupiedSeats / hall.totalSeats * 100
+                                    : 0;
+                                string barClass = pct < 60 ? "safe" : pct < 85 ? "warn" : "danger";
+
+                                <tr>
+                                    <td>@sno</td>
+                                    <td>@hall.blockName</td>
+                                    <td class="fw-semibold">@hall.roomNumber</td>
+                                    <td>@hall.totalDesks</td>
+                                    <td>@hall.seatsPerDesk</td>
+                                    <td>@hall.totalSeats</td>
+                                    <td class="text-danger fw-bold">@hall.occupiedSeats</td>
+                                    <td class="text-success fw-bold">@hall.remainingSeats</td>
+                                    <td style="min-width:100px;">
+                                        <div class="capacity-bar">
+                                            <div class="fill @barClass" style="width:@(pct.ToString("F0"))%;"></div>
+                                        </div>
+                                        <small class="text-muted">@(pct.ToString("F0"))%</small>
+                                    </td>
+                                    <td>
+                                        @if (hall.allocatedDepartments.Count > 0)
+                                        {
+                                            foreach (var d in hall.allocatedDepartments)
+                                            {
+                                                <span class="badge bg-secondary me-1">@d</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <!-- Expand / Collapse toggle -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary"
+                                                onclick="togglePanel(@hall.roomId)">
+                                            <i class="bi bi-chevron-down" id="icon-@hall.roomId"></i> Manage
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- ─── EXPANDABLE PANEL for this hall ─── -->
+                                <tr>
+                                    <td colspan="11" class="p-0 border-top-0">
+                                        <div class="alloc-panel" id="panel-@hall.roomId">
+
+                                            <!-- ── Allocate Students Form ── -->
+                                            <div class="sub-title"><i class="bi bi-person-plus"></i> Allocate Students</div>
+
+                                            <div class="row g-2 mb-3">
+                                                <!-- Mode selector -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label form-label-sm">Allocation Mode</label>
+                                                    <select class="form-select form-select-sm"
+                                                            id="mode-@hall.roomId"
+                                                            onchange="switchMode(@hall.roomId)">
+                                                        <option value="department">By Department + Batch</option>
+                                                        <option value="manual">Manual (Roll Numbers)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Mode = Department -->
+                                            <form asp-action="AllocateStudents" method="post" class="dept-form" id="deptForm-@hall.roomId">
+                                                <input type="hidden" name="roomId" value="@hall.roomId" />
+                                                <input type="hidden" name="mode" value="department" />
+
+                                                <div class="row g-2 mb-2">
+                                                    <div class="col-md-2">
+                                                        <label class="form-label form-label-sm">Department</label>
+                                                        <select name="departmentId" class="form-select form-select-sm" required>
+                                                            <option value="">-- Dept --</option>
+                                                            @foreach (var dept in Model.departments)
+                                                            {
+                                                                <option value="@dept.departmentId">@dept.departmentName</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label form-label-sm">Batch</label>
+                                                        <select name="batchId" class="form-select form-select-sm">
+                                                            <option value="">-- Batch --</option>
+                                                            @foreach (var batch in Model.batches)
+                                                            {
+                                                                <option value="@batch.batchId">@batch.batchName</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label form-label-sm">Roll Start</label>
+                                                        <input type="text" name="rollStart" class="form-control form-control-sm"
+                                                               placeholder="e.g. 23bit001" required />
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label form-label-sm">Roll End</label>
+                                                        <input type="text" name="rollEnd" class="form-control form-control-sm"
+                                                               placeholder="e.g. 23bit030" required />
+                                                    </div>
+                                                    <div class="col-md-2 d-flex align-items-end">
+                                                        <button type="submit" class="btn btn-sm btn-primary">
+                                                            <i class="bi bi-person-plus"></i> Allocate
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            <!-- Mode = Manual -->
+                                            <form asp-action="AllocateStudents" method="post" class="manual-form" id="manualForm-@hall.roomId" style="display:none;">
+                                                <input type="hidden" name="roomId" value="@hall.roomId" />
+                                                <input type="hidden" name="mode" value="manual" />
+
+                                                <div class="row g-2 mb-2">
+                                                    <div class="col-md-8">
+                                                        <label class="form-label form-label-sm">Roll Numbers <small class="text-muted">(comma separated)</small></label>
+                                                        <input type="text" name="manualRollNumbers" class="form-control form-control-sm"
+                                                               placeholder="23bit001, 23bit002, 23bcs005" required />
+                                                    </div>
+                                                    <div class="col-md-2 d-flex align-items-end">
+                                                        <button type="submit" class="btn btn-sm btn-primary">
+                                                            <i class="bi bi-person-plus"></i> Allocate
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            <hr class="my-2" />
+
+                                            <!-- ── Reallocate Entire Department ── -->
+                                            <div class="sub-title"><i class="bi bi-arrows-transfer"></i> Reallocate Department</div>
+                                            <form asp-action="ReallocateDepartment" method="post" class="row g-2 mb-3">
+                                                <input type="hidden" name="fromRoomId" value="@hall.roomId" />
+
+                                                <div class="col-md-2">
+                                                    <label class="form-label form-label-sm">Department</label>
+                                                    <select name="department" class="form-select form-select-sm">
+                                                        <option value="">-- Dept --</option>
+                                                        @foreach (var d in hall.allocatedDepartments)
+                                                        {
+                                                            <option value="@d">@d</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label form-label-sm">Move To Hall</label>
+                                                    <select name="toRoomId" class="form-select form-select-sm">
+                                                        <option value="">-- Target Hall --</option>
+                                                        @foreach (var h in Model.halls)
+                                                        {
+                                                            if (h.roomId != hall.roomId && h.remainingSeats > 0)
+                                                            {
+                                                                <option value="@h.roomId">@h.blockName – @h.roomNumber (@h.remainingSeats free)</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 d-flex align-items-end">
+                                                    <button type="submit" class="btn btn-sm btn-warning">
+                                                        <i class="bi bi-arrows-transfer"></i> Move Dept
+                                                    </button>
+                                                </div>
+                                            </form>
+
+                                            <hr class="my-2" />
+
+                                            <!-- ── Allocated Students Table ── -->
+                                            <div class="sub-title"><i class="bi bi-people"></i> Allocated Students</div>
+                                            <div id="allocTable-@hall.roomId">
+                                                <!-- populated by JS on panel open -->
+                                                <div class="text-muted text-center py-2" id="loadingMsg-@hall.roomId">Loading…</div>
+                                            </div>
+
+                                        </div><!-- end alloc-panel -->
+                                    </td>
+                                </tr>
+
+                                { sno++; }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+</div><!-- end container -->
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     JAVASCRIPT  –  toggle panel, fetch allocations, reallocate row
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+    // ── Cache for loaded allocations (avoid repeated fetches) ──
+    const _loaded = {};
+
+    function togglePanel(roomId) {
+        const panel = document.getElementById('panel-' + roomId);
+        const icon  = document.getElementById('icon-'  + roomId);
+        if (panel.classList.toggle('open')) {
+            icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+            // Fetch allocation data the first time
+            if (!_loaded[roomId]) {
+                fetchAllocations(roomId);
+                _loaded[roomId] = true;
+            }
+        } else {
+            icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+        }
+    }
+
+    function switchMode(roomId) {
+        const sel     = document.getElementById('mode-' + roomId);
+        const deptF   = document.getElementById('deptForm-'   + roomId);
+        const manualF = document.getElementById('manualForm-' + roomId);
+        if (sel.value === 'department') {
+            deptF.style.display   = '';
+            manualF.style.display = 'none';
+        } else {
+            deptF.style.display   = 'none';
+            manualF.style.display = '';
+        }
+    }
+
+    // ── Fetch allocated students via controller endpoint ──
+    async function fetchAllocations(roomId) {
+        const container = document.getElementById('allocTable-' + roomId);
+        const loadMsg   = document.getElementById('loadingMsg-' + roomId);
+
+        try {
+            const res   = await fetch('/AdminHallLocator/GetAllocationsForRoom?roomId=' + roomId);
+            const rows  = await res.json();
+
+            // Build "all halls" option list once (for the per‑row reallocate select)
+            // We pull from the page's existing Reallocate Department selects
+            const hallOptions = getAllHallOptions(roomId);
+
+            if (rows.length === 0) {
+                container.innerHTML = '<div class="text-muted text-center py-2">No students allocated yet.</div>';
+                return;
+            }
+
+            let html = `
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm tbl-alloc mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Roll No</th>
+                            <th>Department</th>
+                            <th>Desk</th>
+                            <th>Seat</th>
+                            <th>Remove</th>
+                            <th>Reallocate To</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            rows.forEach((r, i) => {
+                html += `
+                        <tr>
+                            <td>${i + 1}</td>
+                            <td class="fw-semibold">${r.rollNumber}</td>
+                            <td><span class="badge bg-secondary">${r.department}</span></td>
+                            <td>${r.deskNumber}</td>
+                            <td>${r.seatNumber}</td>
+                            <td>
+                                <form action="/AdminHallLocator/RemoveAllocation" method="post" style="margin:0;">
+                                    <input type="hidden" name="hallSeatingId" value="${r.hallSeatingId}" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Remove this allocation?');">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <form action="/AdminHallLocator/ReallocateStudent" method="post"
+                                      style="margin:0; display:flex; gap:4px; align-items:center;">
+                                    <input type="hidden" name="hallSeatingId" value="${r.hallSeatingId}" />
+                                    <select name="newRoomId" class="form-select form-select-sm realloc-select" required>
+                                        <option value="">-- Hall --</option>
+                                        ${hallOptions}
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-warning text-nowrap">Move</button>
+                                </form>
+                            </td>
+                        </tr>`;
+            });
+
+            html += `           </tbody>
+                </table>
+            </div>`;
+
+            container.innerHTML = html;
+        }
+        catch (e) {
+            container.innerHTML = '<div class="text-danger">Error loading allocations.</div>';
+        }
+    }
+
+    // ── Helper: build <option> list for "reallocate to" selects ──
+    function getAllHallOptions(currentRoomId) {
+        // Grab every hall row's "Move To Hall" select that already exists on page
+        // Those were rendered server-side with remaining-seat info.
+        // We just re-use the FIRST available one (they all have the same hall list).
+        const selects = document.querySelectorAll('[name="toRoomId"]');
+        if (selects.length === 0) return '';
+        // The first select's options are the full hall list (minus its own hall)
+        // We want ALL halls except currentRoomId, so rebuild:
+        const allOptions = [];
+        selects.forEach(sel => {
+            sel.querySelectorAll('option').forEach(opt => {
+                if (opt.value && !allOptions.some(o => o.value === opt.value)) {
+                    allOptions.push({ value: opt.value, text: opt.textContent });
+                }
+            });
+        });
+        return allOptions
+            .filter(o => o.value != currentRoomId)
+            .map(o => `<option value="${o.value}">${o.text}</option>`)
+            .join('');
+    }
+</script>

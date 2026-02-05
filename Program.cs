@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure DbContext
+// ── DbContext ─────────────────────────────────────────────────────────
 builder.Services.AddDbContext<ksiDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("MySQLConnectionString"),
@@ -16,25 +16,23 @@ builder.Services.AddDbContext<ksiDbContext>(options =>
     )
 );
 
-// Register repositories
+// ── Repository registrations ──────────────────────────────────────────
 builder.Services.AddScoped<ICanteenRepository, CanteenRepository>();
 builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();
 builder.Services.AddScoped<IEventDetailsRepository, EventDetailsRepository>();
 builder.Services.AddScoped<ITimetableRepository, TimetableRepository>();
 builder.Services.AddScoped<IFacultyRepository, FacultyRepository>();
 builder.Services.AddScoped<iSyllabusRepository, SyllabusRepository>();
-builder.Services.AddScoped<IHallLocatorRepository, HallLocatorRepository>();
+builder.Services.AddScoped<IHallLocatorRepository, HallLocatorRepository>();   // Hall Locator
 
-//// Add MVC and Razor Pages
-//builder.Services.AddControllersWithViews()
-//    .AddRazorRuntimeCompilation(); // Optional: Enables hot reload for views
-
+// ── MVC ───────────────────────────────────────────────────────────────
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// BUILD THE APP - This must come BEFORE using 'app'
+// ── Build ─────────────────────────────────────────────────────────────
 var app = builder.Build();
 
-// Middleware Configuration
+// ── Middleware ────────────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -42,7 +40,7 @@ if (!app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseDeveloperExceptionPage(); // Shows detailed errors in development
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
@@ -50,10 +48,10 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 
-// Map routes
+// ── Routes ────────────────────────────────────────────────────────────
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=AdminHallLocator}/{action=HallResult}/{id?}"); // Changed default to HallLocator
+    pattern: "{controller=AdminHallLocator}/{action=Index}/{id?}");   // keep Home as default
 
 app.MapRazorPages();
 

@@ -5,30 +5,157 @@
 
 <style>
     /* ── Page‑level helpers ──────────────────────────────────────── */
-    .section-title { font-weight: 700; margin-bottom: 10px; }
-    .card-header-custom { background: #2c3e50; color: #fff; padding: 10px 16px; border-radius: 6px 6px 0 0; }
-    .card-custom { border: 1px solid #dee2e6; border-radius: 6px; margin-bottom: 22px; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
-    .card-body-custom { padding: 18px; }
+    .section-title {
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 6px 6px 0 0;
+        font-weight: 600;
+    }
+
+    .card-custom {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        margin-bottom: 22px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+
+    .card-body-custom {
+        padding: 20px;
+    }
+
+    /* ── Alert improvements ────────────────────────────────────────── */
+    .alert {
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+
+    .alert-success {
+        border-left-color: #28a745;
+        background: #d4edda;
+    }
+
+    .alert-danger {
+        border-left-color: #dc3545;
+        background: #f8d7da;
+    }
+
+    .alert-info {
+        border-left-color: #17a2b8;
+        background: #d1ecf1;
+    }
 
     /* ── Allocation sub‑panel ────────────────────────────────────── */
-    .alloc-panel { display: none; margin-top: 12px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 14px; }
-    .alloc-panel.open { display: block; }
-    .alloc-panel .sub-title { font-weight: 600; font-size: .92rem; margin-bottom: 8px; }
+    .alloc-panel {
+        display: none;
+        margin-top: 12px;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 16px;
+    }
+
+        .alloc-panel.open {
+            display: block;
+        }
+
+        .alloc-panel .sub-title {
+            font-weight: 600;
+            font-size: .95rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
 
     /* ── Capacity bar ────────────────────────────────────────────── */
-    .capacity-bar { width: 100%; height: 12px; background: #e9ecef; border-radius: 6px; overflow: hidden; }
-    .capacity-bar .fill { height: 100%; border-radius: 6px; transition: width .3s; }
-    .capacity-bar .fill.safe   { background: #28a745; }
-    .capacity-bar .fill.warn   { background: #ffc107; }
-    .capacity-bar .fill.danger { background: #dc3545; }
+    .capacity-bar {
+        width: 100%;
+        height: 14px;
+        background: #e9ecef;
+        border-radius: 7px;
+        overflow: hidden;
+        position: relative;
+    }
+
+        .capacity-bar .fill {
+            height: 100%;
+            border-radius: 7px;
+            transition: width .3s ease;
+        }
+
+            .capacity-bar .fill.safe {
+                background: linear-gradient(90deg, #28a745, #34ce57);
+            }
+
+            .capacity-bar .fill.warn {
+                background: linear-gradient(90deg, #ffc107, #ffcd39);
+            }
+
+            .capacity-bar .fill.danger {
+                background: linear-gradient(90deg, #dc3545, #e4606d);
+            }
 
     /* ── Tables ──────────────────────────────────────────────────── */
-    .tbl-halls th, .tbl-alloc th { background: #34495e; color: #fff; text-align: center; }
-    .tbl-alloc { font-size: .88rem; }
-    .tbl-alloc td { text-align: center; vertical-align: middle; }
+    .tbl-halls th, .tbl-alloc th {
+        background: #34495e;
+        color: #fff;
+        text-align: center;
+        font-weight: 600;
+    }
 
-    /* ── Inline select inside reallocate row ─────────────────────── */
-    .realloc-select { max-width: 200px; }
+    .tbl-halls {
+        font-size: .92rem;
+    }
+
+    .tbl-alloc {
+        font-size: .88rem;
+    }
+
+        .tbl-alloc td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+    /* ── Help text ───────────────────────────────────────────────── */
+    .help-text {
+        font-size: .85rem;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+
+        .help-text i {
+            font-size: .9rem;
+        }
+
+    /* ── Badge improvements ──────────────────────────────────────── */
+    .badge {
+        font-size: .8rem;
+        padding: 4px 8px;
+        font-weight: 500;
+    }
+
+    /* ── Button improvements ─────────────────────────────────────── */
+    .btn-sm {
+        font-size: .85rem;
+    }
+
+    /* ── Info box ────────────────────────────────────────────────── */
+    .info-box {
+        background: #e7f3ff;
+        border-left: 4px solid #0d6efd;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+    }
+
+        .info-box i {
+            color: #0d6efd;
+            margin-right: 8px;
+        }
 </style>
 
 <div class="container-fluid mt-3 px-4">
@@ -37,14 +164,14 @@
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Success"]
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["Error"]
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -52,6 +179,9 @@
     <!-- ─── PAGE HEADER ───────────────────────────────────────────────── -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="fw-bold mb-0"><i class="bi bi-building"></i> Hall Locator (Admin)</h4>
+        <div class="text-muted">
+            <small>Total Halls: <strong>@Model.halls.Count</strong></small>
+        </div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -59,9 +189,18 @@
          ═══════════════════════════════════════════════════════════════════ -->
     <div class="card-custom">
         <div class="card-header-custom">
-            <i class="bi bi-plus-circle"></i> Add New Hall
+            <i class="bi bi-plus-circle"></i> Add New Exam Hall
         </div>
         <div class="card-body-custom">
+            <div class="info-box">
+                <i class="bi bi-info-circle-fill"></i>
+                <strong>Seating Configuration:</strong>
+                <ul class="mb-0 mt-2" style="font-size: .85rem;">
+                    <li><strong>1 Seat/Desk:</strong> Each desk accommodates only 1 student (single seating)</li>
+                    <li><strong>2 Seats/Desk:</strong> Each desk accommodates 2 students from <strong>different departments</strong> (prevents copying)</li>
+                </ul>
+            </div>
+
             <form asp-action="AddHall" method="post" class="row g-3">
                 <!-- Block -->
                 <div class="col-md-3">
@@ -79,29 +218,31 @@
                 <div class="col-md-3">
                     <label class="form-label fw-semibold">Hall Number <span class="text-danger">*</span></label>
                     <input type="text" name="roomNumber" class="form-control" placeholder="e.g. C203" required />
+                    <div class="help-text">
+                        <i class="bi bi-lightbulb"></i> Example: C203, A101, E405
+                    </div>
                 </div>
 
                 <!-- Total Desks  (default 30) -->
                 <div class="col-md-2">
-                    <label class="form-label fw-semibold">Total Desks <small class="text-muted">(default 30)</small></label>
-                    <input type="number" name="totalDesks" class="form-control" value="30" min="1" />
+                    <label class="form-label fw-semibold">Total Desks</label>
+                    <input type="number" name="totalDesks" class="form-control" value="30" min="1" max="100" />
+                    <div class="help-text">Default: 30</div>
                 </div>
 
                 <!-- Seats Per Desk -->
                 <div class="col-md-2">
-                    <label class="form-label fw-semibold">Seats / Desk</label>
-                    <select name="seatsPerDesk" class="form-select">
-                        <option value="1">1</option>
-                        <option value="2" selected>2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
+                    <label class="form-label fw-semibold">Seats/Desk <span class="text-danger">*</span></label>
+                    <select name="seatsPerDesk" class="form-select" required>
+                        <option value="1">1 (Single)</option>
+                        <option value="2" selected>2 (Shared - Diff Dept)</option>
                     </select>
                 </div>
 
                 <!-- Submit -->
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="submit" class="btn btn-success w-100">
-                        <i class="bi bi-save"></i> Add Hall
+                        <i class="bi bi-plus-lg"></i> Add Hall
                     </button>
                 </div>
             </form>
@@ -109,17 +250,20 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
-         SECTION 2 – ALL HALLS TABLE  +  per‑hall expand → allocate / edit
+         SECTION 2 – ALL HALLS TABLE  +  per‑hall expand → allocate / view
          ═══════════════════════════════════════════════════════════════════ -->
     <div class="card-custom">
         <div class="card-header-custom">
-            <i class="bi bi-table"></i> All Halls
+            <i class="bi bi-table"></i> All Exam Halls (@Model.halls.Count)
         </div>
         <div class="card-body-custom">
 
             @if (Model.halls.Count == 0)
             {
-                <div class="alert alert-info mb-0">No halls added yet. Add a hall above.</div>
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No halls added yet. Add a hall using the form above.
+                </div>
             }
             else
             {
@@ -127,7 +271,7 @@
                     <table class="table table-bordered table-hover tbl-halls mb-0">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th style="width: 50px;">#</th>
                                 <th>Block</th>
                                 <th>Hall No</th>
                                 <th>Desks</th>
@@ -135,42 +279,44 @@
                                 <th>Total Seats</th>
                                 <th>Occupied</th>
                                 <th>Remaining</th>
-                                <th>Capacity</th>
+                                <th style="min-width: 120px;">Capacity</th>
                                 <th>Departments</th>
-                                <th>Actions</th>
+                                <th style="width: 120px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @{int sno = 1;}
+                            @{
+                                int sno = 1;
+                            }
                             @foreach (var hall in Model.halls)
                             {
                                 // capacity percentage for colour bar
                                 double pct = hall.totalSeats > 0
-                                    ? (double)hall.occupiedSeats / hall.totalSeats * 100
-                                    : 0;
+                                ? (double)hall.occupiedSeats / hall.totalSeats * 100
+                                : 0;
                                 string barClass = pct < 60 ? "safe" : pct < 85 ? "warn" : "danger";
 
                                 <tr>
-                                    <td>@sno</td>
-                                    <td>@hall.blockName</td>
-                                    <td class="fw-semibold">@hall.roomNumber</td>
-                                    <td>@hall.totalDesks</td>
-                                    <td>@hall.seatsPerDesk</td>
-                                    <td>@hall.totalSeats</td>
-                                    <td class="text-danger fw-bold">@hall.occupiedSeats</td>
-                                    <td class="text-success fw-bold">@hall.remainingSeats</td>
-                                    <td style="min-width:100px;">
+                                    <td class="text-center">@sno</td>
+                                    <td class="text-center">@hall.blockName</td>
+                                    <td class="fw-semibold text-center">@hall.roomNumber</td>
+                                    <td class="text-center">@hall.totalDesks</td>
+                                    <td class="text-center">@hall.seatsPerDesk</td>
+                                    <td class="text-center fw-bold">@hall.totalSeats</td>
+                                    <td class="text-center text-danger fw-bold">@hall.occupiedSeats</td>
+                                    <td class="text-center text-success fw-bold">@hall.remainingSeats</td>
+                                    <td>
                                         <div class="capacity-bar">
                                             <div class="fill @barClass" style="width:@(pct.ToString("F0"))%;"></div>
                                         </div>
-                                        <small class="text-muted">@(pct.ToString("F0"))%</small>
+                                        <small class="text-muted d-block text-center mt-1">@(pct.ToString("F0"))%</small>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         @if (hall.allocatedDepartments.Count > 0)
                                         {
                                             foreach (var d in hall.allocatedDepartments)
                                             {
-                                                <span class="badge bg-secondary me-1">@d</span>
+                                                <span class="badge bg-secondary me-1 mb-1">@d</span>
                                             }
                                         }
                                         else
@@ -178,7 +324,7 @@
                                             <span class="text-muted">—</span>
                                         }
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <!-- Expand / Collapse toggle -->
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-primary"
@@ -193,6 +339,21 @@
                                     <td colspan="11" class="p-0 border-top-0">
                                         <div class="alloc-panel" id="panel-@hall.roomId">
 
+                                            <!-- ── Capacity Info ── -->
+                                            <div class="alert alert-info mb-3" style="font-size: .9rem;">
+                                                <i class="bi bi-info-circle-fill me-2"></i>
+                                                <strong>@hall.roomNumber (@hall.blockName):</strong>
+                                                @hall.remainingSeats of @hall.totalSeats seats available
+                                                @if (hall.seatsPerDesk == 2)
+                                                {
+                                                    <span class="ms-2">| <i class="bi bi-people-fill"></i> Shared desks (different departments only)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="ms-2">| <i class="bi bi-person-fill"></i> Single seating</span>
+                                                }
+                                            </div>
+
                                             <!-- ── Allocate Students Form ── -->
                                             <div class="sub-title"><i class="bi bi-person-plus"></i> Allocate Students</div>
 
@@ -203,8 +364,8 @@
                                                     <select class="form-select form-select-sm"
                                                             id="mode-@hall.roomId"
                                                             onchange="switchMode(@hall.roomId)">
-                                                        <option value="department">By Department + Batch</option>
-                                                        <option value="manual">Manual (Roll Numbers)</option>
+                                                        <option value="department">📋 By Department + Roll Range</option>
+                                                        <option value="manual">✍️ Manual (Comma-separated)</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -215,41 +376,34 @@
                                                 <input type="hidden" name="mode" value="department" />
 
                                                 <div class="row g-2 mb-2">
-                                                    <div class="col-md-2">
-                                                        <label class="form-label form-label-sm">Department</label>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label form-label-sm">Department <span class="text-danger">*</span></label>
                                                         <select name="departmentId" class="form-select form-select-sm" required>
-                                                            <option value="">-- Dept --</option>
+                                                            <option value="">-- Select Department --</option>
                                                             @foreach (var dept in Model.departments)
                                                             {
                                                                 <option value="@dept.departmentId">@dept.departmentName</option>
                                                             }
                                                         </select>
                                                     </div>
-                                                    <div class="col-md-2">
-                                                        <label class="form-label form-label-sm">Batch</label>
-                                                        <select name="batchId" class="form-select form-select-sm">
-                                                            <option value="">-- Batch --</option>
-                                                            @foreach (var batch in Model.batches)
-                                                            {
-                                                                <option value="@batch.batchId">@batch.batchName</option>
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-2">
-                                                        <label class="form-label form-label-sm">Roll Start</label>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label form-label-sm">Roll Start <span class="text-danger">*</span></label>
                                                         <input type="text" name="rollStart" class="form-control form-control-sm"
                                                                placeholder="e.g. 23bit001" required />
                                                     </div>
-                                                    <div class="col-md-2">
-                                                        <label class="form-label form-label-sm">Roll End</label>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label form-label-sm">Roll End <span class="text-danger">*</span></label>
                                                         <input type="text" name="rollEnd" class="form-control form-control-sm"
                                                                placeholder="e.g. 23bit030" required />
                                                     </div>
-                                                    <div class="col-md-2 d-flex align-items-end">
-                                                        <button type="submit" class="btn btn-sm btn-primary">
+                                                    <div class="col-md-3 d-flex align-items-end">
+                                                        <button type="submit" class="btn btn-sm btn-primary w-100">
                                                             <i class="bi bi-person-plus"></i> Allocate
                                                         </button>
                                                     </div>
+                                                </div>
+                                                <div class="help-text">
+                                                    <i class="bi bi-lightbulb"></i> System will auto-generate roll numbers from start to end
                                                 </div>
                                             </form>
 
@@ -259,63 +413,34 @@
                                                 <input type="hidden" name="mode" value="manual" />
 
                                                 <div class="row g-2 mb-2">
-                                                    <div class="col-md-8">
-                                                        <label class="form-label form-label-sm">Roll Numbers <small class="text-muted">(comma separated)</small></label>
+                                                    <div class="col-md-9">
+                                                        <label class="form-label form-label-sm">Roll Numbers (comma-separated) <span class="text-danger">*</span></label>
                                                         <input type="text" name="manualRollNumbers" class="form-control form-control-sm"
-                                                               placeholder="23bit001, 23bit002, 23bcs005" required />
+                                                               placeholder="23bit001, 23bit005, 23bcs010, 23bad015" required />
                                                     </div>
-                                                    <div class="col-md-2 d-flex align-items-end">
-                                                        <button type="submit" class="btn btn-sm btn-primary">
+                                                    <div class="col-md-3 d-flex align-items-end">
+                                                        <button type="submit" class="btn btn-sm btn-primary w-100">
                                                             <i class="bi bi-person-plus"></i> Allocate
                                                         </button>
                                                     </div>
                                                 </div>
-                                            </form>
-
-                                            <hr class="my-2" />
-
-                                            <!-- ── Reallocate Entire Department ── -->
-                                            <div class="sub-title"><i class="bi bi-arrows-transfer"></i> Reallocate Department</div>
-                                            <form asp-action="ReallocateDepartment" method="post" class="row g-2 mb-3">
-                                                <input type="hidden" name="fromRoomId" value="@hall.roomId" />
-
-                                                <div class="col-md-2">
-                                                    <label class="form-label form-label-sm">Department</label>
-                                                    <select name="department" class="form-select form-select-sm">
-                                                        <option value="">-- Dept --</option>
-                                                        @foreach (var d in hall.allocatedDepartments)
-                                                        {
-                                                            <option value="@d">@d</option>
-                                                        }
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label class="form-label form-label-sm">Move To Hall</label>
-                                                    <select name="toRoomId" class="form-select form-select-sm">
-                                                        <option value="">-- Target Hall --</option>
-                                                        @foreach (var h in Model.halls)
-                                                        {
-                                                            if (h.roomId != hall.roomId && h.remainingSeats > 0)
-                                                            {
-                                                                <option value="@h.roomId">@h.blockName – @h.roomNumber (@h.remainingSeats free)</option>
-                                                            }
-                                                        }
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2 d-flex align-items-end">
-                                                    <button type="submit" class="btn btn-sm btn-warning">
-                                                        <i class="bi bi-arrows-transfer"></i> Move Dept
-                                                    </button>
+                                                <div class="help-text">
+                                                    <i class="bi bi-lightbulb"></i> Department will be auto-detected from roll number prefix
                                                 </div>
                                             </form>
 
-                                            <hr class="my-2" />
+                                            <hr class="my-3" />
 
                                             <!-- ── Allocated Students Table ── -->
-                                            <div class="sub-title"><i class="bi bi-people"></i> Allocated Students</div>
+                                            <div class="sub-title"><i class="bi bi-people-fill"></i> Allocated Students</div>
                                             <div id="allocTable-@hall.roomId">
                                                 <!-- populated by JS on panel open -->
-                                                <div class="text-muted text-center py-2" id="loadingMsg-@hall.roomId">Loading…</div>
+                                                <div class="text-muted text-center py-3" id="loadingMsg-@hall.roomId">
+                                                    <div class="spinner-border spinner-border-sm me-2" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                    Loading allocations...
+                                                </div>
                                             </div>
 
                                         </div><!-- end alloc-panel -->
@@ -331,11 +456,8 @@
         </div>
     </div>
 
-</div><!-- end container -->
+</div>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     JAVASCRIPT  –  toggle panel, fetch allocations, reallocate row
-     ═══════════════════════════════════════════════════════════════════ -->
 <script>
     // ── Cache for loaded allocations (avoid repeated fetches) ──
     const _loaded = {};
@@ -377,12 +499,8 @@
             const res   = await fetch('/AdminHallLocator/GetAllocationsForRoom?roomId=' + roomId);
             const rows  = await res.json();
 
-            // Build "all halls" option list once (for the per‑row reallocate select)
-            // We pull from the page's existing Reallocate Department selects
-            const hallOptions = getAllHallOptions(roomId);
-
             if (rows.length === 0) {
-                container.innerHTML = '<div class="text-muted text-center py-2">No students allocated yet.</div>';
+                container.innerHTML = '<div class="alert alert-info text-center mb-0"><i class="bi bi-info-circle me-2"></i>No students allocated to this hall yet.</div>';
                 return;
             }
 
@@ -391,13 +509,12 @@
                 <table class="table table-bordered table-sm tbl-alloc mb-0">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Roll No</th>
+                            <th style="width: 50px;">#</th>
+                            <th>Roll Number</th>
                             <th>Department</th>
                             <th>Desk</th>
                             <th>Seat</th>
-                            <th>Remove</th>
-                            <th>Reallocate To</th>
+                            <th style="width: 100px;">Remove</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -406,7 +523,7 @@
                 html += `
                         <tr>
                             <td>${i + 1}</td>
-                            <td class="fw-semibold">${r.rollNumber}</td>
+                            <td class="fw-semibold">${r.rollNumber.toUpperCase()}</td>
                             <td><span class="badge bg-secondary">${r.department}</span></td>
                             <td>${r.deskNumber}</td>
                             <td>${r.seatNumber}</td>
@@ -414,20 +531,9 @@
                                 <form action="/AdminHallLocator/RemoveAllocation" method="post" style="margin:0;">
                                     <input type="hidden" name="hallSeatingId" value="${r.hallSeatingId}" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger"
-                                            onclick="return confirm('Remove this allocation?');">
-                                        <i class="bi bi-trash"></i>
+                                            onclick="return confirm('⚠️ Remove ${r.rollNumber.toUpperCase()} from this hall?');">
+                                        <i class="bi bi-trash"></i> Remove
                                     </button>
-                                </form>
-                            </td>
-                            <td>
-                                <form action="/AdminHallLocator/ReallocateStudent" method="post"
-                                      style="margin:0; display:flex; gap:4px; align-items:center;">
-                                    <input type="hidden" name="hallSeatingId" value="${r.hallSeatingId}" />
-                                    <select name="newRoomId" class="form-select form-select-sm realloc-select" required>
-                                        <option value="">-- Hall --</option>
-                                        ${hallOptions}
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-warning text-nowrap">Move</button>
                                 </form>
                             </td>
                         </tr>`;
@@ -440,30 +546,16 @@
             container.innerHTML = html;
         }
         catch (e) {
-            container.innerHTML = '<div class="text-danger">Error loading allocations.</div>';
+            container.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error loading allocations.</div>';
         }
     }
 
-    // ── Helper: build <option> list for "reallocate to" selects ──
-    function getAllHallOptions(currentRoomId) {
-        // Grab every hall row's "Move To Hall" select that already exists on page
-        // Those were rendered server-side with remaining-seat info.
-        // We just re-use the FIRST available one (they all have the same hall list).
-        const selects = document.querySelectorAll('[name="toRoomId"]');
-        if (selects.length === 0) return '';
-        // The first select's options are the full hall list (minus its own hall)
-        // We want ALL halls except currentRoomId, so rebuild:
-        const allOptions = [];
-        selects.forEach(sel => {
-            sel.querySelectorAll('option').forEach(opt => {
-                if (opt.value && !allOptions.some(o => o.value === opt.value)) {
-                    allOptions.push({ value: opt.value, text: opt.textContent });
-                }
-            });
+    // ── Auto-dismiss alerts after 5 seconds ──
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert-dismissible');
+        alerts.forEach(alert => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
         });
-        return allOptions
-            .filter(o => o.value != currentRoomId)
-            .map(o => `<option value="${o.value}">${o.text}</option>`)
-            .join('');
-    }
+    }, 5000);
 </script>

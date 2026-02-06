@@ -19,7 +19,7 @@ namespace StudentPortal.Controllers
         }
 
         // ════════════════════════════════════════════════════════════════
-        //  INDEX  –  single page : add hall + table + allocate + edit
+        //  INDEX  –  single page : add hall + table + allocate + view
         // ════════════════════════════════════════════════════════════════
 
         public IActionResult Index()
@@ -57,7 +57,7 @@ namespace StudentPortal.Controllers
             var room = new mstRoom
             {
                 blockId = blockId,
-                roomNumber = roomNumber.Trim(),
+                roomNumber = roomNumber.Trim().ToUpper(),  // Standardize to uppercase
                 totalDesks = totalDesks,
                 seatsPerDesk = seatsPerDesk,
                 isActive = true,
@@ -68,15 +68,12 @@ namespace StudentPortal.Controllers
             _context.mstRoom.Add(room);
             _context.SaveChanges();
 
-            TempData["Success"] = $"Hall '{room.roomNumber}' added successfully with {totalDesks} desks!";
+            TempData["Success"] = $"✓ Hall '{room.roomNumber}' added successfully with {totalDesks} desks × {seatsPerDesk} seats!";
             return RedirectToAction("Index");
         }
 
         // ════════════════════════════════════════════════════════════════
         //  ALLOCATE STUDENTS  (POST)
-        //  Two modes:
-        //    mode = "department"  →  generate roll nos from dept + batch + start/end
-        //    mode = "manual"      →  user pastes roll numbers (comma‑separated)
         // ════════════════════════════════════════════════════════════════
 
         [HttpPost]
@@ -84,7 +81,6 @@ namespace StudentPortal.Controllers
             int roomId,
             string mode,                          // "department" or "manual"
             int departmentId,
-            int batchId,
             string rollStart,
             string rollEnd,
             string manualRollNumbers)
@@ -99,6 +95,17 @@ namespace StudentPortal.Controllers
             if (room == null)
             {
                 TempData["Error"] = "Hall not found.";
+                return RedirectToAction("Index");
+            }
+
+            // Check remaining capacity
+            int totalSeats = room.totalDesks * room.seatsPerDesk;
+            int occupied = _repo.GetOccupiedSeats(roomId);
+            int remaining = totalSeats - occupied;
+
+            if (remaining <= 0)
+            {
+                TempData["Error"] = "Hall is already full!";
                 return RedirectToAction("Index");
             }
 
@@ -145,73 +152,46 @@ namespace StudentPortal.Controllers
                     .ToList();
 
                 // Try to derive department from the first roll number prefix
-                department = Derivedepartment(rollNumbers.FirstOrDefault() ?? "");
+                department = DeriveDepartment(rollNumbers.FirstOrDefault() ?? "");
+
+                if (string.IsNullOrWhiteSpace(department))
+                {
+                    TempData["Error"] = "Could not determine department from roll numbers. Please use department mode.";
+                    return RedirectToAction("Index");
+                }
+            }
+
+            // Check if we're trying to allocate more than available
+            if (rollNumbers.Count > remaining)
+            {
+                TempData["Error"] = $"Cannot allocate {rollNumbers.Count} students. Only {remaining} seats remaining!";
+                return RedirectToAction("Index");
             }
 
             int allocated = _repo.AllocateStudents(roomId, department, rollNumbers);
 
             if (allocated > 0)
-                TempData["Success"] = $"{allocated} student(s) allocated to hall successfully.";
+                TempData["Success"] = $"✓ {allocated} student(s) from {department} allocated successfully!";
             else
-                TempData["Error"] = "No students allocated. Room may be full or roll numbers already allocated.";
+                TempData["Error"] = "No students allocated. Students may be already allocated elsewhere.";
 
             return RedirectToAction("Index");
         }
 
         // ════════════════════════════════════════════════════════════════
-        //  REMOVE SINGLE ALLOCATION  (POST)
+        //  REMOVE ALLOCATION  (POST)
         // ════════════════════════════════════════════════════════════════
 
         [HttpPost]
         public IActionResult RemoveAllocation(int hallSeatingId)
         {
             _repo.RemoveAllocation(hallSeatingId);
-            TempData["Success"] = "Student allocation removed successfully.";
+            TempData["Success"] = "✓ Student allocation removed successfully.";
             return RedirectToAction("Index");
         }
 
         // ════════════════════════════════════════════════════════════════
-        //  REALLOCATE SINGLE STUDENT  (POST)
-        // ════════════════════════════════════════════════════════════════
-
-        [HttpPost]
-        public IActionResult ReallocateStudent(int hallSeatingId, int newRoomId)
-        {
-            bool success = _repo.ReallocateStudent(hallSeatingId, newRoomId);
-
-            if (success)
-                TempData["Success"] = "Student reallocated to new hall successfully.";
-            else
-                TempData["Error"] = "Reallocation failed. Target hall may be full or invalid.";
-
-            return RedirectToAction("Index");
-        }
-
-        // ════════════════════════════════════════════════════════════════
-        //  REALLOCATE ENTIRE DEPARTMENT from one hall to another  (POST)
-        // ════════════════════════════════════════════════════════════════
-
-        [HttpPost]
-        public IActionResult ReallocateDepartment(int fromRoomId, string department, int toRoomId)
-        {
-            if (fromRoomId == toRoomId)
-            {
-                TempData["Error"] = "Source and target halls are the same.";
-                return RedirectToAction("Index");
-            }
-
-            int moved = _repo.ReallocateDepartment(fromRoomId, department, toRoomId);
-
-            if (moved > 0)
-                TempData["Success"] = $"{moved} student(s) of '{department}' reallocated successfully.";
-            else
-                TempData["Error"] = "No students moved. Check department name or target hall capacity.";
-
-            return RedirectToAction("Index");
-        }
-
-        // ════════════════════════════════════════════════════════════════
-        //  GET – Allocated students for a specific room (used via AJAX / partial)
+        //  GET ALLOCATIONS FOR ROOM (AJAX)
         // ════════════════════════════════════════════════════════════════
 
         public IActionResult GetAllocationsForRoom(int roomId)
@@ -238,12 +218,9 @@ namespace StudentPortal.Controllers
         }
 
         // ════════════════════════════════════════════════════════════════
-        //  PRIVATE HELPERS
+        //  HELPER METHODS
         // ════════════════════════════════════════════════════════════════
 
-        /// <summary>
-        /// Builds the full page model: all halls with seat counts, block / dept / batch lists.
-        /// </summary>
         private HallLocatorPageDTO BuildPageModel()
         {
             var rooms = _context.mstRoom
@@ -261,11 +238,10 @@ namespace StudentPortal.Controllers
                 int occupied = _repo.GetOccupiedSeats(r.roomId);
 
                 var depts = _context.mstHallSeating
-    .Where(s => s.roomId == r.roomId)
-    .Select(s => s.department)
-    .Distinct()
-    .ToList();
-
+                    .Where(s => s.roomId == r.roomId)
+                    .Select(s => s.department)
+                    .Distinct()
+                    .ToList();
 
                 return new HallTableRowDTO
                 {
@@ -292,9 +268,7 @@ namespace StudentPortal.Controllers
         }
 
         /// <summary>
-        /// Generates roll numbers between start and end.
-        /// Example: "23bit001" to "23bit030"  →  ["23bit001","23bit002",…,"23bit030"]
-        /// The prefix (letters) is extracted from start; only the trailing numeric part increments.
+        /// Generate roll numbers from start to end (e.g., 23bit001 to 23bit030)
         /// </summary>
         private static List<string> GenerateRollNumbers(string start, string end)
         {
@@ -360,7 +334,7 @@ namespace StudentPortal.Controllers
         /// Tries to derive department short code from roll number prefix.
         /// 23bit… → IT, 23bad… → AIDS, 23bcs… → CSE  etc.
         /// </summary>
-        private static string Derivedepartment(string rollNumber)
+        private static string DeriveDepartment(string rollNumber)
         {
             if (string.IsNullOrEmpty(rollNumber)) return "";
 
@@ -369,9 +343,13 @@ namespace StudentPortal.Controllers
             if (lower.Contains("bit")) return "IT";
             if (lower.Contains("bad")) return "AIDS";
             if (lower.Contains("bcs")) return "CSE";
+            if (lower.Contains("ece")) return "ECE";
+            if (lower.Contains("eee")) return "EEE";
+            if (lower.Contains("mec")) return "MECH";
+            if (lower.Contains("civ")) return "CIVIL";
 
             // fallback: return the prefix itself
-            return ExtractPrefix(rollNumber);
+            return ExtractPrefix(rollNumber).ToUpper();
         }
     }
 }

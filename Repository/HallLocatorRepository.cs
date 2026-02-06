@@ -2,7 +2,6 @@
 using KSI_Project.Helpers.DbContexts;
 using ksi.Data.Repository;
 
-
 namespace ksi.Repositories
 {
     public class HallLocatorRepository : IHallLocatorRepository
@@ -112,17 +111,27 @@ namespace ksi.Repositories
                 .FirstOrDefault(s => s.rollNumber.ToLower() == rollNumber.ToLower());
         }
 
+        // ───────────────── IMPROVED ALLOCATION LOGIC ─────────────────
+
         public int AllocateStudents(int roomId, string department, List<string> rollNumbers)
         {
             var room = GetRoomById(roomId);
             if (room == null) return 0;
 
-            var occupiedSet = _context.mstHallSeating
-       .Where(s => s.roomId == roomId)
-       .Select(s => new { s.deskNumber, s.seatNumber })
-       .AsEnumerable()
-       .Select(x => (x.deskNumber, x.seatNumber))
-       .ToHashSet();
+            // Get all existing allocations for this room
+            var existingAllocations = _context.mstHallSeating
+                .Where(s => s.roomId == roomId)
+                .ToList();
+
+            // Create a dictionary: deskNumber → List of (seatNumber, department)
+            var deskOccupancy = new Dictionary<int, List<(int seatNumber, string department)>>();
+            foreach (var alloc in existingAllocations)
+            {
+                if (!deskOccupancy.ContainsKey(alloc.deskNumber))
+                    deskOccupancy[alloc.deskNumber] = new List<(int, string)>();
+
+                deskOccupancy[alloc.deskNumber].Add((alloc.seatNumber, alloc.department));
+            }
 
             int allocated = 0;
 
@@ -131,37 +140,87 @@ namespace ksi.Repositories
                 if (string.IsNullOrWhiteSpace(roll)) continue;
 
                 string r = roll.Trim().ToLower();
-                if (IsRollNumberInRoom(roomId, r)) continue;
+
+                // Skip if already allocated anywhere
+                if (IsRollNumberAllocated(r)) continue;
 
                 bool found = false;
                 int deskNo = 0, seatNo = 0;
 
+                // Try to find an available seat
                 for (int d = 1; d <= room.totalDesks && !found; d++)
                 {
-                    for (int s = 1; s <= room.seatsPerDesk; s++)
+                    if (!deskOccupancy.ContainsKey(d))
                     {
-                        if (!occupiedSet.Contains((d, s)))
+                        // Empty desk - take seat 1
+                        deskNo = d;
+                        seatNo = 1;
+                        found = true;
+                    }
+                    else
+                    {
+                        var occupied = deskOccupancy[d];
+
+                        // Check if desk has space
+                        if (occupied.Count < room.seatsPerDesk)
                         {
-                            deskNo = d;
-                            seatNo = s;
-                            found = true;
-                            break;
+                            // For seatsPerDesk = 2: ensure different department
+                            if (room.seatsPerDesk == 2)
+                            {
+                                var existingDept = occupied.First().department;
+                                if (!existingDept.Equals(department, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    // Different department - can share desk
+                                    // Find the next available seat number
+                                    for (int s = 1; s <= room.seatsPerDesk; s++)
+                                    {
+                                        if (!occupied.Any(o => o.seatNumber == s))
+                                        {
+                                            deskNo = d;
+                                            seatNo = s;
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // seatsPerDesk = 1 or other, just find next seat
+                                for (int s = 1; s <= room.seatsPerDesk; s++)
+                                {
+                                    if (!occupied.Any(o => o.seatNumber == s))
+                                    {
+                                        deskNo = d;
+                                        seatNo = s;
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
 
-                if (!found) break;
-                _context.mstHallSeating.Add(new mstHallSeating
+                if (!found) break; // Room full or no valid seat
+
+                // Add allocation
+                var newAllocation = new mstHallSeating
                 {
                     roomId = roomId,
                     deskNumber = deskNo,
                     seatNumber = seatNo,
                     rollNumber = r,
                     department = department
-                });
+                };
 
+                _context.mstHallSeating.Add(newAllocation);
 
-                occupiedSet.Add((deskNo, seatNo));
+                // Update in-memory occupancy
+                if (!deskOccupancy.ContainsKey(deskNo))
+                    deskOccupancy[deskNo] = new List<(int, string)>();
+                deskOccupancy[deskNo].Add((seatNo, department));
+
                 allocated++;
             }
 
@@ -177,53 +236,6 @@ namespace ksi.Repositories
                 _context.mstHallSeating.Remove(row);
                 _context.SaveChanges();
             }
-        }
-
-        public bool ReallocateStudent(int hallSeatingId, int newRoomId)
-        {
-            var row = _context.mstHallSeating.Find(hallSeatingId);
-            var room = GetRoomById(newRoomId);
-            if (row == null || room == null) return false;
-
-            var occupied = _context.mstHallSeating
-     .Where(s => s.roomId == newRoomId)
-     .Select(s => new { s.deskNumber, s.seatNumber })
-     .AsEnumerable()
-     .Select(x => (x.deskNumber, x.seatNumber))
-     .ToHashSet();
-
-            for (int d = 1; d <= room.totalDesks; d++)
-            {
-                for (int s = 1; s <= room.seatsPerDesk; s++)
-                {
-                    if (!occupied.Contains((d, s)))
-                    {
-                        row.roomId = newRoomId;
-                        row.deskNumber = d;
-                        row.seatNumber = s;
-                        _context.SaveChanges();
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public int ReallocateDepartment(int fromRoomId, string department, int toRoomId)
-        {
-            var rows = _context.mstHallSeating
-               .Where(s => s.roomId == fromRoomId &&
-            s.department.ToLower() == department.ToLower());
-
-
-            int moved = 0;
-            foreach (var row in rows)
-            {
-                if (ReallocateStudent(row.hallSeatingId, toRoomId))
-                    moved++;
-                else break;
-            }
-            return moved;
         }
     }
 }

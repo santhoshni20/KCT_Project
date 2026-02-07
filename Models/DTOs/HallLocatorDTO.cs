@@ -9,6 +9,8 @@ namespace ksi.Models.DTO
         public string blockName { get; set; }
         public int roomId { get; set; }
         public string roomNumber { get; set; }
+        public DateTime? examDate { get; set; }                 // NEW
+        public string examName { get; set; }                   // NEW
         public int totalDesks { get; set; }
         public int seatsPerDesk { get; set; }
         public int totalSeats { get; set; }
@@ -21,24 +23,22 @@ namespace ksi.Models.DTO
     {
         public int blockId { get; set; }
         public string roomNumber { get; set; }
-        public int totalDesks { get; set; } = 30;          // default 30
+        public DateTime? examDate { get; set; }                 // NEW
+        public string examName { get; set; }                   // NEW
+        public int totalDesks { get; set; } = 30;
         public int seatsPerDesk { get; set; } = 2;
     }
 
     // ─── Used to populate the "Allocate Students" form ─────────────────
     public class AllocateStudentDTO
     {
-        public int roomId { get; set; }                    // target hall
+        public int roomId { get; set; }
         public int blockId { get; set; }
         public string roomNumber { get; set; }
-
-        // Option A – pick a department + batch  → roll nos auto‑generated
         public int departmentId { get; set; }
         public int batchId { get; set; }
-        public string rollStart { get; set; }              // e.g. 23bit001
-        public string rollEnd { get; set; }                // e.g. 23bit030
-
-        // Option B – paste roll numbers manually (comma‑separated)
+        public string rollStart { get; set; }
+        public string rollEnd { get; set; }
         public string manualRollNumbers { get; set; }
     }
 
@@ -49,6 +49,8 @@ namespace ksi.Models.DTO
         public int blockId { get; set; }
         public string blockName { get; set; }
         public string roomNumber { get; set; }
+        public DateTime? examDate { get; set; }                 // NEW
+        public string examName { get; set; }                   // NEW
         public int totalDesks { get; set; }
         public int seatsPerDesk { get; set; }
         public int totalSeats { get; set; }
@@ -74,8 +76,34 @@ namespace ksi.Models.DTO
     public class HallLocatorPageDTO
     {
         public List<HallTableRowDTO> halls { get; set; } = new();
-        public List<mstBlock> blocks { get; set; } = new();                   // for dropdowns
-        public List<mstDepartment> departments { get; set; } = new();         // for allocation dropdown
-        public List<mstBatch> batches { get; set; } = new();                  // for batch dropdown
+        public List<mstBlock> blocks { get; set; } = new();
+        public List<mstDepartment> departments { get; set; } = new();
+        public List<mstBatch> batches { get; set; } = new();
+    }
+
+    // ─── NEW: Student View DTO (for public student portal) ─────────────
+    public class StudentHallTicketDTO
+    {
+        public string rollNumber { get; set; }
+        public string studentName { get; set; }                // From student profile
+        public string department { get; set; }
+        public string blockName { get; set; }
+        public string roomNumber { get; set; }
+        public int deskNumber { get; set; }
+        public int seatNumber { get; set; }
+        public DateTime examDate { get; set; }
+        public string examName { get; set; }
+    }
+
+    // ─── NEW: Public Hall List DTO (for students to browse) ────────────
+    public class PublicHallListDTO
+    {
+        public int roomId { get; set; }
+        public string blockName { get; set; }
+        public string roomNumber { get; set; }
+        public DateTime examDate { get; set; }
+        public string examName { get; set; }
+        public int totalSeats { get; set; }
+        public int occupiedSeats { get; set; }
     }
 }

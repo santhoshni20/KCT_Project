@@ -5,11 +5,14 @@ namespace ksi.Models.Entity
 {
     // ─── mstRoom ────────────────────────────────────────────────────────
     // Stores each exam hall / room with its desk & seat capacity.
+    // NOW INCLUDES: examDate to track when the exam is scheduled
     //
     // CREATE TABLE `mstRoom` (
     //   `roomId`       INT          NOT NULL AUTO_INCREMENT,
     //   `blockId`      INT          NOT NULL,
     //   `roomNumber`   VARCHAR(50)  NOT NULL,
+    //   `examDate`     DATE         NOT NULL COMMENT 'Date of the exam',
+    //   `examName`     VARCHAR(200) NULL COMMENT 'Optional exam name/description',
     //   `totalDesks`   INT          NOT NULL DEFAULT 30,
     //   `seatsPerDesk` INT          NOT NULL DEFAULT 2,
     //   `isActive`     BOOLEAN      NOT NULL DEFAULT TRUE,
@@ -32,21 +35,27 @@ namespace ksi.Models.Entity
         public int roomId { get; set; }
 
         [Required]
-        public int blockId { get; set; }                   // FK → mstBlock
+        public int blockId { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string roomNumber { get; set; }             // e.g. "C203"
+        public string roomNumber { get; set; }
 
         [Required]
-        public int totalDesks { get; set; } = 30;          // default 30
+        [DataType(DataType.Date)]
+        public DateTime? examDate { get; set; }
+
+        [MaxLength(200)]
+        public string? examName { get; set; }  // ✅ ADD ? to make it nullable
+
+        [Required]
+        public int totalDesks { get; set; } = 30;
 
         [Required]
         [Range(1, 4)]
         public int seatsPerDesk { get; set; } = 2;
 
         public bool isActive { get; set; } = true;
-
         public int createdBy { get; set; }
         public DateTime createdDate { get; set; }
         public int? updatedBy { get; set; }
@@ -96,5 +105,4 @@ namespace ksi.Models.Entity
         [MaxLength(100)]
         public string department { get; set; }
     }
-
 }

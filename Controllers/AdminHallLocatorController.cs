@@ -33,11 +33,24 @@ namespace StudentPortal.Controllers
         // ════════════════════════════════════════════════════════════════
 
         [HttpPost]
-        public IActionResult AddHall(int blockId, string roomNumber, int totalDesks, int seatsPerDesk)
+        public IActionResult AddHall(
+            int blockId,
+            string roomNumber,
+            DateTime examDate,           // NEW
+            string examName,             // NEW (optional)
+            int totalDesks,
+            int seatsPerDesk)
         {
             if (blockId <= 0 || string.IsNullOrWhiteSpace(roomNumber))
             {
                 TempData["Error"] = "Please select a block and enter a hall number.";
+                return RedirectToAction("Index");
+            }
+
+            // Validate exam date
+            if (examDate < DateTime.Today)
+            {
+                TempData["Error"] = "Exam date cannot be in the past.";
                 return RedirectToAction("Index");
             }
 
@@ -46,29 +59,39 @@ namespace StudentPortal.Controllers
             // Default seats per desk = 2
             if (seatsPerDesk <= 0 || seatsPerDesk > 4) seatsPerDesk = 2;
 
-            // Check duplicate
-            var existing = _repo.GetRoom(blockId, roomNumber.Trim());
+            // Check duplicate (same block + room number + exam date)
+            var existing = _context.mstRoom
+                .FirstOrDefault(r =>
+                    r.blockId == blockId &&
+                    r.roomNumber.ToLower() == roomNumber.Trim().ToLower() &&
+                    r.examDate.HasValue && r.examDate.Value.Date == examDate.Date &&
+                    r.isActive);
+
             if (existing != null)
             {
-                TempData["Error"] = $"Hall '{roomNumber.Trim()}' already exists in this block.";
+                TempData["Error"] = $"Hall '{roomNumber.Trim()}' already exists for this exam date.";
                 return RedirectToAction("Index");
             }
 
             var room = new mstRoom
             {
                 blockId = blockId,
-                roomNumber = roomNumber.Trim().ToUpper(),  // Standardize to uppercase
+                roomNumber = roomNumber.Trim().ToUpper(),
+                examDate = examDate.Date,                      // NEW
+                examName = string.IsNullOrWhiteSpace(examName)
+                    ? null
+                    : examName.Trim(),                          // NEW
                 totalDesks = totalDesks,
                 seatsPerDesk = seatsPerDesk,
                 isActive = true,
-                createdBy = 1,                        // TODO: real user id
+                createdBy = 1,
                 createdDate = DateTime.Now
             };
 
             _context.mstRoom.Add(room);
             _context.SaveChanges();
 
-            TempData["Success"] = $"✓ Hall '{room.roomNumber}' added successfully with {totalDesks} desks × {seatsPerDesk} seats!";
+            TempData["Success"] = $"✓ Hall '{room.roomNumber}' added for exam on {examDate:dd MMM yyyy}!";
             return RedirectToAction("Index");
         }
 
@@ -79,7 +102,7 @@ namespace StudentPortal.Controllers
         [HttpPost]
         public IActionResult AllocateStudents(
             int roomId,
-            string mode,                          // "department" or "manual"
+            string mode,
             int departmentId,
             string rollStart,
             string rollEnd,
@@ -114,7 +137,6 @@ namespace StudentPortal.Controllers
 
             if (mode == "department")
             {
-                // ── Resolve department name ───────────────────────────
                 var dept = _context.mstDepartment.Find(departmentId);
                 if (dept == null)
                 {
@@ -129,7 +151,6 @@ namespace StudentPortal.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // Generate roll numbers from rollStart to rollEnd
                 rollNumbers = GenerateRollNumbers(rollStart.Trim(), rollEnd.Trim());
                 if (rollNumbers.Count == 0)
                 {
@@ -137,7 +158,7 @@ namespace StudentPortal.Controllers
                     return RedirectToAction("Index");
                 }
             }
-            else // mode == "manual"
+            else // manual
             {
                 if (string.IsNullOrWhiteSpace(manualRollNumbers))
                 {
@@ -151,7 +172,6 @@ namespace StudentPortal.Controllers
                     .Where(r => r.Length > 0)
                     .ToList();
 
-                // Try to derive department from the first roll number prefix
                 department = DeriveDepartment(rollNumbers.FirstOrDefault() ?? "");
 
                 if (string.IsNullOrWhiteSpace(department))
@@ -161,7 +181,6 @@ namespace StudentPortal.Controllers
                 }
             }
 
-            // Check if we're trying to allocate more than available
             if (rollNumbers.Count > remaining)
             {
                 TempData["Error"] = $"Cannot allocate {rollNumbers.Count} students. Only {remaining} seats remaining!";
@@ -220,12 +239,12 @@ namespace StudentPortal.Controllers
         // ════════════════════════════════════════════════════════════════
         //  HELPER METHODS
         // ════════════════════════════════════════════════════════════════
-
         private HallLocatorPageDTO BuildPageModel()
         {
             var rooms = _context.mstRoom
                 .Where(r => r.isActive)
-                .OrderBy(r => r.blockId)
+                .OrderBy(r => r.examDate)
+                .ThenBy(r => r.blockId)
                 .ThenBy(r => r.roomNumber)
                 .ToList();
 
@@ -249,6 +268,8 @@ namespace StudentPortal.Controllers
                     blockId = r.blockId,
                     blockName = blockMap.ContainsKey(r.blockId) ? blockMap[r.blockId] : "Unknown",
                     roomNumber = r.roomNumber,
+                    examDate = r.examDate ?? DateTime.MinValue,
+                    examName = string.IsNullOrEmpty(r.examName) ? "" : r.examName,
                     totalDesks = r.totalDesks,
                     seatsPerDesk = r.seatsPerDesk,
                     totalSeats = totalSeats,
@@ -267,22 +288,14 @@ namespace StudentPortal.Controllers
             };
         }
 
-        /// <summary>
-        /// Generate roll numbers from start to end (e.g., 23bit001 to 23bit030)
-        /// </summary>
         private static List<string> GenerateRollNumbers(string start, string end)
         {
             var result = new List<string>();
-
-            // Split prefix (non‑digit) and numeric suffix
             string prefixStart = ExtractPrefix(start);
             string prefixEnd = ExtractPrefix(end);
 
             if (!prefixStart.Equals(prefixEnd, StringComparison.OrdinalIgnoreCase))
-            {
-                // Prefixes don't match – can't generate
                 return result;
-            }
 
             if (!int.TryParse(ExtractNumber(start), out int numStart) ||
                 !int.TryParse(ExtractNumber(end), out int numEnd))
@@ -290,7 +303,6 @@ namespace StudentPortal.Controllers
 
             if (numEnd < numStart) return result;
 
-            // Determine zero‑pad width from the original string
             int padWidth = ExtractNumber(start).Length;
 
             for (int i = numStart; i <= numEnd; i++)
@@ -301,10 +313,8 @@ namespace StudentPortal.Controllers
             return result;
         }
 
-        /// <summary>Extracts the leading non‑digit prefix: "23bit001" → "23bit"</summary>
         private static string ExtractPrefix(string roll)
         {
-            // Find the position where the LAST continuous numeric block starts
             int lastNumStart = roll.Length;
             for (int i = roll.Length - 1; i >= 0; i--)
             {
@@ -316,7 +326,6 @@ namespace StudentPortal.Controllers
             return roll.Substring(0, lastNumStart);
         }
 
-        /// <summary>Extracts the trailing numeric part: "23bit001" → "001"</summary>
         private static string ExtractNumber(string roll)
         {
             int lastNumStart = roll.Length;
@@ -330,10 +339,6 @@ namespace StudentPortal.Controllers
             return roll.Substring(lastNumStart);
         }
 
-        /// <summary>
-        /// Tries to derive department short code from roll number prefix.
-        /// 23bit… → IT, 23bad… → AIDS, 23bcs… → CSE  etc.
-        /// </summary>
         private static string DeriveDepartment(string rollNumber)
         {
             if (string.IsNullOrEmpty(rollNumber)) return "";
@@ -348,7 +353,6 @@ namespace StudentPortal.Controllers
             if (lower.Contains("mec")) return "MECH";
             if (lower.Contains("civ")) return "CIVIL";
 
-            // fallback: return the prefix itself
             return ExtractPrefix(rollNumber).ToUpper();
         }
     }

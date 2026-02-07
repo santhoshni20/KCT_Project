@@ -412,26 +412,28 @@ namespace ksi.Controllers
         //  HALL LOCATOR (STUDENT VIEW)
         // ════════════════════════════════════════════════════════════════
 
-        #region Hall Locator (Student View)
+        // ════════════════════════════════════════════════════════════════
+        //  HALL LOCATOR (STUDENT VIEW)
+        // ════════════════════════════════════════════════════════════════
 
         public async Task<IActionResult> HallLocator()
         {
-            var halls = await _repo.GetUpcomingExamHallsAsync();
-            return View(halls);
+            return View();
         }
 
         [HttpGet]
-        public async Task<IActionResult> HallLocatorByDepartment(string department)
+        public async Task<IActionResult> GetAllHallAllocations(string department = "")
         {
-            if (string.IsNullOrWhiteSpace(department))
+            try
             {
-                return Json(new List<PublicHallListDTO>());
+                var allocations = await _repo.GetAllHallAllocationsAsync(department);
+                return Json(new { success = true, data = allocations });
             }
-
-            var halls = await _repo.GetHallsByDepartmentAsync(department);
-            return Json(halls);
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
-
 
         [HttpGet]
         public async Task<IActionResult> SearchHallByRollNumber(string rollNumber)
@@ -450,7 +452,5 @@ namespace ksi.Controllers
 
             return Json(new { success = true, data = allocation });
         }
-
-        #endregion
     }
 }

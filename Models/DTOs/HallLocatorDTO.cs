@@ -18,6 +18,27 @@ namespace ksi.Models.DTO
         public int remainingSeats { get; set; }
     }
 
+    // ─── NEW: Grouped allocations by hall ───────────────────────────
+    public class HallAllocationGroupDTO
+    {
+        public int roomId { get; set; }
+        public string blockName { get; set; }
+        public string roomNumber { get; set; }
+        public DateTime examDate { get; set; }
+        public string examName { get; set; }
+        public string department { get; set; }
+        public int totalSeats { get; set; }
+        public int occupiedSeats { get; set; }
+        public List<StudentAllocationDTO> students { get; set; } = new();
+    }
+
+    public class StudentAllocationDTO
+    {
+        public string rollNumber { get; set; }
+        public int deskNumber { get; set; }
+        public int seatNumber { get; set; }
+    }
+
     // ─── Used to populate the "Add Hall" form ──────────────────────────
     public class AddHallDTO
     {

@@ -1,17 +1,16 @@
-﻿@model List<ksi.Models.DTO.PublicHallListDTO>
-@{
+﻿@{
     ViewData["Title"] = "Hall Locator";
     Layout = "~/Views/Shared/_LayoutWebsite.cshtml";
 }
 
 <style>
     .hall-container {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
         padding: 20px;
     }
 
-    .search-card {
+    .header-section {
         background: var(--bg-elevated);
         border-radius: 12px;
         padding: 30px;
@@ -19,27 +18,70 @@
         border: 1px solid var(--border-subtle);
     }
 
-    .search-title {
-        font-size: 1.5rem;
-        font-weight: 600;
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
         margin-bottom: 8px;
         color: var(--text-main);
     }
 
-    .search-subtitle {
+    .page-subtitle {
         color: var(--text-muted);
-        margin-bottom: 24px;
         font-size: 0.95rem;
+        margin-bottom: 24px;
     }
 
-    .filter-tabs {
+    /* Search Box */
+    .search-section {
         display: flex;
         gap: 12px;
         margin-bottom: 24px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 14px 18px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 8px;
+        color: var(--text-main);
+        font-size: 0.95rem;
+    }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(255,255,255,0.08);
+        }
+
+    .search-btn {
+        padding: 14px 28px;
+        background: #3b82f6;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .search-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+    /* Filter Tabs */
+    .filter-section {
+        display: flex;
+        gap: 12px;
         flex-wrap: wrap;
     }
 
-    .filter-tab {
+    .filter-btn {
         padding: 10px 20px;
         background: transparent;
         border: 1px solid rgba(255,255,255,0.2);
@@ -47,348 +89,368 @@
         color: var(--text-main);
         cursor: pointer;
         transition: all 0.3s;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        font-weight: 500;
     }
 
-        .filter-tab:hover {
+        .filter-btn:hover {
             background: rgba(255,255,255,0.05);
         }
 
-        .filter-tab.active {
+        .filter-btn.active {
             background: rgba(59, 130, 246, 0.2);
             border-color: #3b82f6;
             color: #60a5fa;
         }
 
-    .search-box {
-        display: flex;
-        gap: 12px;
+    /* Alert Box */
+    .alert-box {
+        padding: 14px 18px;
+        border-radius: 8px;
         margin-bottom: 20px;
+        display: none;
+        font-size: 0.95rem;
     }
 
-        .search-box input {
-            flex: 1;
-            padding: 12px 16px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            color: var(--text-main);
-            font-size: 0.95rem;
-        }
+    .alert-success {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid #22c55e;
+        color: #4ade80;
+    }
 
-            .search-box input::placeholder {
-                color: var(--text-muted);
-            }
+    .alert-error {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid #ef4444;
+        color: #f87171;
+    }
 
-            .search-box input:focus {
-                outline: none;
-                border-color: #3b82f6;
-                background: rgba(255,255,255,0.08);
-            }
-
-        .search-box button {
-            padding: 12px 24px;
-            background: #3b82f6;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-            .search-box button:hover {
-                background: #2563eb;
-            }
-
+    /* Search Result Card */
     .result-card {
-        background: rgba(59, 130, 246, 0.1);
-        border: 1px solid #3b82f6;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 51, 234, 0.15));
+        border: 2px solid #3b82f6;
         border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 20px;
+        padding: 28px;
+        margin-bottom: 24px;
+        display: none;
     }
 
         .result-card h3 {
             color: #60a5fa;
-            margin-bottom: 16px;
-            font-size: 1.2rem;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 700;
         }
 
-        .result-card .info-row {
+        .result-card .result-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 12px;
+            gap: 20px;
         }
 
-        .result-card .info-item {
+        .result-card .result-item {
             display: flex;
             flex-direction: column;
         }
 
-        .result-card .info-label {
+        .result-card .result-label {
             color: var(--text-muted);
             font-size: 0.85rem;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .result-card .info-value {
+        .result-card .result-value {
             color: var(--text-main);
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
         }
 
-    .halls-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
+    /* Hall Cards */
+    .halls-section {
+        margin-top: 30px;
     }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+        .section-title .count-badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
 
     .hall-card {
         background: var(--bg-elevated);
         border: 1px solid var(--border-subtle);
         border-radius: 12px;
-        padding: 20px;
+        padding: 24px;
+        margin-bottom: 24px;
         transition: all 0.3s;
     }
 
         .hall-card:hover {
             border-color: #3b82f6;
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
-        .hall-card .hall-header {
+    .hall-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .hall-title-group h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 6px;
+    }
+
+    .hall-meta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+        .hall-meta span {
             display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 16px;
+            align-items: center;
+            gap: 6px;
         }
 
-        .hall-card .hall-title {
-            font-size: 1.2rem;
+    .dept-badge {
+        padding: 8px 16px;
+        background: rgba(59, 130, 246, 0.2);
+        border: 1px solid #3b82f6;
+        border-radius: 8px;
+        color: #60a5fa;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .exam-badge {
+        padding: 6px 12px;
+        background: rgba(251, 191, 36, 0.2);
+        border: 1px solid #fbbf24;
+        border-radius: 6px;
+        color: #fcd34d;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    /* Students Table */
+    .students-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+    }
+
+        .students-table thead {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .students-table th {
+            padding: 12px;
+            text-align: left;
+            font-size: 0.85rem;
             font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .students-table td {
+            padding: 12px;
+            border-top: 1px solid rgba(255,255,255,0.05);
             color: var(--text-main);
         }
 
-        .hall-card .hall-block {
-            font-size: 0.85rem;
-            color: var(--text-muted);
+        .students-table tbody tr:hover {
+            background: rgba(255,255,255,0.03);
         }
 
-        .hall-card .hall-info {
-            margin-bottom: 12px;
-        }
-
-        .hall-card .info-line {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-    .info-line:last-child {
-        border-bottom: none;
-    }
-
-    .info-line .label {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-    }
-
-    .info-line .value {
-        color: var(--text-main);
-        font-weight: 500;
-    }
-
-    .hall-card .exam-badge {
-        display: inline-block;
-        padding: 6px 12px;
-        background: rgba(59, 130, 246, 0.2);
-        border: 1px solid #3b82f6;
-        border-radius: 6px;
+    .roll-number {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
         color: #60a5fa;
+    }
+
+    .desk-seat {
+        display: flex;
+        gap: 16px;
+    }
+
+    .desk-seat-item {
+        padding: 4px 10px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 4px;
         font-size: 0.85rem;
-        font-weight: 500;
-        margin-top: 12px;
+    }
+
+    /* Loading & Empty States */
+    .loading-spinner {
+        text-align: center;
+        padding: 60px 20px;
+        display: none;
+    }
+
+        .loading-spinner .spinner {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+        }
+
+    @@keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     .empty-state {
         text-align: center;
-        padding: 60px 20px;
+        padding: 80px 20px;
         color: var(--text-muted);
     }
 
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
+        .empty-state .icon {
+            font-size: 4rem;
             margin-bottom: 20px;
             opacity: 0.5;
         }
 
         .empty-state h3 {
-            font-size: 1.3rem;
-            margin-bottom: 8px;
+            font-size: 1.4rem;
+            margin-bottom: 12px;
             color: var(--text-main);
         }
 
         .empty-state p {
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
-
-    .alert-box {
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        display: none;
-    }
-
-    .alert-success {
-        background: rgba(34, 197, 94, 0.1);
-        border: 1px solid #22c55e;
-        color: #4ade80;
-    }
-
-    .alert-error {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid #ef4444;
-        color: #f87171;
-    }
 </style>
 
 <div class="hall-container">
-    <!-- Search Section -->
-    <div class="search-card">
-        <h1 class="search-title">🗺️ Hall Locator</h1>
-        <p class="search-subtitle">Find your exam hall allocation by roll number or browse by department</p>
+    <!-- Header Section -->
+    <div class="header-section">
+        <h1 class="page-title">🗺️ Hall Locator</h1>
+        <p class="page-subtitle">Find your exam hall allocation by roll number or browse by department</p>
 
         <!-- Search by Roll Number -->
-        <div class="search-box">
+        <div class="search-section">
             <input type="text"
                    id="rollNumberInput"
-                   placeholder="Enter your roll number (e.g., 23bit001)" />
-            <button onclick="searchByRollNumber()">Search</button>
+                   class="search-input"
+                   placeholder="Enter your roll number (e.g., 23bit001, 23cse025)" />
+            <button class="search-btn" onclick="searchByRollNumber()">
+                🔍 Search
+            </button>
         </div>
 
         <!-- Alert Box -->
         <div id="alertBox" class="alert-box"></div>
 
         <!-- Search Result -->
-        <div id="searchResult" style="display:none;" class="result-card">
-            <h3>✓ Hall Allocation Found</h3>
-            <div class="info-row">
-                <div class="info-item">
-                    <span class="info-label">Roll Number</span>
-                    <span class="info-value" id="resultRoll"></span>
+        <div id="searchResult" class="result-card">
+            <h3>✓ Your Hall Allocation</h3>
+            <div class="result-grid">
+                <div class="result-item">
+                    <span class="result-label">Roll Number</span>
+                    <span class="result-value" id="resultRoll"></span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">Department</span>
-                    <span class="info-value" id="resultDept"></span>
+                <div class="result-item">
+                    <span class="result-label">Department</span>
+                    <span class="result-value" id="resultDept"></span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">Block</span>
-                    <span class="info-value" id="resultBlock"></span>
+                <div class="result-item">
+                    <span class="result-label">Hall</span>
+                    <span class="result-value" id="resultHall"></span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">Hall</span>
-                    <span class="info-value" id="resultHall"></span>
+                <div class="result-item">
+                    <span class="result-label">Block</span>
+                    <span class="result-value" id="resultBlock"></span>
                 </div>
-            </div>
-            <div class="info-row">
-                <div class="info-item">
-                    <span class="info-label">Desk Number</span>
-                    <span class="info-value" id="resultDesk"></span>
+                <div class="result-item">
+                    <span class="result-label">Desk No.</span>
+                    <span class="result-value" id="resultDesk"></span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">Seat Number</span>
-                    <span class="info-value" id="resultSeat"></span>
+                <div class="result-item">
+                    <span class="result-label">Seat No.</span>
+                    <span class="result-value" id="resultSeat"></span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">Exam Date</span>
-                    <span class="info-value" id="resultDate"></span>
+                <div class="result-item">
+                    <span class="result-label">Exam Date</span>
+                    <span class="result-value" id="resultDate"></span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">Exam Name</span>
-                    <span class="info-value" id="resultExam"></span>
+                <div class="result-item">
+                    <span class="result-label">Exam Name</span>
+                    <span class="result-value" id="resultExam"></span>
                 </div>
             </div>
         </div>
 
         <!-- Department Filters -->
-        <div class="filter-tabs">
-            <button class="filter-tab active" onclick="filterByDept('all')">All Halls</button>
-            <button class="filter-tab" onclick="filterByDept('IT')">IT</button>
-            <button class="filter-tab" onclick="filterByDept('CSE')">CSE</button>
-            <button class="filter-tab" onclick="filterByDept('AIDS')">AIDS</button>
+        <div class="filter-section">
+            <button class="filter-btn active" onclick="filterByDept('')">All Departments</button>
+            <button class="filter-btn" onclick="filterByDept('IT')">IT</button>
+            <button class="filter-btn" onclick="filterByDept('CSE')">CSE</button>
+            <button class="filter-btn" onclick="filterByDept('AIDS')">AIDS</button>
         </div>
     </div>
 
-    <!-- Halls Grid -->
-    <div id="hallsGrid" class="halls-grid">
-        @if (Model != null && Model.Count > 0)
-        {
-            foreach (var hall in Model)
-            {
-                var daysDiff = (hall.examDate - DateTime.Today).Days;
-                var dateText = daysDiff == 0 ? "TODAY" : daysDiff == 1 ? "TOMORROW" : hall.examDate.ToString("dd MMM yyyy");
+    <!-- Halls Section -->
+    <div class="halls-section">
+        <h2 class="section-title">
+            📋 Hall Allocations
+            <span class="count-badge" id="hallCount">0 halls</span>
+        </h2>
 
-                <div class="hall-card" data-dept="all">
-                    <div class="hall-header">
-                        <div>
-                            <div class="hall-title">@hall.roomNumber</div>
-                            <div class="hall-block">@hall.blockName</div>
-                        </div>
-                    </div>
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner">⏳</div>
+            <p>Loading hall allocations...</p>
+        </div>
 
-                    <div class="hall-info">
-                        <div class="info-line">
-                            <span class="label">Exam Date</span>
-                            <span class="value">@dateText</span>
-                        </div>
-                        <div class="info-line">
-                            <span class="label">Total Seats</span>
-                            <span class="value">@hall.totalSeats</span>
-                        </div>
-                        <div class="info-line">
-                            <span class="label">Occupied</span>
-                            <span class="value">@hall.occupiedSeats</span>
-                        </div>
-                        <div class="info-line">
-                            <span class="label">Available</span>
-                            <span class="value">@(hall.totalSeats - hall.occupiedSeats)</span>
-                        </div>
-                    </div>
+        <!-- Halls Container -->
+        <div id="hallsContainer"></div>
 
-                    @if (!string.IsNullOrWhiteSpace(hall.examName))
-                    {
-                        <div class="exam-badge">@hall.examName</div>
-                    }
-                </div>
-            }
-        }
-        else
-        {
-            <div class="empty-state" style="grid-column: 1/-1;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <h3>No Upcoming Exams</h3>
-                <p>There are no exam halls scheduled at the moment.</p>
-            </div>
-        }
-    </div>
-
-    <!-- Loading for department filter -->
-    <div id="loadingSpinner" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">
-        <div style="font-size:2rem; margin-bottom:16px;">⏳</div>
-        <div>Loading halls...</div>
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="icon">📭</div>
+            <h3>No Allocations Found</h3>
+            <p>No student allocations found for the selected department.</p>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        let allHalls = @Html.Raw(Json.Serialize(Model));
+        let currentDepartment = '';
 
+        // Load allocations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHallAllocations('');
+        });
+
+        // Search by Roll Number
         function searchByRollNumber() {
             const rollNumber = document.getElementById('rollNumberInput').value.trim();
             const alertBox = document.getElementById('alertBox');
@@ -399,7 +461,6 @@
                 return;
             }
 
-            // Hide previous results
             resultBox.style.display = 'none';
             alertBox.style.display = 'none';
 
@@ -407,114 +468,127 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        // Show result
                         document.getElementById('resultRoll').textContent = data.data.rollNumber;
                         document.getElementById('resultDept').textContent = data.data.department;
                         document.getElementById('resultBlock').textContent = data.data.blockName;
                         document.getElementById('resultHall').textContent = data.data.roomNumber;
                         document.getElementById('resultDesk').textContent = data.data.deskNumber;
                         document.getElementById('resultSeat').textContent = data.data.seatNumber;
-                        document.getElementById('resultDate').textContent = new Date(data.data.examDate).toLocaleDateString('en-GB');
+                        document.getElementById('resultDate').textContent = formatDate(data.data.examDate);
                         document.getElementById('resultExam').textContent = data.data.examName || 'N/A';
 
                         resultBox.style.display = 'block';
+
+                        // Scroll to result
+                        resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     } else {
                         showAlert(data.message, 'error');
                     }
                 })
                 .catch(err => {
                     showAlert('Error searching. Please try again.', 'error');
+                    console.error(err);
                 });
         }
 
+        // Filter by Department
         function filterByDept(dept) {
-            // Update active tab
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.classList.remove('active');
+            currentDepartment = dept;
+
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
             });
             event.target.classList.add('active');
 
-            const grid = document.getElementById('hallsGrid');
-            const spinner = document.getElementById('loadingSpinner');
+            loadHallAllocations(dept);
+        }
 
-            if (dept === 'all') {
-                // Show all halls from initial load
-                renderHalls(allHalls);
-                return;
-            }
+        // Load Hall Allocations
+        function loadHallAllocations(department) {
+            const container = document.getElementById('hallsContainer');
+            const spinner = document.getElementById('loadingSpinner');
+            const emptyState = document.getElementById('emptyState');
+            const countBadge = document.getElementById('hallCount');
 
             // Show loading
-            grid.style.display = 'none';
+            container.innerHTML = '';
+            emptyState.style.display = 'none';
             spinner.style.display = 'block';
 
-            fetch(`/Website/HallLocatorByDepartment?department=${dept}`)
+            const url = department
+                ? `/Website/GetAllHallAllocations?department=${encodeURIComponent(department)}`
+                : '/Website/GetAllHallAllocations';
+
+            fetch(url)
                 .then(res => res.json())
-                .then(halls => {
+                .then(response => {
                     spinner.style.display = 'none';
-                    grid.style.display = 'grid';
-                    renderHalls(halls);
+
+                    if (!response.success || !response.data || response.data.length === 0) {
+                        emptyState.style.display = 'block';
+                        countBadge.textContent = '0 halls';
+                        return;
+                    }
+
+                    const halls = response.data;
+                    countBadge.textContent = `${halls.length} hall${halls.length !== 1 ? 's' : ''}`;
+
+                    container.innerHTML = halls.map(hall => renderHallCard(hall)).join('');
                 })
                 .catch(err => {
                     spinner.style.display = 'none';
-                    grid.style.display = 'grid';
-                    showAlert('Error loading halls', 'error');
+                    showAlert('Error loading hall allocations', 'error');
+                    console.error(err);
                 });
         }
 
-        function renderHalls(halls) {
-            const grid = document.getElementById('hallsGrid');
+        // Render Hall Card
+        function renderHallCard(hall) {
+            const dateStr = formatDate(hall.examDate);
 
-            if (!halls || halls.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state" style="grid-column: 1/-1;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        <h3>No Halls Found</h3>
-                        <p>No exam halls found for this department.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = halls.map(hall => {
-                const examDate = new Date(hall.examDate);
-                const today = new Date();
-                const daysDiff = Math.floor((examDate - today) / (1000 * 60 * 60 * 24));
-                const dateText = daysDiff === 0 ? 'TODAY' : daysDiff === 1 ? 'TOMORROW' : examDate.toLocaleDateString('en-GB');
-
-                return `
-                    <div class="hall-card">
-                        <div class="hall-header">
-                            <div>
-                                <div class="hall-title">${hall.roomNumber}</div>
-                                <div class="hall-block">${hall.blockName}</div>
+            return `
+                <div class="hall-card">
+                    <div class="hall-header">
+                        <div class="hall-title-group">
+                            <h3>${hall.roomNumber}</h3>
+                            <div class="hall-meta">
+                                <span>📍 ${hall.blockName}</span>
+                                <span>📅 ${dateStr}</span>
+                                <span>👥 ${hall.occupiedSeats} / ${hall.totalSeats} seats</span>
                             </div>
                         </div>
-                        <div class="hall-info">
-                            <div class="info-line">
-                                <span class="label">Exam Date</span>
-                                <span class="value">${dateText}</span>
-                            </div>
-                            <div class="info-line">
-                                <span class="label">Total Seats</span>
-                                <span class="value">${hall.totalSeats}</span>
-                            </div>
-                            <div class="info-line">
-                                <span class="label">Occupied</span>
-                                <span class="value">${hall.occupiedSeats}</span>
-                            </div>
-                            <div class="info-line">
-                                <span class="label">Available</span>
-                                <span class="value">${hall.totalSeats - hall.occupiedSeats}</span>
-                            </div>
+                        <div>
+                            <div class="dept-badge">${hall.department}</div>
+                            ${hall.examName ? `<div class="exam-badge" style="margin-top:8px;">${hall.examName}</div>` : ''}
                         </div>
-                        ${hall.examName ? `<div class="exam-badge">${hall.examName}</div>` : ''}
                     </div>
-                `;
-            }).join('');
+
+                    <table class="students-table">
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">#</th>
+                                <th>Roll Number</th>
+                                <th>Desk Number</th>
+                                <th>Seat Number</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${hall.students.map((student, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td><span class="roll-number">${student.rollNumber}</span></td>
+                                    <td><span class="desk-seat-item">Desk ${student.deskNumber}</span></td>
+                                    <td><span class="desk-seat-item">Seat ${student.seatNumber}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
         }
 
+        // Show Alert
         function showAlert(message, type) {
             const alertBox = document.getElementById('alertBox');
             alertBox.className = `alert-box alert-${type}`;
@@ -526,7 +600,28 @@
             }, 5000);
         }
 
-        // Allow Enter key to search
+        // Format Date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const examDate = new Date(date);
+            examDate.setHours(0, 0, 0, 0);
+
+            const daysDiff = Math.floor((examDate - today) / (1000 * 60 * 60 * 24));
+
+            if (daysDiff === 0) return 'TODAY';
+            if (daysDiff === 1) return 'TOMORROW';
+
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        // Enter key to search
         document.getElementById('rollNumberInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 searchByRollNumber();

@@ -48,8 +48,7 @@ namespace ksi.Interfaces
         #endregion
 
         #region Hall Locator (Student View)
-        Task<List<PublicHallListDTO>> GetUpcomingExamHallsAsync();
-        Task<List<PublicHallListDTO>> GetHallsByDepartmentAsync(string department);
+        Task<List<HallAllocationGroupDTO>> GetAllHallAllocationsAsync(string department = "");
         Task<StudentHallTicketDTO> GetHallAllocationByRollNumberAsync(string rollNumber);
         #endregion
     }

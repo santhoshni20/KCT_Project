@@ -174,12 +174,32 @@
                             </li>
                         </ul>
                     </li>
+                    @* <!-- HALL LOCATOR --> *@
+                    @* <li class="menu-item"> *@
+                    @*     <a href="@Url.Action("Index", "HallLocator")" class="menu-link"> *@
+                    @*         <i class="menu-icon tf-icons bx bx-map"></i> *@
+                    @*         <div>Hall Locator</div> *@
+                    @*     </a> *@
+                    @* </li> *@
+
                     <!-- HALL LOCATOR -->
                     <li class="menu-item">
-                        <a href="@Url.Action("Index", "HallLocator")" class="menu-link">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-map"></i>
                             <div>Hall Locator</div>
                         </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="@Url.Action("Index", "AdminHallLocator")" class="menu-link">
+                                    <div>Manage Halls</div>
+                                </a>
+                            </li>
+                            @* <li class="menu-item"> *@
+                            @*     <a href="@Url.Action("HallLocator", "Website")" class="menu-link" target="_blank"> *@
+                            @*         <div>Student View</div> *@
+                            @*     </a> *@
+                            @* </li> *@
+                        </ul>
                     </li>
 
 

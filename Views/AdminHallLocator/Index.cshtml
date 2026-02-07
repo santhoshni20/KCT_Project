@@ -4,7 +4,6 @@
     }
 
     <style>
-        /* ── Page‑level helpers ──────────────────────────────────────── */
         .card-header-custom {
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: #fff;
@@ -65,7 +64,10 @@
                 margin-bottom: 10px;
                 color: #2c3e50;
             }
-
+    /* ── Action buttons ──────────────────────────────────────────── */
+    .d-flex.gap-1 {
+        gap: 0.25rem;
+    }
         /* ── Capacity bar ────────────────────────────────────────────── */
         .capacity-bar {
             width: 100%;
@@ -374,13 +376,28 @@
                                                 <span class="text-muted">—</span>
                                             }
                                         </td>
-                                        <td class="text-center">
+                                    <td class="text-center">
+                                        <div class="d-flex gap-1 justify-content-center">
                                             <button type="button"
                                                     class="btn btn-sm btn-outline-primary"
                                                     onclick="togglePanel(@hall.roomId)">
                                                 <i class="bi bi-chevron-down" id="icon-@hall.roomId"></i> Manage
                                             </button>
-                                        </td>
+
+                                            <form asp-action="DeleteHall" method="post" class="d-inline">
+                                                <input type="hidden" name="roomId" value="@hall.roomId" />
+                                                <input type="hidden" name="forceDelete" value="true" />
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        title="Delete hall"
+                                                        onclick="return confirm('@(hall.occupiedSeats > 0
+                ? $"⚠️ DELETE {hall.roomNumber}?\n\n• This hall has {hall.occupiedSeats} allocated students\n• All allocations will be removed\n• This action cannot be undone!\n\nAre you absolutely sure?"
+                : $"⚠️ Delete {hall.roomNumber}?\n\nThis action cannot be undone!")');">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                     </tr>
 
                                     <!-- ─── EXPANDABLE PANEL ─── -->
@@ -408,6 +425,23 @@
                                                         <span class="ms-2">| <i class="bi bi-person-fill"></i> Single</span>
                                                     }
                                                 </div>
+                                            @if (hall.occupiedSeats > 0)
+                                            {
+                                                <div class="alert alert-warning mb-3 d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                        <strong>@hall.occupiedSeats student(s) allocated</strong> in this hall
+                                                    </div>
+                                                    <form asp-action="RemoveAllAllocations" method="post" class="d-inline">
+                                                        <input type="hidden" name="roomId" value="@hall.roomId" />
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-danger"
+                                                                onclick="return confirm('⚠️ Remove ALL @hall.occupiedSeats students from @hall.roomNumber?\n\nThis will clear all seat allocations.\n\nAre you sure?');">
+                                                            <i class="bi bi-trash3"></i> Remove All Allocations
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            }
 
                                                 <!-- ── Allocate Students ── -->
                                                 <div class="sub-title"><i class="bi bi-person-plus"></i> Allocate Students</div>

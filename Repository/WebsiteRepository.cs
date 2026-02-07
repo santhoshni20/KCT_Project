@@ -1,5 +1,6 @@
 ﻿using ksi.Interfaces;
 using ksi.Models;
+using ksi.Models.DTO;
 using ksi.Models.DTOs;
 using KSI_Project.Helpers.DbContexts;
 using KSI_Project.Models.DTOs;
@@ -422,5 +423,182 @@ namespace ksi.Repository
         }
         #endregion
 
+
+        #region Hall Locator (Student View)
+
+        public async Task<List<PublicHallListDTO>> GetUpcomingExamHallsAsync()
+        {
+            try
+            {
+                var today = DateTime.Today;
+                var halls = await _context.mstRoom
+                    .Where(r => r.isActive
+                        && r.examDate.HasValue
+                        && r.examDate.Value >= today)
+                    .OrderBy(r => r.examDate)
+                    .ThenBy(r => r.blockId)
+                    .ThenBy(r => r.roomNumber)
+                    .Select(r => new
+                    {
+                        r.roomId,
+                        r.blockId,
+                        r.roomNumber,
+                        r.examDate,
+                        r.examName,
+                        r.totalDesks,
+                        r.seatsPerDesk
+                    })
+                    .ToListAsync();
+
+                var result = new List<PublicHallListDTO>();
+
+                foreach (var hall in halls)
+                {
+                    var block = await _context.mstBlock
+                        .Where(b => b.blockId == hall.blockId)
+                        .Select(b => b.blockName)
+                        .FirstOrDefaultAsync();
+
+                    var occupiedSeats = await _context.mstHallSeating
+                        .CountAsync(s => s.roomId == hall.roomId);
+
+                    int totalSeats = hall.totalDesks * hall.seatsPerDesk;
+
+                    result.Add(new PublicHallListDTO
+                    {
+                        roomId = hall.roomId,
+                        blockName = block ?? "Unknown",
+                        roomNumber = hall.roomNumber,
+                        examDate = hall.examDate ?? DateTime.MinValue,
+                        examName = hall.examName ?? "",
+                        totalSeats = totalSeats,
+                        occupiedSeats = occupiedSeats
+                    });
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving exam halls: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<List<PublicHallListDTO>> GetHallsByDepartmentAsync(string department)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(department))
+                    return new List<PublicHallListDTO>();
+
+                var today = DateTime.Today;
+
+                // Get rooms that have students from this department
+                var roomIds = await _context.mstHallSeating
+                    .Where(s => s.department.ToLower() == department.ToLower())
+                    .Select(s => s.roomId)
+                    .Distinct()
+                    .ToListAsync();
+
+                var halls = await _context.mstRoom
+                    .Where(r => r.isActive
+                        && roomIds.Contains(r.roomId)
+                        && r.examDate.HasValue
+                        && r.examDate.Value >= today)
+                    .OrderBy(r => r.examDate)
+                    .ThenBy(r => r.blockId)
+                    .ThenBy(r => r.roomNumber)
+                    .Select(r => new
+                    {
+                        r.roomId,
+                        r.blockId,
+                        r.roomNumber,
+                        r.examDate,
+                        r.examName,
+                        r.totalDesks,
+                        r.seatsPerDesk
+                    })
+                    .ToListAsync();
+
+                var result = new List<PublicHallListDTO>();
+
+                foreach (var hall in halls)
+                {
+                    var block = await _context.mstBlock
+                        .Where(b => b.blockId == hall.blockId)
+                        .Select(b => b.blockName)
+                        .FirstOrDefaultAsync();
+
+                    var occupiedSeats = await _context.mstHallSeating
+                        .CountAsync(s => s.roomId == hall.roomId && s.department.ToLower() == department.ToLower());
+
+                    int totalSeats = hall.totalDesks * hall.seatsPerDesk;
+
+                    result.Add(new PublicHallListDTO
+                    {
+                        roomId = hall.roomId,
+                        blockName = block ?? "Unknown",
+                        roomNumber = hall.roomNumber,
+                        examDate = hall.examDate ?? DateTime.MinValue,
+                        examName = hall.examName ?? "",
+                        totalSeats = totalSeats,
+                        occupiedSeats = occupiedSeats
+                    });
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving halls by department: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<StudentHallTicketDTO> GetHallAllocationByRollNumberAsync(string rollNumber)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(rollNumber))
+                    return null;
+
+                var allocation = await _context.mstHallSeating
+                    .Where(s => s.rollNumber.ToLower() == rollNumber.ToLower().Trim())
+                    .FirstOrDefaultAsync();
+
+                if (allocation == null)
+                    return null;
+
+                var room = await _context.mstRoom
+                    .Where(r => r.roomId == allocation.roomId && r.isActive)
+                    .FirstOrDefaultAsync();
+
+                if (room == null)
+                    return null;
+
+                var block = await _context.mstBlock
+                    .Where(b => b.blockId == room.blockId)
+                    .Select(b => b.blockName)
+                    .FirstOrDefaultAsync();
+
+                return new StudentHallTicketDTO
+                {
+                    rollNumber = allocation.rollNumber.ToUpper(),
+                    studentName = "",  // You can populate this from student profile if available
+                    department = allocation.department,
+                    blockName = block ?? "Unknown",
+                    roomNumber = room.roomNumber,
+                    deskNumber = allocation.deskNumber,
+                    seatNumber = allocation.seatNumber,
+                    examDate = room.examDate ?? DateTime.MinValue,
+                    examName = room.examName ?? ""
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving hall allocation: {ex.Message}", ex);
+            }
+        }
+
+        #endregion
     }
 }

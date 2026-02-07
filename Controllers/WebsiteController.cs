@@ -7,6 +7,7 @@ using KSI_Project.Models.Entity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq; // added
 using System;
+using ksi.Models.DTO;
 
 namespace ksi.Controllers
 {
@@ -325,6 +326,7 @@ namespace ksi.Controllers
             }
         }
         #endregion
+
         #region CGPA
         public IActionResult Cgpa()
         {
@@ -404,6 +406,51 @@ namespace ksi.Controllers
                 };
             }
         }
+        #endregion
+
+        // ════════════════════════════════════════════════════════════════
+        //  HALL LOCATOR (STUDENT VIEW)
+        // ════════════════════════════════════════════════════════════════
+
+        #region Hall Locator (Student View)
+
+        public async Task<IActionResult> HallLocator()
+        {
+            var halls = await _repo.GetUpcomingExamHallsAsync();
+            return View(halls);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> HallLocatorByDepartment(string department)
+        {
+            if (string.IsNullOrWhiteSpace(department))
+            {
+                return Json(new List<PublicHallListDTO>());
+            }
+
+            var halls = await _repo.GetHallsByDepartmentAsync(department);
+            return Json(halls);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> SearchHallByRollNumber(string rollNumber)
+        {
+            if (string.IsNullOrWhiteSpace(rollNumber))
+            {
+                return Json(new { success = false, message = "Please enter a roll number" });
+            }
+
+            var allocation = await _repo.GetHallAllocationByRollNumberAsync(rollNumber);
+
+            if (allocation == null)
+            {
+                return Json(new { success = false, message = "No hall allocation found for this roll number" });
+            }
+
+            return Json(new { success = true, data = allocation });
+        }
+
         #endregion
     }
 }

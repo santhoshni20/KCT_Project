@@ -1,4 +1,5 @@
 ﻿using ksi.Models;
+using ksi.Models.DTO;
 using ksi.Models.DTOs;
 using KSI_Project.Models.DTOs;
 using KSI_Project.Models.Entity;
@@ -44,6 +45,12 @@ namespace ksi.Interfaces
         #region CGPA
         List<subjectDTO> getSubjectsForCgpa(int batchId, int departmentId);
         Task<cgpaResultDTO> calculateCgpaAsync(int batchId, int departmentId, List<gradeEntryDTO> grades);
+        #endregion
+
+        #region Hall Locator (Student View)
+        Task<List<PublicHallListDTO>> GetUpcomingExamHallsAsync();
+        Task<List<PublicHallListDTO>> GetHallsByDepartmentAsync(string department);
+        Task<StudentHallTicketDTO> GetHallAllocationByRollNumberAsync(string rollNumber);
         #endregion
     }
 }

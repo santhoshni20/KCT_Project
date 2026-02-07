@@ -237,6 +237,99 @@ namespace StudentPortal.Controllers
         }
 
         // ════════════════════════════════════════════════════════════════
+        //  DELETE HALL  (POST)
+        // ════════════════════════════════════════════════════════════════
+
+        [HttpPost]
+        public IActionResult DeleteHall(int roomId, bool forceDelete = false)
+        {
+            if (roomId <= 0)
+            {
+                TempData["Error"] = "Invalid hall selected.";
+                return RedirectToAction("Index");
+            }
+
+            var room = _repo.GetRoomById(roomId);
+            if (room == null)
+            {
+                TempData["Error"] = "Hall not found.";
+                return RedirectToAction("Index");
+            }
+
+            // Check if hall has any allocated students
+            int occupiedSeats = _repo.GetOccupiedSeats(roomId);
+
+            if (occupiedSeats > 0 && !forceDelete)
+            {
+                TempData["Error"] = $"Cannot delete hall '{room.roomNumber}'. It has {occupiedSeats} allocated student(s). Please remove all allocations first, or use force delete.";
+                return RedirectToAction("Index");
+            }
+
+            // If force delete, remove all allocations first
+            if (forceDelete && occupiedSeats > 0)
+            {
+                var allocations = _context.mstHallSeating
+                    .Where(s => s.roomId == roomId)
+                    .ToList();
+
+                _context.mstHallSeating.RemoveRange(allocations);
+            }
+
+            // Soft delete the hall
+            room.isActive = false;
+            room.deletedBy = 1;
+            room.deletedDate = DateTime.Now;
+
+            _context.SaveChanges();
+
+            TempData["Success"] = forceDelete
+                ? $"✓ Hall '{room.roomNumber}' and {occupiedSeats} allocation(s) deleted successfully!"
+                : $"✓ Hall '{room.roomNumber}' deleted successfully!";
+
+            return RedirectToAction("Index");
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  REMOVE ALL ALLOCATIONS FROM A HALL  (POST)
+        // ════════════════════════════════════════════════════════════════
+
+        [HttpPost]
+        public IActionResult RemoveAllAllocations(int roomId)
+        {
+            if (roomId <= 0)
+            {
+                TempData["Error"] = "Invalid hall selected.";
+                return RedirectToAction("Index");
+            }
+
+            var room = _repo.GetRoomById(roomId);
+            if (room == null)
+            {
+                TempData["Error"] = "Hall not found.";
+                return RedirectToAction("Index");
+            }
+
+            // Get all allocations for this room
+            var allocations = _context.mstHallSeating
+                .Where(s => s.roomId == roomId)
+                .ToList();
+
+            if (allocations.Count == 0)
+            {
+                TempData["Info"] = "No students to remove.";
+                return RedirectToAction("Index");
+            }
+
+            int count = allocations.Count;
+
+            // Remove all allocations
+            _context.mstHallSeating.RemoveRange(allocations);
+            _context.SaveChanges();
+
+            TempData["Success"] = $"✓ Removed all {count} student(s) from hall {room.roomNumber}!";
+            return RedirectToAction("Index");
+        }
+        // ════════════════════════════════════════════════════════════════
         //  HELPER METHODS
         // ════════════════════════════════════════════════════════════════
         private HallLocatorPageDTO BuildPageModel()

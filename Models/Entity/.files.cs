@@ -1,5 +1,4 @@
-﻿//using Microsoft.AspNetCore.Http.HttpResults;
-
+﻿//USE ksi;
 //CREATE TABLE mstBatch (
 //    batchId INT AUTO_INCREMENT PRIMARY KEY,
 //    batchName VARCHAR(255) NOT NULL,
@@ -188,7 +187,7 @@
 
 //    batchId INT NOT NULL,
 //    departmentId INT NOT NULL,
-//    sectionId INT NULL,            
+//    sectionId INT NULL,
 
 //    subjectName VARCHAR(255) NOT NULL,
 //    numberOfCredits INT NOT NULL,
@@ -229,11 +228,11 @@
 //    sectionId INT NOT NULL,
 //    subjectId INT NOT NULL,
 //    facultyId INT NOT NULL,
-//    day VARCHAR(10) NOT NULL,    
+//    day VARCHAR(10) NOT NULL,
 //    blockId INT NOT NULL,
 //    roomId INT NOT NULL,
 
-//    hourNo INT NOT NULL,        
+//    hourNo INT NOT NULL,
 
 //    isActive BOOLEAN NOT NULL DEFAULT TRUE,
 

@@ -1,9 +1,9 @@
 ﻿using ksi.Models;
 using ksi.Models.Entity;
 using KSI.Models.Entity;
-using ksi_project.Models.Entity;
+//using ksi_project.Models.Entity;
 using KSI_Project.Models.Entity;
-using KsiProject.Entities;
+///using KsiProject.Entities;
 using Microsoft.EntityFrameworkCore;
 using YourProject.Entities;
 
@@ -14,15 +14,13 @@ namespace KSI_Project.Helpers.DbContexts
         public ksiDbContext(DbContextOptions<ksiDbContext> options) : base(options) { }
 
         // ── Existing DbSets ───────────────────────────────────────────
-        public DbSet<StudentProfile> student_profile { get; set; }
-        public DbSet<syllabus> syllabus { get; set; }
+        
         public DbSet<mstEventDetails> mstEventDetails { get; set; }
         public DbSet<mstBatch> mstBatch { get; set; }
         public DbSet<mstDepartment> mstDepartment { get; set; }
         public DbSet<mstSection> mstSection { get; set; }
         public DbSet<mstSubject> mstSubject { get; set; }
         public DbSet<mstClubs> mstClubs { get; set; }
-        public DbSet<timetable> timetable { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<mstCanteen> mstCanteens { get; set; }
         public DbSet<CanteenId> mstCanteenIds { get; set; }

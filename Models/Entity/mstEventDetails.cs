@@ -24,21 +24,3 @@ namespace ksi.Models.Entity
     }
 
 }
-
-
-//CREATE TABLE mstEventDetails (
-//    mstEventId INT AUTO_INCREMENT PRIMARY KEY,
-//    eventName VARCHAR(255) NOT NULL,
-//    organisedBy VARCHAR(255) NOT NULL,
-//    registrationDeadline DATETIME NOT NULL,
-//    brochureImagePath VARCHAR(500),
-//    eventDate DATETIME NOT NULL,
-//    contactNumber VARCHAR(20),
-//    isActive TINYINT(1) NOT NULL DEFAULT 1,
-//    createdBy INT NOT NULL,
-//    createdDate DATETIME NOT NULL,
-//    updatedBy INT NULL,
-//    updatedDate DATETIME NULL,
-//    deletedBy INT NULL,
-//    deletedDate DATETIME NULL
-//);

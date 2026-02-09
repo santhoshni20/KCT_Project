@@ -17,16 +17,3 @@ namespace ksi.Models.Entity
         public DateTime? deletedDate { get; set; }
     }
 }
-
-//CREATE TABLE mstDepartment (
-//    departmentId INT AUTO_INCREMENT PRIMARY KEY,
-//    departmentName VARCHAR(100) NOT NULL,
-
-//    isActive BOOLEAN NOT NULL DEFAULT TRUE,
-//    createdBy INT NOT NULL,
-//    createdDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//    updatedBy INT NULL,
-//    updatedDate DATETIME NULL,
-//    deletedBy INT NULL,
-//    deletedDate DATETIME NULL
-//);

@@ -23,17 +23,3 @@ namespace ksi.Models.Entity
         public DateTime? deletedDate { get; set; }
     }
 }
-
-//CREATE TABLE mstSyllabus (
-//    syllabusId INT AUTO_INCREMENT PRIMARY KEY,
-//    batchId INT NOT NULL,
-//    departmentId INT NOT NULL,
-//    syllabusDriveLink VARCHAR(500) NOT NULL,
-//    isActive TINYINT(1) NOT NULL DEFAULT 1,
-//    createdBy INT NOT NULL,
-//    createdDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//    updatedBy INT NULL,
-//    updatedDate DATETIME NULL,
-//    deletedBy INT NULL,
-//    deletedDate DATETIME NULL
-//);

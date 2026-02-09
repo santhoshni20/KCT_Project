@@ -18,15 +18,3 @@ namespace ksi.Models.Entity
     }
 }
 
-//CREATE TABLE mstSection (
-//    sectionId INT AUTO_INCREMENT PRIMARY KEY,
-//    sectionName VARCHAR(20) NOT NULL,
-
-//    isActive BOOLEAN NOT NULL DEFAULT TRUE,
-//    createdBy INT NOT NULL,
-//    createdDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//    updatedBy INT NULL,
-//    updatedDate DATETIME NULL,
-//    deletedBy INT NULL,
-//    deletedDate DATETIME NULL
-//);

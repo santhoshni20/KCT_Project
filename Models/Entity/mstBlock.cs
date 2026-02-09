@@ -22,18 +22,3 @@ namespace ksi.Models.Entity
         public DateTime? deletedDate { get; set; }
     }
 }
-
-/*
-CREATE TABLE `mstblock` (
-  `blockId` INT NOT NULL AUTO_INCREMENT,
-  `blockName` VARCHAR(100) NOT NULL,
-  `isActive` BOOLEAN NOT NULL DEFAULT TRUE,
-  `createdBy` INT NOT NULL,
-  `createdDate` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updatedBy` INT NULL,
-  `updatedDate` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
-  `deletedBy` INT NULL,
-  `deletedDate` TIMESTAMP NULL,
-  PRIMARY KEY (`blockId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-*/

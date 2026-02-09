@@ -51,7 +51,7 @@ app.UseAuthorization();
 // ── Routes ────────────────────────────────────────────────────────────
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=AdminHallLocator}/{action=Index}/{id?}");   // keep Home as default
+    pattern: "{controller=Website}/{action=AdminDashboard}/{id?}");   // keep Home as default
 
 app.MapRazorPages();
 

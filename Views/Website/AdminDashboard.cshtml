@@ -4,21 +4,238 @@
 }
 
 <style>
+    /* GLOBAL STYLES */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --info-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.15);
+        --shadow-hover: 0 25px 60px rgba(102, 126, 234, 0.25);
+    }
+
+    body {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+        margin-bottom: 30px;
+        animation: slideDown 0.6s ease-out;
+    }
+
+        .page-header h4 {
+            font-weight: 700;
+            font-size: 2rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+    /* MAIN CARD CONTAINER */
+    .main-card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 0;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    /* HERO SECTION */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        padding: 50px 40px;
+        margin: 0;
+        overflow: hidden;
+        text-align: center;
+    }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 8px 24px;
+        border-radius: 50px;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .hero-title {
+        font-weight: 800;
+        font-size: 2.8rem;
+        color: white;
+        margin-bottom: 15px;
+        line-height: 1.2;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .hero-description {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        margin-bottom: 25px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-btn {
+        background: white;
+        color: #667eea;
+        padding: 14px 35px;
+        border-radius: 50px;
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+        .hero-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            color: #667eea;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+    /* STATS BAR */
+    .stats-bar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0;
+        margin: 0;
+        background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 100%);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-item {
+        padding: 30px;
+        text-align: center;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-item:hover {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            transform: scale(1.02);
+        }
+
+    .stat-number {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* DASHBOARD SECTION */
+    .dashboard-section {
+        padding: 50px 40px;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .section-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 15px;
+    }
+
+    .section-subtitle {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+
+    /* DASHBOARD GRID */
     .dashboard-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 25px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
     }
 
     .dashboard-card {
         background: white;
-        border-radius: 18px;
-        padding: 25px;
+        border-radius: 20px;
+        padding: 35px 30px;
         text-align: center;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        cursor: pointer;
     }
 
         .dashboard-card::before {
@@ -27,104 +244,390 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 5px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .dashboard-card:hover::before {
+            transform: scaleX(1);
         }
 
         .dashboard-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(102, 126, 234, 0.2);
         }
 
+        /* GRADIENT BACKGROUNDS FOR ICONS */
+        .dashboard-card:nth-child(1) .icon-wrapper {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .dashboard-card:nth-child(2) .icon-wrapper {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .dashboard-card:nth-child(3) .icon-wrapper {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .dashboard-card:nth-child(4) .icon-wrapper {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .dashboard-card:nth-child(5) .icon-wrapper {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .dashboard-card:nth-child(6) .icon-wrapper {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        .dashboard-card:nth-child(7) .icon-wrapper {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+
+        .dashboard-card:nth-child(8) .icon-wrapper {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .dashboard-card:nth-child(9) .icon-wrapper {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+
+        .dashboard-card:nth-child(10) .icon-wrapper {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+    .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card:hover .icon-wrapper {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+    }
+
     .dashboard-icon {
-        font-size: 3.5rem;
-        margin-bottom: 15px;
+        font-size: 2.5rem;
     }
 
     .dashboard-card h5 {
-        font-weight: 600;
-        margin-bottom: 12px;
-        color: #333;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #2d3748;
+        font-size: 1.25rem;
     }
 
     .dashboard-card p {
-        color: #555;
+        color: #718096;
         font-size: 0.95rem;
-        line-height: 1.6;
+        line-height: 1.7;
+        margin-bottom: 0;
+    }
+
+    .dashboard-card a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* ANIMATIONS */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.85;
+        }
+    }
+
+    @@keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* RESPONSIVE DESIGN */
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 40px 25px;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .dashboard-section {
+            padding: 35px 20px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .stats-bar {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .stat-item {
+            padding: 20px 15px;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .hero-title {
+            font-size: 1.6rem;
+        }
+
+        .stats-bar {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-<!-- PAGE HEADER (MATCHES OTHER DASHBOARD PAGES) -->
-<div class="d-flex justify-content-between mb-3">
-    <h4 class="fw-bold">KSI Dashboard</h4>
+<!-- PAGE HEADER -->
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4>KSI Dashboard</h4>
 </div>
 
-<!-- CARD WRAPPER -->
-<div class="card p-4">
+<!-- MAIN CARD -->
+<div class="main-card">
 
-    <div class="text-center mb-4">
-        <h2 class="fw-bold">🎓 Kumaraguru School Of Innovation</h2>
-        <p class="text-muted">
-            Empowering Education • Innovation • Excellence
-        </p>
+    <!-- HERO SECTION -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-badge">
+                ✨ Pioneering Excellence Since 1984
+            </div>
+            <h1 class="hero-title">
+                🎓 Kumaraguru School Of Innovation
+            </h1>
+            <p class="hero-subtitle">
+                Empowering Education • Innovation • Excellence
+            </p>
+            <p class="hero-description">
+                Kumaraguru School of Innovation focuses on outcome-based education,
+                industry exposure, innovation-driven learning, and holistic
+                student development.
+            </p>
+            <a href="https://www.kct.ac.in/" target="_blank" class="hero-btn">
+                🚀 Explore Campus
+            </a>
+        </div>
     </div>
 
-    <!-- DASHBOARD GRID (CANTEEN STYLE) -->
-    <div class="dashboard-grid">
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <span class="stat-number">5000+</span>
+            <span class="stat-label">Students</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">200+</span>
+            <span class="stat-label">Faculty Members</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">95%</span>
+            <span class="stat-label">Placement Rate</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">40+</span>
+            <span class="stat-label">Years of Legacy</span>
+        </div>
+    </div>
 
-        <div class="dashboard-card">
-            <div class="dashboard-icon">🏫</div>
-            <h5>About the College</h5>
-            <p>
-                KSI Institute of Technology is committed to delivering quality education
-                that nurtures innovation, leadership, and ethical values.
-            </p>
+    <!-- DASHBOARD SECTION -->
+    <div class="dashboard-section">
+
+        <div class="section-header">
+            <h2 class="section-title">Student Services</h2>
+            <p class="section-subtitle">Access all your essential campus services in one place</p>
         </div>
 
-        <div class="dashboard-card">
-            <div class="dashboard-icon">📖</div>
-            <h5>Academic Excellence</h5>
-            <p>
-                Student-centric learning with experienced faculty, industry-aligned
-                curriculum, and continuous academic development.
-            </p>
-        </div>
+        <!-- DASHBOARD GRID -->
+        <div class="dashboard-grid">
 
-        <div class="dashboard-card">
-            <div class="dashboard-icon">🧪</div>
-            <h5>Infrastructure</h5>
-            <p>
-                Modern classrooms, advanced laboratories, smart boards,
-                and a well-equipped digital library.
-            </p>
-        </div>
+            <a href="@Url.Action("Canteen", "Website")" style="text-decoration: none;">
+                <div class="dashboard-card">
+                    <div class="icon-wrapper">
+                        <div class="dashboard-icon">🍽️</div>
+                    </div>
+                    <h5>Canteen Services</h5>
+                    <p>
+                        Browse menu items, check prices, and plan your meals
+                        with our comprehensive canteen directory.
+                    </p>
+                </div>
+            </a>
 
-        <div class="dashboard-card">
-            <div class="dashboard-icon">🍽</div>
-            <h5>Campus Facilities</h5>
-            <p>
-                Hygienic canteens, hostels, sports complexes,
-                medical facilities, and a vibrant campus environment.
-            </p>
-        </div>
+            <a href="@Url.Action("Cgpa", "Website")" style="text-decoration: none;">
+                <div class="dashboard-card">
+                    <div class="icon-wrapper">
+                        <div class="dashboard-icon">📊</div>
+                    </div>
+                    <h5>CGPA Calculator</h5>
+                    <p>
+                        Calculate your semester GPA and cumulative CGPA
+                        with our easy-to-use grade calculator.
+                    </p>
+                </div>
+            </a>
 
-        <div class="dashboard-card">
-            <div class="dashboard-icon">🚀</div>
-            <h5>Placements & Career</h5>
-            <p>
-                Dedicated placement cell offering internships,
-                training programs, and recruitment with top companies.
-            </p>
-        </div>
+            <a href="@Url.Action("EventDetails", "Website")" style="text-decoration: none;">
+                <div class="dashboard-card">
+                    <div class="icon-wrapper">
+                        <div class="dashboard-icon">🎉</div>
+                    </div>
+                    <h5>Event Details</h5>
+                    <p>
+                        Stay updated with upcoming events, workshops, seminars,
+                        and cultural activities on campus.
+                    </p>
+                </div>
+            </a>
 
-        <div class="dashboard-card">
-            <div class="dashboard-icon">🎯</div>
-            <h5>Student Development</h5>
-            <p>
-                Clubs, technical events, cultural activities,
-                leadership programs, and innovation cells.
-            </p>
-        </div>
+            <a href="@Url.Action("FacultySupport", "Website")" style="text-decoration: none;">
+                <div class="dashboard-card">
+                    <div class="icon-wrapper">
+                        <div class="dashboard-icon">👨‍🏫</div>
+                    </div>
+                    <h5>Faculty Support</h5>
+                    <p>
+                        Connect with faculty members, schedule appointments,
+                        and get academic guidance when needed.
+                    </p>
+                </div>
+            </a>
 
+            <a href="@Url.Action("HallLocator", "Website")" style="text-decoration: none;">
+                <div class="dashboard-card">
+                    <div class="icon-wrapper">
+                        <div class="dashboard-icon">🗺️</div>
+                    </div>
+                    <h5>Hall Locator</h5>
+                    <p>
+                        Find classrooms, labs, and halls quickly with our
+                        interactive campus navigation system.
+                    </p>
+                </div>
+            </a>
+
+            <a href="@Url.Action("IdBalance", "Website")" style="text-decoration: none;">
+                <div class="dashboard-card">
+                    <div class="icon-wrapper">
+                        <div class="dashboard-icon">💳</div>
+                    </div>
+                    <h5>ID Balance</h5>
+                    <p>
+                        Check your student ID card balance and transaction
+                        history for all campus services.
+                    </p>
+                </div>
+            </a>
+
+            <a href="@Url.Action("Placement", "Website")" style="text-decoration: none;">
+                <div class="dashboard-card">
+                    <div class="icon-wrapper">
+                        <div class="dashboard-icon">🚀</div>
+                    </div>
+                    <h5>Placement Support</h5>
+                    <p>
+                        Access placement opportunities, company details,
+                        interview schedules, and career resources.
+                    </p>
+                </div>
+            </a>
+
+            <a href="@Url.Action("Syllabus", "Website")" style="text-decoration: none;">
+                <div class="dashboard-card">
+                    <div class="icon-wrapper">
+                        <div class="dashboard-icon">📚</div>
+                    </div>
+                    <h5>Syllabus</h5>
+                    <p>
+                        View and download course syllabus, curriculum details,
+                        and academic requirements for all subjects.
+                    </p>
+                </div>
+            </a>
+
+            <a href="@Url.Action("Timetable", "Website")" style="text-decoration: none;">
+                <div class="dashboard-card">
+                    <div class="icon-wrapper">
+                        <div class="dashboard-icon">📅</div>
+                    </div>
+                    <h5>Timetable</h5>
+                    <p>
+                        Access your class schedule, exam timetable,
+                        and important academic dates throughout the semester.
+                    </p>
+                </div>
+            </a>
+
+            <div class="dashboard-card">
+                <div class="icon-wrapper">
+                    <div class="dashboard-icon">🏫</div>
+                </div>
+                <h5>About College</h5>
+                <p>
+                    Learn about KSI's vision, mission, infrastructure,
+                    and our commitment to educational excellence.
+                </p>
+            </div>
+
+        </div>
     </div>
 </div>

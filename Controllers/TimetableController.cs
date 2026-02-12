@@ -2,6 +2,7 @@
 using ksi.Models.DTOs;
 using ksi.Repository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace ksi.Controllers
@@ -10,10 +11,12 @@ namespace ksi.Controllers
     {
         #region Constructor and DI
         private readonly ITimetableRepository _repository;
+        private readonly ILogger<TimetableController> _logger;
 
-        public TimetableController(ITimetableRepository repository)
+        public TimetableController(ITimetableRepository repository, ILogger<TimetableController> logger)
         {
             _repository = repository;
+            _logger = logger;
         }
         #endregion
 
@@ -187,25 +190,65 @@ namespace ksi.Controllers
         [HttpPost]
         public async Task<ApiResponseDTO> AddRoom([FromBody] TimetableDTO dto)
         {
-            var result = await _repository.addRoomAsync(dto, 1);
-            return new ApiResponseDTO { success = result };
+            try
+            {
+                if (dto == null || string.IsNullOrWhiteSpace(dto.name))
+                {
+                    return new ApiResponseDTO
+                    {
+                        statusCode = 400,
+                        success = false,
+                        message = "invalid request"
+                    };
+                }
+
+                var result = await _repository.addRoomAsync(dto, 1);
+
+                return new ApiResponseDTO
+                {
+                    statusCode = result ? 200 : 500,
+                    success = result,
+                    message = result ? "Room added successfully" : "Failed to add room"
+                };
+            }
+            // inside TimetableController.AddRoom
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "addRoom failed for {name}", dto?.name);
+                return new ApiResponseDTO
+                {
+                    statusCode = 500,
+                    success = false,
+                    message = "internal server error",
+                    errorDetails = ex.InnerException?.Message ?? ex.Message // <-- include inner exception
+                                                                            // For deeper debug you can use ex.ToString() (remove in production)
+                };
+            }
         }
+
         [HttpGet]
         public async Task<IActionResult> GetMasterData()
         {
             try
             {
                 var data = await _repository.getMasterDataAsync();
-
-                return Json(new
+                return Json(new ApiResponseDTO
                 {
+                    statusCode = 200,
                     success = true,
-                    data
+                    message = "success",
+                    data = data
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message); // IMPORTANT
+                return Json(new ApiResponseDTO
+                {
+                    statusCode = 500,
+                    success = false,
+                    message = "error loading master data",
+                    errorDetails = ex.Message
+                });
             }
         }
         [HttpGet]

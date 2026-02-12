@@ -51,7 +51,7 @@ app.UseAuthorization();
 // ── Routes ────────────────────────────────────────────────────────────
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=EventDetails}/{action=AddClubs}/{id?}");   // keep Home as default
+    pattern: "{controller=Website}/{action=AdminDashboard}/{id?}");   // keep Home as default
 
 app.MapRazorPages();
 

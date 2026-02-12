@@ -323,13 +323,32 @@ namespace ksi.Repository
         }
         public async Task<bool> addRoomAsync(TimetableDTO dto, int createdBy)
         {
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+            if (string.IsNullOrWhiteSpace(dto.name)) throw new ArgumentException("room name is required", nameof(dto.name));
+            if (!dto.blockId.HasValue) throw new ArgumentException("blockId is required", nameof(dto.blockId));
+
+            dto.name = dto.name.Trim();
+            if (dto.name.Length > 200) // adjust to column size
+                throw new ArgumentException("name too long", nameof(dto));
+
+            // ensure block exists to satisfy FK
+            var blockExists = await _context.mstBlock.AnyAsync(b => b.blockId == dto.blockId.Value);
+            if (!blockExists)
+                throw new InvalidOperationException($"blockId {dto.blockId.Value} does not exist");
+
+            // avoid duplicate room within same block
+            if (await _context.mstRoom.AnyAsync(r => r.blockId == dto.blockId.Value && r.roomNumber == dto.name))
+                return false; // already exists
+
             var entity = new mstRoom
             {
                 roomNumber = dto.name,
+                blockId = dto.blockId.Value,
                 createdBy = createdBy,
                 createdDate = DateTime.Now,
                 isActive = true
             };
+
             await _context.mstRoom.AddAsync(entity);
             return await _context.SaveChangesAsync() > 0;
         }

@@ -154,22 +154,40 @@
             addSimple('/Timetable/AddRoom', 'roomNumber');
         }
 
-        function addSimple(url, inputId) {
+                function addSimple(url, inputId) {
             const name = document.getElementById(inputId).value.trim();
             if (!name) return;
 
             fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({ name })
             })
-            .then(r => r.json())
-            .then(res => {
-                if (res.success) {
+            .then(async res => {
+                const text = await res.text(); // always read raw text
+                try {
+                    const json = JSON.parse(text);
+                    return { ok: res.ok, json };
+                } catch (err) {
+                    console.error('Server returned non-JSON response:', text);
+                    throw new Error('server-non-json');
+                }
+            })
+            .then(({ ok, json }) => {
+                if (json.success) {
                     document.getElementById(inputId).value = '';
                     loadMasterData();
                 } else {
-                    alert(res.message);
+                    alert(json.message || 'Save failed. Check console.');
+                    console.error('API error details:', json.errorDetails);
+                }
+            })
+            .catch(err => {
+                if (err.message === 'server-non-json') {
+                    alert('Server error occurred. See console for raw response.');
+                } else {
+                    console.error(err);
+                    alert('Unexpected client error. See console.');
                 }
             });
         }

@@ -21,7 +21,7 @@
     /* Header */
     .event-header {
         text-align: center;
-        margin-bottom: 50px;
+        margin-bottom: 20px;
         color: white;
     }
 
@@ -35,6 +35,36 @@
             font-size: 1.2rem;
             opacity: 0.9;
         }
+
+    /* Search / Controls */
+    .event-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin: 20px 0 30px 0;
+    }
+
+    .search-box {
+        flex: 1;
+        max-width: 520px;
+        display: flex;
+        gap: 8px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        font-size: 1rem;
+    }
+
+    .search-box .btn {
+        padding: 10px 14px;
+        border-radius: 8px;
+    }
 
     /* Date Section */
     .event-date-section {
@@ -71,7 +101,7 @@
         border-radius: 20px;
         padding: 20px;
         width: 260px;
-        height: 320px;
+        height: 360px;
         display: flex;
         flex-direction: column;
         text-align: center;
@@ -97,24 +127,38 @@
             margin-bottom: 6px;
         }
 
-    .btn-view {
+    .card-actions {
         margin-top: auto;
-        padding: 10px 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .btn-view, .btn-download {
+        padding: 8px 12px;
         border-radius: 50px;
         font-weight: 600;
         border: none;
         text-decoration: none;
-        transition: all 0.3s ease;
         display: inline-block;
     }
 
-        .btn-view:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-            color: white;
-        }
+    .btn-view {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-download {
+        background: #f1f1f1;
+        color: #333;
+        border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .btn-view:hover {
+        transform: scale(1.03);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
 
     .no-events {
         color: white;
@@ -129,6 +173,16 @@
         <p>Explore upcoming college events</p>
     </div>
 
+    <div class="event-controls">
+        <div class="search-box">
+            <input id="clubSearch" type="text" placeholder="Search by club (e.g., Photography Club, Coding Club)..." />
+            <button id="clearSearch" class="btn btn-light">Clear</button>
+        </div>
+
+        <!-- Optional: a client-side download-all button could be implemented if you provide a server endpoint.
+             For now we keep only per-event download buttons below. -->
+    </div>
+
     <div id="eventGrid">
         <!-- Events loaded here by JS -->
     </div>
@@ -138,8 +192,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script>
+        // Keep a global reference to all upcoming events so we can re-render on client-side filter
+        let allUpcomingEvents = [];
+
         $(document).ready(function () {
             loadEvents();
+
+            // Search input behavior: filter by organisedBy (club) case-insensitive
+            $("#clubSearch").on("input", function () {
+                const q = $(this).val().trim().toLowerCase();
+                renderEvents(filterByClub(allUpcomingEvents, q));
+            });
+
+            $("#clearSearch").on("click", function () {
+                $("#clubSearch").val('');
+                renderEvents(allUpcomingEvents);
+            });
         });
 
         function loadEvents() {
@@ -156,45 +224,88 @@
 
                     // Filter upcoming events only
                     const today = new Date();
-                    dataArray = dataArray.filter(e => new Date(e.eventDate) >= today);
-
-                    // Group events by date
-                    const grouped = {};
-                    dataArray.forEach(e => {
-                        const dateKey = formatDate(e.eventDate);
-                        if (!grouped[dateKey]) grouped[dateKey] = [];
-                        grouped[dateKey].push(e);
+                    dataArray = dataArray.filter(e => {
+                        // defensively handle missing date
+                        try {
+                            return new Date(e.eventDate) >= today;
+                        } catch {
+                            return false;
+                        }
                     });
 
-                    let html = '';
+                    // store globally for client-side filtering
+                    allUpcomingEvents = dataArray;
 
-                    for (const [date, events] of Object.entries(grouped)) {
-                        html += `
-                            <div class="event-date-section">
-                                <h3>${date}</h3>
-                                <div class="event-row">
-                                    ${events.map(e => `
-                                        <div class="event-card">
-                                            <h5>${e.eventName ?? ''}</h5>
-                                            <p><strong>Organised By:</strong> ${e.organisedBy ?? ''}</p>
-                                            <p><strong>Registration Till:</strong> ${formatDate(e.registrationDeadline)}</p>
-                                            <p><strong>Contact:</strong> ${e.contactNumber ?? ''}</p>
-                                            <p>${e.description ?? ''}</p>
-                                            ${e.brochureImagePath ? `<a href="${e.brochureImagePath}" target="_blank" class="btn-view">View Brochure</a>` : ''}
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    $("#eventGrid").html(html);
+                    // initial render (no filter)
+                    renderEvents(allUpcomingEvents);
                 },
                 error: function (xhr) {
                     console.error("Error loading events", xhr.responseText);
                     alert("Failed to load events");
                 }
             });
+        }
+
+        function filterByClub(events, query) {
+            if (!query) return events;
+
+            return events.filter(e => {
+                const club = (e.organisedBy || '').toString().toLowerCase();
+                const name = (e.eventName || '').toString().toLowerCase();
+                // match club name or event name
+                return club.includes(query) || name.includes(query);
+            });
+        }
+
+        function renderEvents(events) {
+            if (!Array.isArray(events) || events.length === 0) {
+                $("#eventGrid").html('<div class="no-events">No events match your search</div>');
+                return;
+            }
+
+            // Group events by date
+            const grouped = {};
+            events.forEach(e => {
+                const dateKey = formatDate(e.eventDate);
+                if (!grouped[dateKey]) grouped[dateKey] = [];
+                grouped[dateKey].push(e);
+            });
+
+            let html = '';
+
+            for (const [date, evs] of Object.entries(grouped)) {
+                html += `
+                    <div class="event-date-section">
+                        <h3>${date}</h3>
+                        <div class="event-row">
+                            ${evs.map(e => {
+                                // safe values
+                                const brochure = e.brochureImagePath || '';
+                                const hasBrochure = brochure.length > 0;
+                                // If you want the download file name to be meaningful, you can construct a filename here:
+                                const downloadAttr = hasBrochure ? `download="${(e.eventName || 'brochure').replace(/[^a-z0-9_.-]/gi,'_')}.pdf"` : '';
+                                const viewBtn = hasBrochure ? `<a href="${brochure}" target="_blank" class="btn-view">View Brochure</a>` : '';
+                                const downloadBtn = hasBrochure ? `<a href="${brochure}" ${downloadAttr} class="btn-download">Download</a>` : '';
+                                return `
+                                    <div class="event-card">
+                                        <h5>${e.eventName ?? ''}</h5>
+                                        <p><strong>Organised By:</strong> ${e.organisedBy ?? ''}</p>
+                                        <p><strong>Registration Till:</strong> ${formatDate(e.registrationDeadline)}</p>
+                                        <p><strong>Contact:</strong> ${e.contactNumber ?? ''}</p>
+                                        <p style="min-height:48px; overflow:hidden; text-overflow:ellipsis;">${e.description ?? ''}</p>
+                                        <div class="card-actions">
+                                            ${viewBtn}
+                                            ${downloadBtn}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            $("#eventGrid").html(html);
         }
 
         function formatDate(dateStr) {

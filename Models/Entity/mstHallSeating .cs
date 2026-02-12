@@ -16,7 +16,6 @@ namespace ksi.Models.Entity
         [MaxLength(50)]
         public string roomNumber { get; set; }
 
-        [Required]
         [DataType(DataType.Date)]
         public DateTime? examDate { get; set; }
 

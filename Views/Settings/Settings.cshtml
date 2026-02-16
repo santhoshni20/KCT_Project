@@ -1,0 +1,41 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="fw-bold py-3 mb-4">Settings</h4>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Activity Logs</h5>
+                        <p class="card-text">View and search through system activity logs.</p>
+                        <div class="mt-auto">
+                            <a href="@Url.Action("ActivityLogs", "Settings")" class="btn btn-primary">Open Activity Logs</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Access Level</h5>
+                        <p class="card-text">Manage user roles and access levels.</p>
+                        <div class="mt-auto">
+                            <a href="@Url.Action("AccessLevel", "Settings")" class="btn btn-primary">Open Access Level</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

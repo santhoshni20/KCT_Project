@@ -212,6 +212,35 @@
                         </a>
                     </li>
 
+                    <!-- SETTINGS (last item) -->
+                    <li class="menu-item">
+                        <a href="@Url.Action("Settings", "Settings")" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-cog"></i>
+                            <div>Settings</div>
+                        </a>
+                        <a href="javascript:void(0);" class="menu-link menu-toggle d-xl-none">
+                            <i class="bx bx-chevron-down"></i>
+                        </a>
+
+                        <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="@Url.Action("Settings", "Settings")" class="menu-link">
+                                    <div>Settings</div>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="@Url.Action("ActivityLogs", "Settings")" class="menu-link">
+                                    <div>Activity Logs</div>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="@Url.Action("AccessLevel", "Settings")" class="menu-link">
+                                    <div>Access Level</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
 
 
                 </ul>

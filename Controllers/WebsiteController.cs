@@ -416,6 +416,11 @@ namespace ksi.Controllers
         //  HALL LOCATOR (STUDENT VIEW)
         // ════════════════════════════════════════════════════════════════
 
+
+      /*  public IActionResult Index()
+        {
+            return View();
+        }*/
         public async Task<IActionResult> HallLocator()
         {
             return View();

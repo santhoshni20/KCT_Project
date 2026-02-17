@@ -52,6 +52,31 @@ namespace ksi.Repositories
                     departmentName = x.departmentName
                 }).ToList();
         }
+        public bool updateSyllabus(syllabusDTO dto, int updatedBy)
+        {
+            var entity = _context.mstSyllabus.Find(dto.syllabusId);
+            if (entity == null) return false;
+
+            entity.batchId = dto.batchId;
+            entity.departmentId = dto.departmentId;
+            entity.syllabusDriveLink = dto.syllabusDriveLink;
+            entity.updatedBy = updatedBy;
+            entity.updatedDate = DateTime.Now;
+
+            return _context.SaveChanges() > 0;
+        }
+
+        public bool deleteSyllabus(int syllabusId, int deletedBy)
+        {
+            var entity = _context.mstSyllabus.Find(syllabusId);
+            if (entity == null) return false;
+
+            entity.isActive = false;
+            entity.deletedBy = deletedBy;
+            entity.deletedDate = DateTime.Now;
+
+            return _context.SaveChanges() > 0;
+        }
 
         public bool addSyllabus(syllabusDTO dto, int createdBy)
         {

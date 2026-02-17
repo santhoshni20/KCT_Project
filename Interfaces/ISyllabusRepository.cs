@@ -8,6 +8,9 @@ namespace ksi.Interfaces
         List<syllabusDTO> getAllSyllabus();
         List<syllabusDTO> getBatchList();
         List<syllabusDTO> getDepartmentList();
+
+        bool updateSyllabus(syllabusDTO dto, int updatedBy);
+        bool deleteSyllabus(int syllabusId, int deletedBy);
         bool addSyllabus(syllabusDTO dto, int createdBy);
     }
 }

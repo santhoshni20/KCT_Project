@@ -51,6 +51,30 @@ namespace ksi.Controllers
             };
         }
 
+
+        [HttpPost]
+        public ApiResponseDTO updateSyllabus(syllabusDTO dto)
+        {
+            bool result = _repo.updateSyllabus(dto, 1);
+            return new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 400,
+                success = result,
+                message = result ? "Syllabus updated successfully" : "Failed to update syllabus"
+            };
+        }
+
+        [HttpPost]
+        public ApiResponseDTO deleteSyllabus(int syllabusId)
+        {
+            bool result = _repo.deleteSyllabus(syllabusId, 1);
+            return new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 400,
+                success = result,
+                message = result ? "Syllabus deleted successfully" : "Failed to delete syllabus"
+            };
+        }
         [HttpPost]
         public ApiResponseDTO addSyllabus(syllabusDTO dto)
         {

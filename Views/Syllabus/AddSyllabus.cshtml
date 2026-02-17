@@ -3,11 +3,15 @@
     ViewData["Title"] = "Add Syllabus";
 }
 
+<!-- Add Search Bar -->
 <div class="d-flex justify-content-between mb-3">
     <h4 class="fw-bold">Syllabus Details</h4>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#syllabusModal">
-        <i class="bx bx-plus"></i> Add Syllabus
-    </button>
+    <div class="d-flex gap-2">
+        <input type="text" id="searchBox" class="form-control" placeholder="Search..." style="max-width: 300px;" />
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#syllabusModal" onclick="resetForm()">
+            <i class="bx bx-plus"></i> Add Syllabus
+        </button>
+    </div>
 </div>
 
 <div class="card">
@@ -19,6 +23,7 @@
                     <th>Batch</th>
                     <th>Department</th>
                     <th>Drive Link</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -30,22 +35,23 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Syllabus</h5>
+                <h5 class="modal-title" id="modalTitle">Add Syllabus</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="syllabusForm">
+                    <input type="hidden" id="syllabusId" />
                     <div class="mb-2">
                         <label>Batch</label>
-                        <select id="batchId" class="form-control"></select>
+                        <select id="batchId" class="form-control" required></select>
                     </div>
                     <div class="mb-2">
                         <label>Department</label>
-                        <select id="departmentId" class="form-control"></select>
+                        <select id="departmentId" class="form-control" required></select>
                     </div>
                     <div class="mb-2">
                         <label>Syllabus Drive Link</label>
-                        <input id="syllabusDriveLink" class="form-control" />
+                        <input id="syllabusDriveLink" class="form-control" required />
                     </div>
                 </form>
             </div>
@@ -58,45 +64,114 @@
 
 @section Scripts {
     <script>
+        let allData = [];
+
         function loadSyllabus() {
             $.get('@Url.Action("getAllSyllabus", "Syllabus")', function (res) {
-                let rows = '';
-                res.data.forEach((x, i) => {
-                    rows += `<tr>
-                        <td>${i + 1}</td>
-                        <td>${x.batchName}</td>
-                        <td>${x.departmentName}</td>
-                        <td><a href="${x.syllabusDriveLink}" target="_blank">View</a></td>
-                    </tr>`;
-                });
-                $('#syllabusTable tbody').html(rows);
+                allData = res.data;
+                renderTable(allData);
             });
         }
 
+        function renderTable(data) {
+            let rows = '';
+            data.forEach((x, i) => {
+                rows += `<tr>
+                    <td>${i + 1}</td>
+                    <td>${x.batchName}</td>
+                    <td>${x.departmentName}</td>
+                    <td><a href="${x.syllabusDriveLink}" target="_blank">View</a></td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="editSyllabus(${x.syllabusId})">
+                            <i class="bx bx-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteSyllabus(${x.syllabusId})">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            $('#syllabusTable tbody').html(rows);
+        }
+
+        // Search functionality
+        $('#searchBox').on('keyup', function() {
+            const searchTerm = $(this).val().toLowerCase();
+            const filtered = allData.filter(x =>
+                x.batchName.toLowerCase().includes(searchTerm) ||
+                x.departmentName.toLowerCase().includes(searchTerm)
+            );
+            renderTable(filtered);
+        });
+
         function loadDropdowns() {
             $.get('@Url.Action("getBatchList", "Syllabus")', res => {
-                let opt = '<option value="">Select</option>';
+                let opt = '<option value="">Select Batch</option>';
                 res.data.forEach(x => opt += `<option value="${x.batchId}">${x.batchName}</option>`);
                 $('#batchId').html(opt);
             });
-
             $.get('@Url.Action("getDepartmentList", "Syllabus")', res => {
-                let opt = '<option value="">Select</option>';
+                let opt = '<option value="">Select Department</option>';
                 res.data.forEach(x => opt += `<option value="${x.departmentId}">${x.departmentName}</option>`);
                 $('#departmentId').html(opt);
             });
         }
 
+        function resetForm() {
+            $('#syllabusForm')[0].reset();
+            $('#syllabusId').val('');
+            $('#modalTitle').text('Add Syllabus');
+        }
+
+        function editSyllabus(id) {
+            const item = allData.find(x => x.syllabusId === id);
+            if (!item) return;
+
+            $('#syllabusId').val(item.syllabusId);
+            $('#batchId').val(item.batchId);
+            $('#departmentId').val(item.departmentId);
+            $('#syllabusDriveLink').val(item.syllabusDriveLink);
+            $('#modalTitle').text('Edit Syllabus');
+            $('#syllabusModal').modal('show');
+        }
+
         function saveSyllabus() {
-            $.post('@Url.Action("addSyllabus", "Syllabus")', {
+            const syllabusId = $('#syllabusId').val();
+            const url = syllabusId ? '@Url.Action("updateSyllabus", "Syllabus")' : '@Url.Action("addSyllabus", "Syllabus")';
+
+            const data = {
+                syllabusId: syllabusId || 0,
                 batchId: $('#batchId').val(),
                 departmentId: $('#departmentId').val(),
                 syllabusDriveLink: $('#syllabusDriveLink').val()
-            }, function (res) {
-                if (res.statusCode === 200) {
+            };
+
+            if (!data.batchId || !data.departmentId || !data.syllabusDriveLink) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            $.post(url, data, function (res) {
+                if (res.success) {
                     $('#syllabusModal').modal('hide');
-                    $('#syllabusForm')[0].reset();
+                    resetForm();
                     loadSyllabus();
+                    alert(res.message);
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+
+        function deleteSyllabus(id) {
+            if (!confirm('Are you sure you want to delete this syllabus?')) return;
+
+            $.post('@Url.Action("deleteSyllabus", "Syllabus")', { syllabusId: id }, function (res) {
+                if (res.success) {
+                    loadSyllabus();
+                    alert(res.message);
+                } else {
+                    alert(res.message);
                 }
             });
         }

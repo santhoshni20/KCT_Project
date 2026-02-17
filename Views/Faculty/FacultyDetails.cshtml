@@ -260,6 +260,8 @@
         </div>
     </div>
 
+    @if (Model == null || Model.FacultyID == 0)
+    {
     <!-- Faculty List Table -->
     <div class="row">
         <div class="col-12">
@@ -372,6 +374,7 @@
             </div>
         </div>
     </div>
+    }
 </div>
 
 <!-- Hidden delete form -->

@@ -181,12 +181,15 @@
                                                placeholder="faculty@college.edu" required />
                                         <span asp-validation-for="CollegeMail" class="text-danger"></span>
                                     </div>
-
                                     <div class="col-md-6 mb-3">
                                         <label asp-for="ContactNumber" class="form-label">Contact Number</label>
                                         <input asp-for="ContactNumber" type="tel" class="form-control"
-                                               placeholder="+91-XXXXXXXXXX" />
+                                               placeholder="10-digit mobile number"
+                                               pattern="[0-9]{10}"
+                                               maxlength="10"
+                                               title="Please enter a valid 10-digit mobile number" />
                                         <span asp-validation-for="ContactNumber" class="text-danger"></span>
+                                        <small class="text-muted">Enter 10-digit mobile number without country code</small>
                                     </div>
                                 </div>
                             </div>

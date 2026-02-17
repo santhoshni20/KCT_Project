@@ -80,7 +80,7 @@
     @if (Model != null && Model.FacultyID >= 0 && ViewContext.RouteData.Values["id"] != null)
     {
         <!-- Faculty Form Card -->
-        <div class="row mb-4">
+        <div class="row mb-4" id="facultyFormWrapper">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
@@ -246,9 +246,9 @@
                                     <i class="bx bx-save me-1"></i>
                                     @(Model.FacultyID > 0 ? "Update Faculty" : "Save Faculty")
                                 </button>
-                                <a asp-action="FacultyDetails" class="btn btn-secondary">
+                                <button type="button" class="btn btn-secondary" onclick="cancelForm()">
                                     <i class="bx bx-x me-1"></i>Cancel
-                                </a>
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -424,6 +424,14 @@
 
                 reader.readAsDataURL(file);
             }
+        }
+
+                function cancelForm() {
+            document.getElementById('facultyFormWrapper').style.display = 'none';
+            // Scroll back to the table smoothly
+            $('html, body').animate({
+                scrollTop: $('.card:last').offset().top - 100   
+            }, 400);
         }
 
         function toggleStatus(facultyId, checkbox) {

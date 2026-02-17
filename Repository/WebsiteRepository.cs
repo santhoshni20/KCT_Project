@@ -106,6 +106,68 @@ namespace ksi.Repository
         #endregion
 
         #region Faculty Support
+
+  
+
+        public async Task<List<FacultyDTO>> GetFacultiesByExpertiseDomainAsync(string domain)
+        {
+            try
+            {
+                return await _context.Faculties
+                    .Where(f => f.ExpertiseDomain != null &&
+                               f.ExpertiseDomain.Contains(domain) &&
+                               f.IsActive &&
+                               f.DeletedDate == null)
+                    .OrderBy(f => f.Department)
+                    .ThenBy(f => f.FacultyName)
+                    .Select(f => new FacultyDTO
+                    {
+                        FacultyID = f.FacultyID,
+                        FacultyName = f.FacultyName,
+                        Department = f.Department,
+                        Designation = f.Designation,
+                        ExpertiseDomain = f.ExpertiseDomain,
+                        CollegeMail = f.CollegeMail,
+                        ContactNumber = f.ContactNumber,
+                        DOB = f.DOB,
+                        PhotoPath = string.IsNullOrEmpty(f.PhotoPath) ? "/images/faculty/default.jpg" : f.PhotoPath,
+                        IsActive = f.IsActive
+                    })
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving faculties by expertise domain: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<List<string>> GetAllExpertiseDomainsAsync()
+        {
+            try
+            {
+                var allDomains = await _context.Faculties
+                    .Where(f => f.ExpertiseDomain != null && f.IsActive && f.DeletedDate == null)
+                    .Select(f => f.ExpertiseDomain)
+                    .ToListAsync();
+
+                // Split comma-separated domains and get unique values
+                var uniqueDomains = allDomains
+                    .SelectMany(d => d.Split(','))
+                    .Select(d => d.Trim())
+                    .Where(d => !string.IsNullOrEmpty(d))
+                    .Distinct()
+                    .OrderBy(d => d)
+                    .ToList();
+
+                return uniqueDomains;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving expertise domains: {ex.Message}", ex);
+            }
+        }
+
+     
         public async Task<List<FacultyDTO>> GetAllActiveFacultiesAsync()
         {
             try

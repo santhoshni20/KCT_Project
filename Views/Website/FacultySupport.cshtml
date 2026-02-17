@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Faculty Support";
     Layout = null;
-    var selectedDept = ViewBag.SelectedDepartment as string ?? "";
+    var searchQuery = ViewBag.SearchQuery as string ?? "";
 }
 
 <!DOCTYPE html>
@@ -64,50 +64,82 @@
             font-size: 1rem;
         }
 
-        /* Department Filter */
-        .department-filter {
+        /* Search Bar */
+        .search-section {
             background: white;
-            padding: 25px;
+            padding: 30px;
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 40px;
-            text-align: center;
         }
 
-        .filter-title {
+        .search-title {
             font-size: 1.3rem;
             color: #2d3748;
             margin-bottom: 20px;
             font-weight: 600;
+            text-align: center;
         }
 
-        .dept-buttons {
+        .search-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
             justify-content: center;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .dept-btn {
-            display: inline-flex;
+        .search-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+            .search-input:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+        .search-btn {
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 24px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            cursor: pointer;
         }
 
-            .dept-btn:hover, .dept-btn.active {
-                background: #667eea;
-                color: white;
+            .search-btn:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+            }
+
+        .clear-search-btn {
+            padding: 14px 25px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .clear-search-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
             }
 
         /* Faculty Grid */
@@ -207,16 +239,13 @@
             }
 
         @@keyframes fadeIn {
-            from
+            from {
+                opacity: 0;
+            }
 
-        {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-
+            to {
+                opacity: 1;
+            }
         }
 
         .modal-content {
@@ -231,18 +260,15 @@
         }
 
         @@keyframes slideUp {
-            from
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
 
-        {
-            transform: translateY(50px);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-close {
@@ -453,42 +479,48 @@
 
         /* Responsive */
         @@media (max-width: 768px) {
-            .hero-title
+            .hero-title {
+                font-size: 2rem;
+            }
 
-        {
-            font-size: 2rem;
-        }
+            .search-container {
+                flex-direction: column;
+            }
 
-        .faculty-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
+            .search-btn, .clear-search-btn {
+                width: 100%;
+                justify-content: center;
+            }
 
-        .faculty-name {
-            font-size: 1.1rem;
-        }
+            .faculty-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
 
-        .modal-header {
-            padding: 40px 20px;
-        }
+            .faculty-name {
+                font-size: 1.1rem;
+            }
 
-        .modal-body {
-            padding: 25px;
-        }
+            .modal-header {
+                padding: 40px 20px;
+            }
 
-        .modal-name {
-            font-size: 1.8rem;
-        }
+            .modal-body {
+                padding: 25px;
+            }
 
-        .contact-btn {
-            min-width: 100%;
-        }
+            .modal-name {
+                font-size: 1.8rem;
+            }
 
-        .modal-photo {
-            width: 160px;
-            height: 160px;
-        }
+            .contact-btn {
+                min-width: 100%;
+            }
 
+            .modal-photo {
+                width: 160px;
+                height: 160px;
+            }
         }
     </style>
 </head>
@@ -513,32 +545,28 @@
     </div>
 
     <div class="container">
-        <!-- Department Filter -->
-        <div class="department-filter">
-            <h2 class="filter-title">
-                <i class="bx bx-filter"></i> Filter by Department
+        <!-- Search Section -->
+        <div class="search-section">
+            <h2 class="search-title">
+                <i class="bx bx-search"></i> Search Faculty
             </h2>
-            <div class="dept-buttons">
-                <a href="@Url.Action("FacultySupport")"
-                   class="dept-btn @(string.IsNullOrEmpty(selectedDept) ? "active" : "")">
-                    <i class="bx bx-grid-alt"></i>
-                    All Departments
-                </a>
-                <a href="@Url.Action("FacultySupport", new { department = "Computer Science" })"
-                   class="dept-btn @(selectedDept == "Computer Science" ? "active" : "")">
-                    <i class="bx bx-laptop"></i>
-                    Computer Science
-                </a>
-                <a href="@Url.Action("FacultySupport", new { department = "Information Technology" })"
-                   class="dept-btn @(selectedDept == "Information Technology" ? "active" : "")">
-                    <i class="bx bx-code-alt"></i>
-                    Information Technology
-                </a>
-                <a href="@Url.Action("FacultySupport", new { department = "AIDS" })"
-                   class="dept-btn @(selectedDept == "AIDS" ? "active" : "")">
-                    <i class="bx bx-brain"></i>
-                    AIDS
-                </a>
+            <div class="search-container">
+                <input type="text"
+                       id="searchInput"
+                       class="search-input"
+                       placeholder="Search by name, department, or expertise..."
+                       value="@searchQuery" />
+                <button class="search-btn" onclick="performSearch()">
+                    <i class="bx bx-search"></i>
+                    Search
+                </button>
+                @if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    <button class="clear-search-btn" onclick="clearSearch()">
+                        <i class="bx bx-x"></i>
+                        Clear
+                    </button>
+                }
             </div>
         </div>
 
@@ -549,9 +577,9 @@
                 <i class="bx bx-user-x"></i>
                 <h3>No Faculty Found</h3>
                 <p>
-                    @if (!string.IsNullOrEmpty(selectedDept))
+                    @if (!string.IsNullOrEmpty(searchQuery))
                     {
-                        <text>No faculty members found in @selectedDept department.</text>
+                        <text>No faculty members found matching "@searchQuery"</text>
                     }
                     else
                     {
@@ -649,6 +677,30 @@
     </div>
 
     <script>
+        function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchQuery = searchInput.value.trim();
+
+            let url = '@Url.Action("FacultySupport")';
+
+            if (searchQuery) {
+                url += '?search=' + encodeURIComponent(searchQuery);
+            }
+
+            window.location.href = url;
+        }
+
+        function clearSearch() {
+            window.location.href = '@Url.Action("FacultySupport")';
+        }
+
+        // Search on Enter key
+        document.getElementById('searchInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
         async function showFacultyDetails(facultyId) {
             try {
                 const response = await fetch(`@Url.Action("GetFacultyDetails")?id=${facultyId}`);

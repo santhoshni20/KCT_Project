@@ -123,23 +123,34 @@ namespace ksi.Controllers
         }
         #endregion
 
+        // Updated Controller Method - Replace your existing FacultySupport method
+
         #region Faculty Support
-        public async Task<IActionResult> FacultySupport(string department = "")
+
+        public async Task<IActionResult> FacultySupport(string search = "")
         {
             try
             {
                 List<FacultyDTO> faculties;
 
-                if (string.IsNullOrEmpty(department))
+                // Get all active faculties
+                faculties = await _repo.GetAllActiveFacultiesAsync();
+
+                // Apply search filter if provided
+                if (!string.IsNullOrEmpty(search))
                 {
-                    faculties = await _repo.GetAllActiveFacultiesAsync();
-                }
-                else
-                {
-                    faculties = await _repo.GetFacultiesByDepartmentAsync(department);
+                    faculties = faculties
+                        .Where(f =>
+                            f.FacultyName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                            (f.Department != null && f.Department.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                            (f.ExpertiseDomain != null && f.ExpertiseDomain.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                            (f.Designation != null && f.Designation.Contains(search, StringComparison.OrdinalIgnoreCase))
+                        )
+                        .ToList();
                 }
 
-                ViewBag.SelectedDepartment = department;
+                ViewBag.SearchQuery = search;
+
                 return View(faculties);
             }
             catch (Exception ex)
@@ -149,19 +160,17 @@ namespace ksi.Controllers
             }
         }
 
-        // API endpoint for modal details
+        // API endpoint for modal details (keep this as is)
         [HttpGet]
         public async Task<IActionResult> GetFacultyDetails(int id)
         {
             try
             {
                 var faculty = await _repo.GetFacultyByIdAsync(id);
-
                 if (faculty == null)
                 {
                     return Json(new { success = false, message = "Faculty not found" });
                 }
-
                 return Json(new
                 {
                     success = true,
@@ -184,6 +193,7 @@ namespace ksi.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
         #endregion
 
         #region Timetable

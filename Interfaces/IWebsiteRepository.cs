@@ -25,6 +25,8 @@ namespace ksi.Interfaces
         #region Faculty Support
         Task<List<FacultyDTO>> GetAllActiveFacultiesAsync();
         Task<List<FacultyDTO>> GetFacultiesByDepartmentAsync(string department);
+        Task<List<FacultyDTO>> GetFacultiesByExpertiseDomainAsync(string domain);
+        Task<List<string>> GetAllExpertiseDomainsAsync(); // New method to get unique domains
         Task<FacultyDTO> GetFacultyByIdAsync(int facultyId);
         #endregion
 

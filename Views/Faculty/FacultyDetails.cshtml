@@ -77,194 +77,186 @@
         </div>
     }
 
-    <!-- Faculty Form Card -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="bx bx-user-plus me-2"></i>@(Model?.FacultyID > 0 ? "Edit Faculty" : "Add New Faculty")
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <form asp-action="SaveFaculty" method="post" id="facultyForm" enctype="multipart/form-data">
-                        <input type="hidden" asp-for="FacultyID" />
-                        <input type="hidden" asp-for="PhotoPath" />
+    @if (Model != null && Model.FacultyID >= 0 && ViewContext.RouteData.Values["id"] != null)
+    {
+        <!-- Faculty Form Card -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="bx bx-user-plus me-2"></i>@(Model.FacultyID > 0 ? "Edit Faculty" : "Add New Faculty")
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="SaveFaculty" method="post" id="facultyForm" enctype="multipart/form-data">
+                            <input type="hidden" asp-for="FacultyID" />
+                            <input type="hidden" asp-for="PhotoPath" />
 
-                        <!-- Nav tabs -->
-                        <ul class="nav nav-tabs" id="facultyTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab"
-                                        data-bs-target="#basic" type="button" role="tab">
-                                    <i class="bx bx-user me-1"></i>Basic Information
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab"
-                                        data-bs-target="#contact" type="button" role="tab">
-                                    <i class="bx bx-phone me-1"></i>Contact Details
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="additional-tab" data-bs-toggle="tab"
-                                        data-bs-target="#additional" type="button" role="tab">
-                                    <i class="bx bx-info-circle me-1"></i>Additional Info
-                                </button>
-                            </li>
-                        </ul>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs" id="facultyTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="basic-tab" data-bs-toggle="tab"
+                                            data-bs-target="#basic" type="button" role="tab">
+                                        <i class="bx bx-user me-1"></i>Basic Information
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="contact-tab" data-bs-toggle="tab"
+                                            data-bs-target="#contact" type="button" role="tab">
+                                        <i class="bx bx-phone me-1"></i>Contact Details
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="additional-tab" data-bs-toggle="tab"
+                                            data-bs-target="#additional" type="button" role="tab">
+                                        <i class="bx bx-info-circle me-1"></i>Additional Info
+                                    </button>
+                                </li>
+                            </ul>
 
-                        <!-- Tab panes -->
-                        <div class="tab-content mt-3" id="facultyTabContent">
-                            <!-- Basic Information Tab -->
-                            <div class="tab-pane fade show active" id="basic" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label asp-for="FacultyName" class="form-label">
-                                            Faculty Name <span class="text-danger">*</span>
-                                        </label>
-                                        <input asp-for="FacultyName" class="form-control"
-                                               placeholder="Enter faculty name" required />
-                                        <span asp-validation-for="FacultyName" class="text-danger"></span>
-                                    </div>
+                            <!-- Tab panes -->
+                            <div class="tab-content mt-3" id="facultyTabContent">
+                                <!-- Basic Information Tab -->
+                                <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="FacultyName" class="form-label">
+                                                Faculty Name <span class="text-danger">*</span>
+                                            </label>
+                                            <input asp-for="FacultyName" class="form-control"
+                                                   placeholder="Enter faculty name" required />
+                                            <span asp-validation-for="FacultyName" class="text-danger"></span>
+                                        </div>
 
-                                    <div class="col-md-6 mb-3">
-                                        <label asp-for="Department" class="form-label">
-                                            Department <span class="text-danger">*</span>
-                                        </label>
-                                        <select asp-for="Department" class="form-select" required>
-                                            <option value="">-- Select Department --</option>
-                                            <option value="Computer Science">Computer Science</option>
-                                            <option value="Information Technology">Information Technology</option>
-                                            <option value="AIDS">AIDS</option>
-                                        </select>
-                                        <span asp-validation-for="Department" class="text-danger"></span>
-                                    </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="Department" class="form-label">
+                                                Department <span class="text-danger">*</span>
+                                            </label>
+                                            <select asp-for="Department" class="form-select" required>
+                                                <option value="">-- Select Department --</option>
+                                                <option value="Computer Science">Computer Science</option>
+                                                <option value="Information Technology">Information Technology</option>
+                                                <option value="AIDS">AIDS</option>
+                                            </select>
+                                            <span asp-validation-for="Department" class="text-danger"></span>
+                                        </div>
 
-                                    <div class="col-md-6 mb-3">
-                                        <label asp-for="Designation" class="form-label">
-                                            Designation <span class="text-danger">*</span>
-                                        </label>
-                                        <select asp-for="Designation" class="form-select" required>
-                                            <option value="">-- Select Designation --</option>
-                                            <option value="Professor">Professor</option>
-                                            <option value="Associate Professor">Associate Professor</option>
-                                            <option value="Assistant Professor">Assistant Professor</option>
-                                            <option value="Lecturer">Lecturer</option>
-                                            <option value="HOD">HOD</option>
-                                        </select>
-                                        <span asp-validation-for="Designation" class="text-danger"></span>
-                                    </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="Designation" class="form-label">
+                                                Designation <span class="text-danger">*</span>
+                                            </label>
+                                            <select asp-for="Designation" class="form-select" required>
+                                                <option value="">-- Select Designation --</option>
+                                                <option value="Professor">Professor</option>
+                                                <option value="Associate Professor">Associate Professor</option>
+                                                <option value="Assistant Professor">Assistant Professor</option>
+                                                <option value="Lecturer">Lecturer</option>
+                                                <option value="HOD">HOD</option>
+                                            </select>
+                                            <span asp-validation-for="Designation" class="text-danger"></span>
+                                        </div>
 
-                                    <div class="col-md-6 mb-3">
-                                        <label asp-for="DOB" class="form-label">Date of Birth</label>
-                                        <input asp-for="DOB" type="date" class="form-control" />
-                                        <span asp-validation-for="DOB" class="text-danger"></span>
-                                    </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="DOB" class="form-label">Date of Birth</label>
+                                            <input asp-for="DOB" type="date" class="form-control" />
+                                            <span asp-validation-for="DOB" class="text-danger"></span>
+                                        </div>
 
-                                    <div class="col-12 mb-3">
-                                        <label asp-for="ExpertiseDomain" class="form-label">Expertise Domain</label>
-                                        <textarea asp-for="ExpertiseDomain" class="form-control" rows="3"
-                                                  placeholder="e.g., Machine Learning, Data Science, Web Development"></textarea>
-                                        <span asp-validation-for="ExpertiseDomain" class="text-danger"></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Contact Details Tab -->
-                            <div class="tab-pane fade" id="contact" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label asp-for="CollegeMail" class="form-label">
-                                            College Email <span class="text-danger">*</span>
-                                        </label>
-                                        <input asp-for="CollegeMail" type="email" class="form-control"
-                                               placeholder="faculty@college.edu" required />
-                                        <span asp-validation-for="CollegeMail" class="text-danger"></span>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label asp-for="ContactNumber" class="form-label">Contact Number</label>
-                                        <input asp-for="ContactNumber" type="tel" class="form-control"
-                                               placeholder="10-digit mobile number"
-                                               pattern="[0-9]{10}"
-                                               maxlength="10"
-                                               title="Please enter a valid 10-digit mobile number" />
-                                        <span asp-validation-for="ContactNumber" class="text-danger"></span>
-                                        <small class="text-muted">Enter 10-digit mobile number without country code</small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Additional Info Tab -->
-                            <div class="tab-pane fade" id="additional" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-check form-switch">
-                                            <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
-                                            <label asp-for="IsActive" class="form-check-label">Active Status</label>
+                                        <div class="col-12 mb-3">
+                                            <label asp-for="ExpertiseDomain" class="form-label">Expertise Domain</label>
+                                            <textarea asp-for="ExpertiseDomain" class="form-control" rows="3"
+                                                      placeholder="e.g., Machine Learning, Data Science, Web Development"></textarea>
+                                            <span asp-validation-for="ExpertiseDomain" class="text-danger"></span>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="col-12 mb-3">
-                                        <label class="form-label">
-                                            <i class="bx bx-image me-1"></i>Faculty Photo
-                                        </label>
+                                <!-- Contact Details Tab -->
+                                <div class="tab-pane fade" id="contact" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="CollegeMail" class="form-label">
+                                                College Email <span class="text-danger">*</span>
+                                            </label>
+                                            <input asp-for="CollegeMail" type="email" class="form-control"
+                                                   placeholder="faculty@college.edu" required />
+                                            <span asp-validation-for="CollegeMail" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label asp-for="ContactNumber" class="form-label">Contact Number</label>
+                                            <input asp-for="ContactNumber" type="tel" class="form-control"
+                                                   placeholder="10-digit mobile number"
+                                                   pattern="[0-9]{10}"
+                                                   maxlength="10"
+                                                   title="Please enter a valid 10-digit mobile number" />
+                                            <span asp-validation-for="ContactNumber" class="text-danger"></span>
+                                            <small class="text-muted">Enter 10-digit mobile number without country code</small>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                        @if (!string.IsNullOrEmpty(Model?.PhotoPath))
-                                        {
-                                            <div class="mb-3">
-                                                <img src="@Model.PhotoPath" alt="Current Photo" class="photo-preview" />
-                                                <div class="mt-2">
-                                                    <small class="text-muted">Current photo - Upload a new one to replace</small>
-                                                </div>
+                                <!-- Additional Info Tab -->
+                                <div class="tab-pane fade" id="additional" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                                <label asp-for="IsActive" class="form-check-label">Active Status</label>
                                             </div>
-                                        }
-
-                                        <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
-                                            <i class="bx bx-cloud-upload" style="font-size: 3rem; color: #6c757d;"></i>
-                                            <p class="mb-1"><strong>Click to upload photo</strong></p>
-                                            <p class="text-muted small mb-0">
-                                                Allowed: JPG, JPEG, PNG, GIF (Max 2MB)
-                                            </p>
                                         </div>
-                                        <input type="file"
-                                               id="photoInput"
-                                               name="photo"
-                                               accept="image/*"
-                                               class="d-none"
-                                               onchange="previewPhoto(this)" />
-                                        <div id="photoPreview" class="mt-3"></div>
+
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label">
+                                                <i class="bx bx-image me-1"></i>Faculty Photo
+                                            </label>
+
+                                            @if (!string.IsNullOrEmpty(Model?.PhotoPath))
+                                            {
+                                                <div class="mb-3">
+                                                    <img src="@Model.PhotoPath" alt="Current Photo" class="photo-preview" />
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">Current photo - Upload a new one to replace</small>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
+                                                <i class="bx bx-cloud-upload" style="font-size: 3rem; color: #6c757d;"></i>
+                                                <p class="mb-1"><strong>Click to upload photo</strong></p>
+                                                <p class="text-muted small mb-0">
+                                                    Allowed: JPG, JPEG, PNG, GIF (Max 2MB)
+                                                </p>
+                                            </div>
+                                            <input type="file"
+                                                   id="photoInput"
+                                                   name="photo"
+                                                   accept="image/*"
+                                                   class="d-none"
+                                                   onchange="previewPhoto(this)" />
+                                            <div id="photoPreview" class="mt-3"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Form Actions -->
-                        <div class="mt-4 border-top pt-3">
-                            <button type="submit" class="btn btn-primary me-2">
-                                <i class="bx bx-save me-1"></i>
-                                @(Model?.FacultyID > 0 ? "Update Faculty" : "Save Faculty")
-                            </button>
-                            @if (Model?.FacultyID > 0)
-                            {
+                            <!-- Form Actions -->
+                            <div class="mt-4 border-top pt-3">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="bx bx-save me-1"></i>
+                                    @(Model.FacultyID > 0 ? "Update Faculty" : "Save Faculty")
+                                </button>
                                 <a asp-action="FacultyDetails" class="btn btn-secondary">
                                     <i class="bx bx-x me-1"></i>Cancel
                                 </a>
-                            }
-                            else
-                            {
-                                <button type="reset" class="btn btn-secondary" onclick="clearPhotoPreview()">
-                                    <i class="bx bx-refresh me-1"></i>Reset
-                                </button>
-                            }
-                        </div>
-                    </form>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
 
-    @if (Model == null || Model.FacultyID == 0)
-    {
     <!-- Faculty List Table -->
     <div class="row">
         <div class="col-12">
@@ -273,10 +265,15 @@
                     <h5 class="mb-0">
                         <i class="bx bx-list-ul me-2"></i>Faculty List
                     </h5>
-                    @if (faculties != null)
-                    {
-                        <span class="badge bg-primary">Total: @faculties.Count()</span>
-                    }
+                    <div>
+                        @if (faculties != null)
+                        {
+                            <span class="badge bg-primary me-2">Total: @faculties.Count()</span>
+                        }
+                        <a asp-action="FacultyDetails" asp-route-id="0" class="btn btn-sm btn-success">
+                            <i class="bx bx-plus me-1"></i>Add Faculty
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (faculties == null)
@@ -291,7 +288,7 @@
                         <div class="text-center py-5">
                             <i class="bx bx-user-x" style="font-size: 4rem; color: #ccc;"></i>
                             <h5 class="mt-3 text-muted">No Faculty Records Found</h5>
-                            <p class="text-muted">Add your first faculty member using the form above!</p>
+                            <p class="text-muted">Add your first faculty member using the button above!</p>
                         </div>
                     }
                     else
@@ -341,15 +338,15 @@
                                             <td>
                                                 <small>@faculty.ContactNumber</small>
                                             </td>
-                                                <td>
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input"
-                                                               type="checkbox"
-                                                               @(faculty.IsActive ? "checked" : "")
-                                                               onclick="toggleStatus(@faculty.FacultyID, this)"
-                                                               style="cursor: pointer; width: 50px; height: 24px;">
-                                                    </div>
-                                                </td>
+                                            <td>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input"
+                                                           type="checkbox"
+                                                           @(faculty.IsActive ? "checked" : "")
+                                                           onclick="toggleStatus(@faculty.FacultyID, this)"
+                                                           style="cursor: pointer; width: 50px; height: 24px;">
+                                                </div>
+                                            </td>
                                             <td class="text-center">
                                                 <div class="btn-group" role="group">
                                                     <a asp-action="FacultyDetails"
@@ -376,7 +373,6 @@
             </div>
         </div>
     </div>
-    }
 </div>
 
 <!-- Hidden delete form -->
@@ -430,7 +426,7 @@
             }
         }
 
-                function toggleStatus(facultyId, checkbox) {
+        function toggleStatus(facultyId, checkbox) {
             $.ajax({
                 url: '@Url.Action("ToggleFacultyStatus", "Faculty")',
                 type: 'POST',
@@ -464,27 +460,27 @@
             }, 5000);
 
             // Scroll to form if editing
-        @if (Model?.FacultyID > 0)
-        {
-            <text>
-                    $('html, body').animate({
-                        scrollTop: $('#facultyForm').offset().top - 100
-                    }, 500);
-            </text>
-        }
-        else
-        {
-            <text>
-                    // Scroll to table after adding new faculty
-                    if ($('.alert-success').length > 0) {
-                        setTimeout(function() {
-                            $('html, body').animate({
-                                scrollTop: $('.card:last').offset().top - 100
-                            }, 500);
-                        }, 100);
-                    }
-            </text>
-        }
+            @if (Model?.FacultyID >= 0 && ViewContext.RouteData.Values["id"] != null)
+            {
+                <text>
+                $('html, body').animate({
+                    scrollTop: $('#facultyForm').offset().top - 100
+                }, 500);
+                </text>
+            }
+            else
+            {
+                <text>
+                // Scroll to table after adding new faculty
+                if ($('.alert-success').length > 0) {
+                    setTimeout(function() {
+                        $('html, body').animate({
+                            scrollTop: $('.card:last').offset().top - 100
+                        }, 500);
+                    }, 100);
+                }
+                </text>
+            }
         });
 
         // Delete confirmation

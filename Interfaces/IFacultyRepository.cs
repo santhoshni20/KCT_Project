@@ -15,5 +15,7 @@ namespace ksi.Interfaces
         Task<bool> DeleteFacultyAsync(int facultyId, string deletedBy);
         Task<bool> FacultyExistsAsync(int facultyId);
         Task<bool> IsEmailExistsAsync(string email, int? excludeFacultyId = null);
+
+        Task<bool> ToggleFacultyStatusAsync(int facultyId, string updatedBy);
     }
 }

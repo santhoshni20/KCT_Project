@@ -141,6 +141,24 @@ namespace ksi.Controllers
             return View("FacultyDetails", facultyDTO);
         }
 
+
+
+        // POST: Faculty/ToggleFacultyStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleFacultyStatus(int facultyId)
+        {
+            try
+            {
+                await _facultyRepository.ToggleFacultyStatusAsync(facultyId, User.Identity.Name ?? "System");
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         // POST: Faculty/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]

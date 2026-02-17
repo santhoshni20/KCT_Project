@@ -338,16 +338,15 @@
                                             <td>
                                                 <small>@faculty.ContactNumber</small>
                                             </td>
-                                            <td>
-                                                @if (faculty.IsActive)
-                                                {
-                                                    <span class="badge bg-success">Active</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-danger">Inactive</span>
-                                                }
-                                            </td>
+                                                <td>
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input"
+                                                               type="checkbox"
+                                                               @(faculty.IsActive ? "checked" : "")
+                                                               onclick="toggleStatus(@faculty.FacultyID, this)"
+                                                               style="cursor: pointer; width: 50px; height: 24px;">
+                                                    </div>
+                                                </td>
                                             <td class="text-center">
                                                 <div class="btn-group" role="group">
                                                     <a asp-action="FacultyDetails"
@@ -426,6 +425,27 @@
 
                 reader.readAsDataURL(file);
             }
+        }
+
+                function toggleStatus(facultyId, checkbox) {
+            $.ajax({
+                url: '@Url.Action("ToggleFacultyStatus", "Faculty")',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val(),
+                    facultyId: facultyId
+                },
+                success: function(result) {
+                    if (!result.success) {
+                        alert('Error: ' + result.message);
+                        checkbox.checked = !checkbox.checked; // Revert
+                    }
+                },
+                error: function() {
+                    alert('Error updating status');
+                    checkbox.checked = !checkbox.checked; // Revert
+                }
+            });
         }
 
         // Clear photo preview on reset

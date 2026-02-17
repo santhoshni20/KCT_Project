@@ -285,6 +285,35 @@ namespace ksi.Repository
             }
         }
 
+
+
+        // Toggle faculty active status
+        public async Task<bool> ToggleFacultyStatusAsync(int facultyId, string updatedBy)
+        {
+            try
+            {
+                var faculty = await _context.Faculties
+                    .FirstOrDefaultAsync(f => f.FacultyID == facultyId && f.DeletedDate == null);
+
+                if (faculty == null)
+                {
+                    throw new Exception("Faculty not found.");
+                }
+
+                // Toggle the status
+                faculty.IsActive = !faculty.IsActive;
+                faculty.UpdatedBy = updatedBy;
+                faculty.UpdatedDate = DateTime.Now;
+
+                _context.Faculties.Update(faculty);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error toggling faculty status: {ex.Message}", ex);
+            }
+        }
         // Check if email exists
         public async Task<bool> IsEmailExistsAsync(string email, int? excludeFacultyId = null)
         {

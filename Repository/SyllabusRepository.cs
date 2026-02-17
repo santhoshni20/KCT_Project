@@ -57,6 +57,16 @@ namespace ksi.Repositories
             var entity = _context.mstSyllabus.Find(dto.syllabusId);
             if (entity == null) return false;
 
+            // Check for duplicate (excluding current record)
+            var exists = _context.mstSyllabus.Any(s =>
+                s.syllabusId != dto.syllabusId &&
+                s.batchId == dto.batchId &&
+                s.departmentId == dto.departmentId &&
+                s.isActive);
+
+            if (exists)
+                return false; // Duplicate found
+
             entity.batchId = dto.batchId;
             entity.departmentId = dto.departmentId;
             entity.syllabusDriveLink = dto.syllabusDriveLink;
@@ -65,7 +75,6 @@ namespace ksi.Repositories
 
             return _context.SaveChanges() > 0;
         }
-
         public bool deleteSyllabus(int syllabusId, int deletedBy)
         {
             var entity = _context.mstSyllabus.Find(syllabusId);
@@ -80,15 +89,24 @@ namespace ksi.Repositories
 
         public bool addSyllabus(syllabusDTO dto, int createdBy)
         {
+            // Check for duplicate
+            var exists = _context.mstSyllabus.Any(s =>
+                s.batchId == dto.batchId &&
+                s.departmentId == dto.departmentId &&
+                s.isActive);
+
+            if (exists)
+                return false; // Duplicate found
+
             var entity = new mstSyllabus
             {
                 batchId = dto.batchId,
                 departmentId = dto.departmentId,
                 syllabusDriveLink = dto.syllabusDriveLink,
                 createdBy = createdBy,
-                createdDate = DateTime.Now
+                createdDate = DateTime.Now,
+                isActive = true
             };
-
             _context.mstSyllabus.Add(entity);
             return _context.SaveChanges() > 0;
         }

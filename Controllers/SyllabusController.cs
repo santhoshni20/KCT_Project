@@ -53,18 +53,6 @@ namespace ksi.Controllers
 
 
         [HttpPost]
-        public ApiResponseDTO updateSyllabus(syllabusDTO dto)
-        {
-            bool result = _repo.updateSyllabus(dto, 1);
-            return new ApiResponseDTO
-            {
-                statusCode = result ? 200 : 400,
-                success = result,
-                message = result ? "Syllabus updated successfully" : "Failed to update syllabus"
-            };
-        }
-
-        [HttpPost]
         public ApiResponseDTO deleteSyllabus(int syllabusId)
         {
             bool result = _repo.deleteSyllabus(syllabusId, 1);
@@ -79,12 +67,23 @@ namespace ksi.Controllers
         public ApiResponseDTO addSyllabus(syllabusDTO dto)
         {
             bool result = _repo.addSyllabus(dto, 1);
-
             return new ApiResponseDTO
             {
                 statusCode = result ? 200 : 400,
                 success = result,
-                message = result ? "Syllabus added successfully" : "Failed to add syllabus"
+                message = result ? "Syllabus added successfully" : "Syllabus already exists for this batch and department"
+            };
+        }
+
+        [HttpPost]
+        public ApiResponseDTO updateSyllabus(syllabusDTO dto)
+        {
+            bool result = _repo.updateSyllabus(dto, 1);
+            return new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 400,
+                success = result,
+                message = result ? "Syllabus updated successfully" : "Syllabus already exists for this batch and department"
             };
         }
     }

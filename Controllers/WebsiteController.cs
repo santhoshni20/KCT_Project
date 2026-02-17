@@ -233,6 +233,8 @@ namespace ksi.Controllers
         }
         #endregion
 
+        // Add these methods to your WebsiteController.cs
+
         #region Syllabus
         public IActionResult Syllabus()
         {
@@ -245,7 +247,6 @@ namespace ksi.Controllers
             try
             {
                 var data = _repo.getActiveBatches();
-
                 return Json(new ApiResponseDTO
                 {
                     statusCode = 200,
@@ -272,7 +273,6 @@ namespace ksi.Controllers
             try
             {
                 var data = _repo.getActiveDepartments();
-
                 return Json(new ApiResponseDTO
                 {
                     statusCode = 200,
@@ -293,13 +293,45 @@ namespace ksi.Controllers
             }
         }
 
-        // New: DownloadSyllabus action
+        [HttpGet]
+        public IActionResult DebugSyllabus(int batchId, int departmentId)
+        {
+            try
+            {
+                var all = _repo.getAllSyllabus() ?? new List<syllabusDTO>();
+                var matches = all.Where(s => s.batchId == batchId && s.departmentId == departmentId).ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    count = matches.Count,
+                    matches = matches.Select(m => new {
+                        m.syllabusId,
+                        m.batchId,
+                        m.batchName,
+                        m.departmentId,
+                        m.departmentName,
+                        m.syllabusDriveLink
+                    })
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    count = 0,
+                    error = ex.Message
+                });
+            }
+        }
+
         [HttpGet]
         public IActionResult DownloadSyllabus(int batchId, int departmentId)
         {
             try
             {
-                var all = _syllabusRepo.getAllSyllabus() ?? new List<syllabusDTO>();
+                var all = _repo.getAllSyllabus() ?? new List<syllabusDTO>();
                 var entry = all.FirstOrDefault(s => s.batchId == batchId && s.departmentId == departmentId);
 
                 if (entry == null || string.IsNullOrEmpty(entry.syllabusDriveLink))
@@ -307,32 +339,44 @@ namespace ksi.Controllers
                     return NotFound("Syllabus not found for selected batch/department.");
                 }
 
-                // Redirect to the drive link (opens in new tab from the view)
-                return Redirect(entry.syllabusDriveLink);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-        // add inside WebsiteController (Syllabus region)
-        [HttpGet]
-        public IActionResult DebugSyllabus(int batchId, int departmentId)
-        {
-            try
-            {
-                var all = _syllabusRepo.getAllSyllabus() ?? new List<syllabusDTO>();
-                var matches = all.Where(s => s.batchId == batchId && s.departmentId == departmentId).ToList();
-                return Json(new
+                string driveLink = entry.syllabusDriveLink;
+
+                // Auto-convert Google Drive view link to download link
+                if (driveLink.Contains("drive.google.com/file/d/"))
                 {
-                    success = true,
-                    count = matches.Count,
-                    matches
-                });
+                    var fileIdMatch = System.Text.RegularExpressions.Regex.Match(
+                        driveLink,
+                        @"drive\.google\.com/file/d/([^/]+)"
+                    );
+
+                    if (fileIdMatch.Success)
+                    {
+                        string fileId = fileIdMatch.Groups[1].Value;
+                        // Use direct download format
+                        driveLink = $"https://drive.google.com/uc?export=download&id={fileId}";
+                    }
+                }
+                // Handle Google Sheets links
+                else if (driveLink.Contains("docs.google.com/spreadsheets/d/"))
+                {
+                    var sheetIdMatch = System.Text.RegularExpressions.Regex.Match(
+                        driveLink,
+                        @"spreadsheets/d/([^/]+)"
+                    );
+
+                    if (sheetIdMatch.Success)
+                    {
+                        string sheetId = sheetIdMatch.Groups[1].Value;
+                        // Convert to PDF download link (change format=pdf to xlsx if needed)
+                        driveLink = $"https://docs.google.com/spreadsheets/d/{sheetId}/export?format=pdf";
+                    }
+                }
+
+                return Redirect(driveLink);
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, error = ex.Message });
+                return StatusCode(500, $"Error: {ex.Message}");
             }
         }
         #endregion

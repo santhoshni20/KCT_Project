@@ -28,6 +28,8 @@ namespace ksi.Interfaces
         Task<List<FacultyDTO>> GetFacultiesByExpertiseDomainAsync(string domain);
         Task<List<string>> GetAllExpertiseDomainsAsync(); // New method to get unique domains
         Task<FacultyDTO> GetFacultyByIdAsync(int facultyId);
+
+
         #endregion
 
         #region Timetable View
@@ -39,10 +41,13 @@ namespace ksi.Interfaces
         );
         #endregion
 
+       
         #region Syllabus
         List<syllabusDTO> getActiveBatches();
         List<syllabusDTO> getActiveDepartments();
+        List<syllabusDTO> getAllSyllabus();
         #endregion
+        
 
         #region CGPA
         List<subjectDTO> getSubjectsForCgpa(int batchId, int departmentId);

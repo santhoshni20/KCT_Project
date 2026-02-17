@@ -333,6 +333,8 @@ namespace ksi.Repository
 
         #endregion
 
+        // Add these methods to your WebsiteRepository.cs implementation
+
         #region Syllabus
         public List<syllabusDTO> getActiveBatches()
         {
@@ -356,6 +358,23 @@ namespace ksi.Repository
                     departmentName = d.departmentName
                 })
                 .ToList();
+        }
+
+        public List<syllabusDTO> getAllSyllabus()
+        {
+            return (from s in _context.mstSyllabus
+                    join b in _context.mstBatch on s.batchId equals b.batchId
+                    join d in _context.mstDepartment on s.departmentId equals d.departmentId
+                    where s.isActive
+                    select new syllabusDTO
+                    {
+                        syllabusId = s.syllabusId,
+                        batchId = b.batchId,
+                        batchName = b.batchName,
+                        departmentId = d.departmentId,
+                        departmentName = d.departmentName,
+                        syllabusDriveLink = s.syllabusDriveLink
+                    }).ToList();
         }
         #endregion
 

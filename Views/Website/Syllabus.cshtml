@@ -75,11 +75,18 @@
         justify-content: center;
         gap: 10px;
         transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+        cursor: pointer;
     }
 
         .download-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
     @@keyframes fadeIn {
@@ -99,6 +106,22 @@
         font-size: 0.85rem;
         color: rgba(0, 0, 0, 0.6);
     }
+
+    .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 
 <div class="syllabus-container">
@@ -116,14 +139,16 @@
         <!-- Department Dropdown -->
         <div class="batch-section">
             <label class="batch-label"><i class="fas fa-building"></i> Select Department</label>
-            <select class="form-select" id="deptDropdown" disabled>
+            <select class="form-select" id="deptDropdown">
                 <option value="">-- Select Department --</option>
             </select>
         </div>
 
         <!-- Download Button -->
         <button class="download-btn" id="downloadBtn">
-            <i class="fas fa-download"></i> Download Syllabus
+            <i class="fas fa-download" id="downloadIcon"></i>
+            <span id="downloadText">Download Syllabus</span>
+            <div class="loading-spinner" id="loadingSpinner"></div>
         </button>
 
         <footer>
@@ -137,16 +162,30 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Controller is Website (actions defined in WebsiteController)
+            // Load dropdowns
             loadDropdown("@Url.Action("getBatches", "Website")", "batchDropdown");
-            loadDropdown("@Url.Action("getDepartments", "Website")", "deptDropdown", true);
+            loadDropdown("@Url.Action("getDepartments", "Website")", "deptDropdown");
+
+            // Add download button click handler
+            const downloadBtn = document.getElementById("downloadBtn");
+            if (downloadBtn) {
+                downloadBtn.addEventListener("click", handleDownload);
+            } else {
+                console.error("Download button not found!");
+            }
         });
 
-        function loadDropdown(url, dropdownId, enableOnLoad = false) {
+              function loadDropdown(url, dropdownId) {
             fetch(url, { credentials: 'same-origin' })
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                    }
+                    return res.json();
+                })
                 .then(result => {
                     console.log('loadDropdown result for', dropdownId, result);
+
                     if (!result) {
                         console.error('No response for', dropdownId);
                         return;
@@ -159,11 +198,29 @@
                     }
 
                     const dropdown = document.getElementById(dropdownId);
+                    if (!dropdown) {
+                        console.error('Dropdown not found:', dropdownId);
+                        return;
+                    }
+
+                    // Keep the first "Select" option
                     dropdown.options.length = 1;
 
                     data.forEach(item => {
-                        const value = item.id ?? item.batchId ?? item.departmentId ?? item.batchID ?? item.departmentID;
-                        const text = item.name ?? item.batchName ?? item.departmentName;
+                        console.log('Processing item:', item); // Debug log
+
+                        // Try multiple property name variations
+                        let value, text;
+
+                        if (dropdownId === 'batchDropdown') {
+                            value = item.batchId ?? item.id;
+                            text = item.batchName ?? item.name;
+                        } else if (dropdownId === 'deptDropdown') {
+                            value = item.departmentId ?? item.id;
+                            text = item.departmentName ?? item.name;
+                        }
+
+                        console.log('Mapped to - value:', value, 'text:', text); // Debug log
 
                         if (value === undefined || text === undefined) {
                             console.warn('Skipping dropdown item with missing fields', item);
@@ -176,41 +233,81 @@
                         dropdown.appendChild(opt);
                     });
 
-                    if (enableOnLoad) dropdown.disabled = false;
+                    console.log(`${dropdownId} loaded with ${dropdown.options.length - 1} items`);
                 })
-                .catch(err => console.error('Error loading dropdown', dropdownId, err));
+                .catch(err => {
+                    console.error('Error loading dropdown', dropdownId, err);
+                    alert(`Failed to load ${dropdownId}. Please refresh the page.`);
+                });
         }
 
-        document.getElementById("downloadBtn").addEventListener("click", () => {
+
+        function handleDownload() {
             const batchId = document.getElementById("batchDropdown").value;
             const departmentId = document.getElementById("deptDropdown").value;
 
             console.log('Download click - batchId:', batchId, 'departmentId:', departmentId);
 
             if (!batchId || !departmentId) {
-                alert("Please select batch and department");
+                alert("Please select both batch and department");
                 return;
             }
 
-            // quick debug: call debug endpoint first (returns matching rows)
+            // Show loading state
+            const downloadBtn = document.getElementById("downloadBtn");
+            const downloadIcon = document.getElementById("downloadIcon");
+            const downloadText = document.getElementById("downloadText");
+            const loadingSpinner = document.getElementById("loadingSpinner");
+
+            downloadBtn.disabled = true;
+            downloadIcon.style.display = 'none';
+            downloadText.textContent = 'Checking...';
+            loadingSpinner.style.display = 'block';
+
+            // Debug: Check if syllabus exists
             const debugUrl = '@Url.Action("DebugSyllabus", "Website")';
-            fetch(`${debugUrl}?batchId=${encodeURIComponent(batchId)}&departmentId=${encodeURIComponent(departmentId)}`, { credentials: 'same-origin' })
-                .then(r => r.json())
+            fetch(`${debugUrl}?batchId=${encodeURIComponent(batchId)}&departmentId=${encodeURIComponent(departmentId)}`,
+                { credentials: 'same-origin' })
+                .then(r => {
+                    if (!r.ok) {
+                        throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+                    }
+                    return r.json();
+                })
                 .then(debugResp => {
                     console.log('DebugSyllabus response:', debugResp);
-                    // if server reports matching rows, open the redirecting endpoint
+
                     if (debugResp && debugResp.count > 0) {
+                        // Open download link
                         const downloadUrl = '@Url.Action("DownloadSyllabus", "Website")';
                         window.open(`${downloadUrl}?batchId=${batchId}&departmentId=${departmentId}`, "_blank");
+
+                        // Reset button state
+                        setTimeout(() => {
+                            resetDownloadButton();
+                        }, 1000);
                     } else {
-                        alert('Syllabus not found for selected batch/department. See console for details.');
+                        alert('Syllabus not found for the selected batch and department.\n\nPlease contact your administrator to upload the syllabus.');
+                        resetDownloadButton();
                     }
                 })
                 .catch(err => {
                     console.error('Debug call failed', err);
-                    alert('Error while checking syllabus. See console.');
+                    alert('Error checking syllabus availability. Please try again.');
+                    resetDownloadButton();
                 });
-        });
-    </script>
+        }
 
+        function resetDownloadButton() {
+            const downloadBtn = document.getElementById("downloadBtn");
+            const downloadIcon = document.getElementById("downloadIcon");
+            const downloadText = document.getElementById("downloadText");
+            const loadingSpinner = document.getElementById("loadingSpinner");
+
+            downloadBtn.disabled = false;
+            downloadIcon.style.display = 'inline';
+            downloadText.textContent = 'Download Syllabus';
+            loadingSpinner.style.display = 'none';
+        }
+    </script>
 }

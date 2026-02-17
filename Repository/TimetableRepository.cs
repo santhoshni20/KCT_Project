@@ -325,25 +325,42 @@ namespace ksi.Repository
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
             if (string.IsNullOrWhiteSpace(dto.name)) throw new ArgumentException("room name is required", nameof(dto.name));
-            if (!dto.blockId.HasValue) throw new ArgumentException("blockId is required", nameof(dto.blockId));
 
             dto.name = dto.name.Trim();
-            if (dto.name.Length > 200) // adjust to column size
+            if (dto.name.Length > 200)
                 throw new ArgumentException("name too long", nameof(dto));
 
-            // ensure block exists to satisfy FK
-            var blockExists = await _context.mstBlock.AnyAsync(b => b.blockId == dto.blockId.Value);
-            if (!blockExists)
-                throw new InvalidOperationException($"blockId {dto.blockId.Value} does not exist");
+            // Get first active block as default if blockId not provided
+            int blockIdToUse;
+            if (dto.blockId.HasValue && dto.blockId.Value > 0)
+            {
+                blockIdToUse = dto.blockId.Value;
+            }
+            else
+            {
+                var defaultBlock = await _context.mstBlock
+                    .Where(b => b.isActive)
+                    .OrderBy(b => b.blockId)
+                    .FirstOrDefaultAsync();
 
-            // avoid duplicate room within same block
-            if (await _context.mstRoom.AnyAsync(r => r.blockId == dto.blockId.Value && r.roomNumber == dto.name))
+                if (defaultBlock == null)
+                    throw new InvalidOperationException("No active block found. Please add a block first.");
+
+                blockIdToUse = defaultBlock.blockId;
+            }
+
+            // Check for duplicate room number
+            if (await _context.mstRoom.AnyAsync(r => r.roomNumber == dto.name))
                 return false; // already exists
 
             var entity = new mstRoom
             {
                 roomNumber = dto.name,
-                blockId = dto.blockId.Value,
+                blockId = blockIdToUse,
+                examDate = null,           // ✅ Set to null (allowed in entity)
+                examName = null,           // ✅ Set to null (already nullable)
+                totalDesks = 30,           // ✅ Default value
+                seatsPerDesk = 2,          // ✅ Default value
                 createdBy = createdBy,
                 createdDate = DateTime.Now,
                 isActive = true

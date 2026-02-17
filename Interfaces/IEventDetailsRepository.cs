@@ -1,15 +1,18 @@
-﻿using ksi.Models.DTOs;
-using System.Collections.Generic;
+﻿// IEventDetailsRepository.cs
+using ksi.Models.DTOs;
 
-namespace ksi.Interfaces
+public interface IEventDetailsRepository
 {
-    public interface IEventDetailsRepository
-    {
-        List<EventDetailsDTO> getAllEvents();
-        bool addEvent(EventDetailsDTO eventDto);
+    List<EventDetailsDTO> getAllEvents();
+    bool addEvent(EventDetailsDTO eventDto);
+    bool UpdateEvent(EventDetailsDTO eventDto);
+    bool deleteEvent(int id);
+    //bool toggleEventStatus(int id);
 
-        List<EventDetailsDTO> getAllClubs();
-        bool addClub(EventDetailsDTO clubDto);
-    }
-
+    List<EventDetailsDTO> getAllClubs();
+    bool addClub(EventDetailsDTO clubDto);
+    bool updateClub(EventDetailsDTO clubDto);
+    bool deleteClub(int id);
+    bool updateEvent(EventDetailsDTO eventDto);
+    //bool updateEvent(EventDetailsDTO eventDto);
 }

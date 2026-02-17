@@ -40,6 +40,43 @@ namespace ksi.Repository
                 .ToList();
         }
 
+
+        //public bool toggleEventStatus(int id)
+        //{
+        //    var entity = _context.mstEventDetails.FirstOrDefault(x => x.mstEventId == id);
+        //    if (entity == null) return false;
+
+        //    entity.isActive = !entity.isActive;
+        //    return _context.SaveChanges() > 0;
+        //}
+        public bool deleteEvent(int id)
+        {
+            var entity = _context.mstEventDetails.FirstOrDefault(x => x.mstEventId == id);
+            if (entity == null) return false;
+
+            entity.isActive = false;
+            entity.deletedDate = DateTime.Now;
+            return _context.SaveChanges() > 0;
+        }
+
+
+        public bool UpdateEvent(EventDetailsDTO dto)
+        {
+            var entity = _context.mstEventDetails.FirstOrDefault(x => x.mstEventId == dto.mstEventId);
+            if (entity == null) return false;
+
+            entity.eventName = dto.eventName;
+            entity.organisedBy = dto.organisedBy;
+            entity.eventDate = dto.eventDate ?? entity.eventDate;
+            entity.registrationDeadline = dto.registrationDeadline ?? entity.registrationDeadline;
+            entity.contactNumber = dto.contactNumber;
+            entity.description = dto.description;
+
+            if (!string.IsNullOrEmpty(dto.brochureImagePath))
+                entity.brochureImagePath = dto.brochureImagePath;
+
+            return _context.SaveChanges() > 0;
+        }
         public bool addEvent(EventDetailsDTO eventDto)
         {
             var entity = new mstEventDetails
@@ -81,6 +118,40 @@ namespace ksi.Repository
                 .ToList();
         }
 
+
+
+        //public bool toggleClubStatus(int id)
+        //{
+        //    var entity = _context.mstClubs.FirstOrDefault(x => x.mstClubId == id);
+        //    if (entity == null) return false;
+
+        //    entity.isActive = !entity.isActive;
+        //    return _context.SaveChanges() > 0;
+        //}
+
+        public bool deleteClub(int id)
+        {
+            var entity = _context.mstClubs.FirstOrDefault(x => x.mstClubId == id);
+            if (entity == null) return false;
+
+            entity.isActive = false;
+            entity.deletedDate = DateTime.Now;
+            return _context.SaveChanges() > 0;
+        }
+
+        public bool updateClub(EventDetailsDTO dto)
+        {
+            var entity = _context.mstClubs.FirstOrDefault(x => x.mstClubId == dto.mstClubId);
+            if (entity == null) return false;
+
+            entity.clubName = dto.clubName;
+            entity.president = dto.president;
+            entity.contactNumber = dto.contactNumber;
+            entity.description = dto.description;
+
+            return _context.SaveChanges() > 0;
+        }
+
         public bool addClub(EventDetailsDTO clubDto)
         {
             var entity = new mstClubs
@@ -96,6 +167,11 @@ namespace ksi.Repository
 
             _context.mstClubs.Add(entity);
             return _context.SaveChanges() > 0;
+        }
+
+        public bool updateEvent(EventDetailsDTO eventDto)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

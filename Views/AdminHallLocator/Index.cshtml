@@ -1,381 +1,530 @@
-﻿    @model ksi.Models.DTO.HallLocatorPageDTO
-    @{
-        ViewData["Title"] = "Hall Locator – Admin";
+﻿@model ksi.Models.DTO.HallLocatorPageDTO
+@{
+    ViewData["Title"] = "Hall Locator – Admin";
+}
+
+<style>
+    /* ── Page layout ── */
+    .card-custom {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 22px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        background: #fff;
     }
 
-    <style>
-        .card-header-custom {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: #fff;
-            padding: 12px 18px;
-            border-radius: 6px 6px 0 0;
+    .card-header-custom {
+        background: #fff;
+        color: #2c3e50;
+        padding: 14px 18px;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+        font-size: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-body-custom {
+        padding: 0; /* table flush to card edges */
+    }
+
+    /* ── Alerts ── */
+    .alert {
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+
+    .alert-success {
+        border-left-color: #28a745;
+        background: #d4edda;
+    }
+
+    .alert-danger {
+        border-left-color: #dc3545;
+        background: #f8d7da;
+    }
+
+    .alert-info {
+        border-left-color: #17a2b8;
+        background: #d1ecf1;
+    }
+
+    /* ── Alloc panel ── */
+    .alloc-panel {
+        display: none;
+        background: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
+        padding: 20px;
+    }
+
+        .alloc-panel.open {
+            display: block;
+        }
+
+        .alloc-panel .sub-title {
             font-weight: 600;
+            font-size: .9rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
         }
 
-        .card-custom {
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            margin-bottom: 22px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.1);
-        }
-
-        .card-body-custom {
-            padding: 20px;
-        }
-
-        /* ── Alert improvements ────────────────────────────────────────── */
-        .alert {
-            border-radius: 8px;
-            border-left: 4px solid;
-        }
-
-        .alert-success {
-            border-left-color: #28a745;
-            background: #d4edda;
-        }
-
-        .alert-danger {
-            border-left-color: #dc3545;
-            background: #f8d7da;
-        }
-
-        .alert-info {
-            border-left-color: #17a2b8;
-            background: #d1ecf1;
-        }
-
-        /* ── Allocation sub‑panel ────────────────────────────────────── */
-        .alloc-panel {
-            display: none;
-            margin-top: 12px;
-            background: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 16px;
-        }
-
-            .alloc-panel.open {
-                display: block;
-            }
-
-            .alloc-panel .sub-title {
-                font-weight: 600;
-                font-size: .95rem;
-                margin-bottom: 10px;
-                color: #2c3e50;
-            }
-    /* ── Action buttons ──────────────────────────────────────────── */
-    .d-flex.gap-1 {
-        gap: 0.25rem;
+    /* ── Capacity bar ── */
+    .capacity-bar {
+        width: 100%;
+        min-width: 80px;
+        height: 10px;
+        background: #e9ecef;
+        border-radius: 5px;
+        overflow: hidden;
     }
-        /* ── Capacity bar ────────────────────────────────────────────── */
-        .capacity-bar {
-            width: 100%;
-            height: 14px;
-            background: #e9ecef;
-            border-radius: 7px;
-            overflow: hidden;
+
+        .capacity-bar .fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width .3s ease;
         }
 
-            .capacity-bar .fill {
-                height: 100%;
-                border-radius: 7px;
-                transition: width .3s ease;
+            .capacity-bar .fill.safe {
+                background: #28a745;
             }
 
-                .capacity-bar .fill.safe {
-                    background: linear-gradient(90deg, #28a745, #34ce57);
-                }
+            .capacity-bar .fill.warn {
+                background: #ffc107;
+            }
 
-                .capacity-bar .fill.warn {
-                    background: linear-gradient(90deg, #ffc107, #ffcd39);
-                }
+            .capacity-bar .fill.danger {
+                background: #dc3545;
+            }
 
-                .capacity-bar .fill.danger {
-                    background: linear-gradient(90deg, #dc3545, #e4606d);
-                }
+    /* ══════════════════════════════════════════════
+           MAIN HALLS TABLE  –  matches image 2 style
+           ══════════════════════════════════════════════ */
+    .tbl-halls {
+        font-size: .82rem;
+        table-layout: fixed;
+        width: 100%;
+        min-width: 1100px;
+        border-collapse: collapse;
+        margin: 0;
+    }
 
-        /* ── Tables ──────────────────────────────────────────────────── */
-        .tbl-halls th, .tbl-alloc th {
-            background: #34495e;
-            color: #fff;
+        /* Header row — plain light style like image 2 */
+        .tbl-halls thead tr {
+            background: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tbl-halls th {
+            background: transparent;
+            color: #6b7280; /* muted grey label, like image 2 */
             text-align: center;
             font-weight: 600;
+            font-size: .72rem;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            padding: 11px 8px;
+            vertical-align: middle;
+            border-right: 1px solid #e8e8e8;
         }
 
-        .tbl-halls {
-            font-size: .92rem;
-        }
-
-        .tbl-alloc {
-            font-size: .88rem;
-        }
-
-            .tbl-alloc td {
-                text-align: center;
-                vertical-align: middle;
+            .tbl-halls th:last-child {
+                border-right: none;
             }
 
-        /* ── Help text ───────────────────────────────────────────────── */
-        .help-text {
-            font-size: .85rem;
-            color: #6c757d;
-            margin-top: 4px;
+        /* Body cells */
+        .tbl-halls td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 12px 8px;
+            white-space: nowrap;
+            border-right: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #374151;
         }
 
-            .help-text i {
-                font-size: .9rem;
+            .tbl-halls td:last-child {
+                border-right: none;
             }
 
-        /* ── Badge improvements ──────────────────────────────────────── */
-        .badge {
-            font-size: .8rem;
-            padding: 4px 8px;
-            font-weight: 500;
+        /* Hover row highlight */
+        .tbl-halls tbody tr.hall-row:hover {
+            background: #f9fafb;
         }
 
-        /* ── Info box ────────────────────────────────────────────────── */
-        .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #0d6efd;
-            padding: 12px 16px;
+        /* Exam date — bold blue like image 2 */
+        .tbl-halls td:nth-child(2) strong {
+            color: #4f46e5;
+            font-weight: 600;
+        }
+
+        /* ── Fixed column widths ── */
+        .tbl-halls th:nth-child(1),
+        .tbl-halls td:nth-child(1) {
+            width: 42px;
+        }
+        /* # */
+
+        .tbl-halls th:nth-child(2),
+        .tbl-halls td:nth-child(2) {
+            width: 115px;
+        }
+        /* Exam Date */
+
+        .tbl-halls th:nth-child(3),
+        .tbl-halls td:nth-child(3) {
+            width: 100px;
+        }
+        /* Exam Name */
+
+        .tbl-halls th:nth-child(4),
+        .tbl-halls td:nth-child(4) {
+            width: 70px;
+        }
+        /* Block */
+
+        .tbl-halls th:nth-child(5),
+        .tbl-halls td:nth-child(5) {
+            width: 70px;
+        }
+        /* Hall */
+
+        .tbl-halls th:nth-child(6),
+        .tbl-halls td:nth-child(6) {
+            width: 60px;
+        }
+        /* Desks */
+
+        .tbl-halls th:nth-child(7),
+        .tbl-halls td:nth-child(7) {
+            width: 50px;
+        }
+        /* S/D */
+
+        .tbl-halls th:nth-child(8),
+        .tbl-halls td:nth-child(8) {
+            width: 60px;
+        }
+        /* Total */
+
+        .tbl-halls th:nth-child(9),
+        .tbl-halls td:nth-child(9) {
+            width: 85px;
+        }
+        /* Occupied */
+
+        .tbl-halls th:nth-child(10),
+        .tbl-halls td:nth-child(10) {
+            width: 55px;
+        }
+        /* Free */
+
+        .tbl-halls th:nth-child(11),
+        .tbl-halls td:nth-child(11) {
+            width: 110px;
+        }
+        /* Capacity */
+
+        .tbl-halls th:nth-child(12),
+        .tbl-halls td:nth-child(12) {
+            width: 130px;
+            white-space: normal;
+        }
+        /* Departments */
+
+        .tbl-halls th:nth-child(13),
+        .tbl-halls td:nth-child(13) {
+            width: 115px;
+        }
+    /* Actions */
+
+    /* ── Allocation sub-table ── */
+    .tbl-alloc {
+        font-size: .85rem;
+        border-collapse: collapse;
+    }
+
+        .tbl-alloc th {
+            background: #f5f5f5;
+            color: #6b7280;
+            text-align: center;
+            font-weight: 600;
+            font-size: .72rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            white-space: nowrap;
+            padding: 9px 8px;
+            border-bottom: 2px solid #e0e0e0;
+            border-right: 1px solid #e8e8e8;
+        }
+
+            .tbl-alloc th:last-child {
+                border-right: none;
+            }
+
+        .tbl-alloc td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            border-right: 1px solid #f0f0f0;
+            color: #374151;
+        }
+
+            .tbl-alloc td:last-child {
+                border-right: none;
+            }
+
+        /* ── Action buttons ── */
+        .tbl-halls .btn-sm,
+        .tbl-alloc .btn-sm {
+            font-size: .76rem;
+            padding: 4px 10px;
+            white-space: nowrap;
             border-radius: 6px;
-            margin-bottom: 16px;
         }
 
-            .info-box i {
-                color: #0d6efd;
-                margin-right: 8px;
-            }
+    /* Manage button — outlined indigo like image 2 */
+    .btn-outline-primary {
+        color: #4f46e5;
+        border-color: #4f46e5;
+    }
 
-        /* ── Exam date badge ─────────────────────────────────────────── */
-        .exam-date-badge {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffc107;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: .8rem;
-            font-weight: 500;
-        }
-    </style>
-
-    <div class="container-fluid mt-3 px-4">
-
-        <!-- ─── ALERTS ─────────────────────────────────────────────── -->
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+        .btn-outline-primary:hover {
+            background: #4f46e5;
+            color: #fff;
         }
 
-        <!-- ─── PAGE HEADER ───────────────────────────────────────────────── -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold mb-0"><i class="bi bi-building"></i> Hall Locator (Admin)</h4>
-            <div class="text-muted">
-                <small>Total Halls: <strong>@Model.halls.Count</strong></small>
+    /* ── Help text ── */
+    .help-text {
+        font-size: .82rem;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+
+    /* ── Badge ── */
+    .badge {
+        font-size: .75rem;
+        padding: 3px 7px;
+        font-weight: 500;
+    }
+
+    /* ── Info box ── */
+    .info-box {
+        background: #eff6ff;
+        border-left: 4px solid #4f46e5;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        font-size: .88rem;
+    }
+
+        .info-box i {
+            color: #4f46e5;
+            margin-right: 8px;
+        }
+
+    /* ── Exam name badge ── */
+    .exam-date-badge {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffc107;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: .76rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    /* ── Search hidden rows ── */
+    tr.row-hidden {
+        display: none;
+    }
+
+    /* ── Search input in header ── */
+    #searchInput {
+        background: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: .82rem;
+        color: #374151;
+    }
+
+        #searchInput:focus {
+            background: #fff;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79,70,229,.15);
+            outline: none;
+        }
+
+    /* ── No results ── */
+    #noResults {
+        margin: 12px 18px;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="container-fluid mt-3 px-4">
+
+    <!-- ALERTS -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0"><i class="bi bi-building"></i> Hall Locator (Admin)</h4>
+        <div class="d-flex align-items-center gap-2">
+            <small class="text-muted me-2">Total Halls: <strong>@Model.halls.Count</strong></small>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addHallModal">
+                <i class="bi bi-plus-lg"></i> Add New Hall
+            </button>
+        </div>
+    </div>
+
+    <!-- HALLS TABLE -->
+    <div class="card-custom">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-table"></i> All Exam Halls (@Model.halls.Count)</span>
+            <!-- SEARCH BAR -->
+            <div class="d-flex gap-2" style="min-width: 420px;">
+                <input type="text"
+                       id="searchInput"
+                       class="form-control form-control-sm"
+                       placeholder="🔍 Search by hall, block, exam name, date, department..."
+                       oninput="filterTable()" />
+                <button class="btn btn-sm btn-outline-light" onclick="clearSearch()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
         </div>
+        <div class="card-body-custom">
 
-        <!-- ═══════════════════════════════════════════════════════════════════
-             SECTION 1 – ADD NEW HALL
-             ═══════════════════════════════════════════════════════════════════ -->
-        <div class="card-custom">
-            <div class="card-header-custom">
-                <i class="bi bi-plus-circle"></i> Add New Exam Hall
-            </div>
-            <div class="card-body-custom">
-                <div class="info-box">
-                    <i class="bi bi-info-circle-fill"></i>
-                    <strong>Seating Configuration:</strong>
-                    <ul class="mb-0 mt-2" style="font-size: .85rem;">
-                        <li><strong>1 Seat/Desk:</strong> Each desk accommodates only 1 student</li>
-                        <li><strong>2 Seats/Desk:</strong> Each desk accommodates 2 students from <strong>different departments</strong></li>
-                    </ul>
+            @if (Model.halls.Count == 0)
+            {
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No halls added yet. Click <strong>Add New Hall</strong> above to get started.
+                </div>
+            }
+            else
+            {
+                <!-- No results message -->
+                <div id="noResults" class="alert alert-warning text-center mb-3" style="display:none;">
+                    <i class="bi bi-search me-2"></i> No halls match your search.
                 </div>
 
-                <form asp-action="AddHall" method="post" class="row g-3">
-                    <!-- Block -->
-                    <div class="col-md-2">
-                        <label class="form-label fw-semibold">Block <span class="text-danger">*</span></label>
-                        <select name="blockId" class="form-select" required>
-                            <option value="">-- Block --</option>
-                            @foreach (var block in Model.blocks)
-                            {
-                                <option value="@block.blockId">@block.blockName</option>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover tbl-halls mb-0" id="hallsTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">#</th>
+                                <th>Exam Date</th>
+                                <th>Exam Name</th>
+                                <th>Block</th>
+                                <th>Hall</th>
+                                <th>Desks</th>
+                                <th>S/D</th>
+                                <th>Total</th>
+                                <th>Occupied</th>
+                                <th>Free</th>
+                                <th style="min-width: 120px;">Capacity</th>
+                                <th>Departments</th>
+                                <th style="width: 100px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int sno = 1;
                             }
-                        </select>
-                    </div>
+                            @foreach (var hall in Model.halls)
+                            {
+                                double pct = hall.totalSeats > 0
+                                ? (double)hall.occupiedSeats / hall.totalSeats * 100
+                                : 0;
+                                string barClass = pct < 60 ? "safe" : pct < 85 ? "warn" : "danger";
 
-                    <!-- Hall Number -->
-                    <div class="col-md-2">
-                        <label class="form-label fw-semibold">Hall Number <span class="text-danger">*</span></label>
-                        <input type="text" name="roomNumber" class="form-control" placeholder="C203" required />
-                    </div>
-
-                    <!-- Exam Date (NEW) -->
-                    <div class="col-md-2">
-                        <label class="form-label fw-semibold">Exam Date <span class="text-danger">*</span></label>
-                        <input type="date" name="examDate" class="form-control"
-                               min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
-                        <div class="help-text">
-                            <i class="bi bi-calendar"></i> Date of exam
-                        </div>
-                    </div>
-
-                    <!-- Exam Name (NEW - Optional) -->
-                    <div class="col-md-2">
-                        <label class="form-label fw-semibold">Exam Name</label>
-                        <input type="text" name="examName" class="form-control" placeholder="e.g. Mid Term" />
-                        <div class="help-text">Optional</div>
-                    </div>
-
-                    <!-- Total Desks -->
-                    <div class="col-md-1">
-                        <label class="form-label fw-semibold">Desks</label>
-                        <input type="number" name="totalDesks" class="form-control" value="30" min="1" max="100" />
-                    </div>
-
-                    <!-- Seats Per Desk -->
-                    <div class="col-md-1">
-                        <label class="form-label fw-semibold">Seats/D</label>
-                        <select name="seatsPerDesk" class="form-select" required>
-                            <option value="1">1</option>
-                            <option value="2" selected>2</option>
-                        </select>
-                    </div>
-
-                    <!-- Submit -->
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-plus-lg"></i> Add Hall
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- ═══════════════════════════════════════════════════════════════════
-             SECTION 2 – ALL HALLS TABLE
-             ═══════════════════════════════════════════════════════════════════ -->
-        <div class="card-custom">
-            <div class="card-header-custom">
-                <i class="bi bi-table"></i> All Exam Halls (@Model.halls.Count)
-            </div>
-            <div class="card-body-custom">
-
-                @if (Model.halls.Count == 0)
-                {
-                    <div class="alert alert-info mb-0">
-                        <i class="bi bi-info-circle me-2"></i>
-                        No halls added yet. Add a hall using the form above.
-                    </div>
-                }
-                else
-                {
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover tbl-halls mb-0">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40px;">#</th>
-                                    <th>Exam Date</th>
-                                    <th>Exam Name</th>
-                                    <th>Block</th>
-                                    <th>Hall</th>
-                                    <th>Desks</th>
-                                    <th>S/D</th>
-                                    <th>Total</th>
-                                    <th>Occupied</th>
-                                    <th>Free</th>
-                                    <th style="min-width: 120px;">Capacity</th>
-                                    <th>Departments</th>
-                                    <th style="width: 100px;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    int sno = 1;
-                                }
-                                @foreach (var hall in Model.halls)
-                                {
-                                    double pct = hall.totalSeats > 0
-                                    ? (double)hall.occupiedSeats / hall.totalSeats * 100
-                                    : 0;
-                                    string barClass = pct < 60 ? "safe" : pct < 85 ? "warn" : "danger";
-
-                                    // Highlight upcoming exams
-                                var daysDiff = hall.examDate.HasValue ? (hall.examDate.Value.Date - DateTime.Today).Days : int.MaxValue;
+                                var daysDiff = hall.examDate.HasValue
+                                ? (hall.examDate.Value.Date - DateTime.Today).Days
+                                : int.MaxValue;
                                 string rowClass = daysDiff <= 1 && daysDiff >= 0 ? "table-warning" : "";
 
-                                    <tr class="@rowClass">
+                                // Build a searchable data string for JS filtering
+                                string searchData = $"{hall.roomNumber} {hall.blockName} {hall.examName} {hall.examDate?.ToString("dd MMM yyyy")} {string.Join(" ", hall.allocatedDepartments)}".ToLower();
 
-                                        <td class="text-center">@sno</td>
-                                        <td class="text-center">
+                                <tr class="@rowClass hall-row" data-search="@searchData">
+                                    <td class="text-center">@sno</td>
+                                    <td class="text-center">
                                         <strong>@(hall.examDate?.ToString("dd MMM yyyy") ?? "N/A")</strong>
-                                            @if (daysDiff == 0)
+                                        @if (daysDiff == 0)
+                                        {
+                                            <br />
+                                
+                                            <span class="badge bg-danger">TODAY</span>
+                                        }
+                                        else if (daysDiff == 1)
+                                        {
+                                            <br />
+                                
+                                            <span class="badge bg-warning text-dark">TOMORROW</span>
+                                        }
+                                        else if (daysDiff > 1 && daysDiff <= 7)
+                                        {
+                                            <br />
+                                
+                                            <small class="text-muted">In @daysDiff days</small>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrWhiteSpace(hall.examName))
+                                        {
+                                            <span class="exam-date-badge">@hall.examName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">@hall.blockName</td>
+                                    <td class="fw-semibold text-center">@hall.roomNumber</td>
+                                    <td class="text-center">@hall.totalDesks</td>
+                                    <td class="text-center">@hall.seatsPerDesk</td>
+                                    <td class="text-center fw-bold">@hall.totalSeats</td>
+                                    <td class="text-center text-danger fw-bold">@hall.occupiedSeats</td>
+                                    <td class="text-center text-success fw-bold">@hall.remainingSeats</td>
+                                    <td>
+                                        <div class="capacity-bar">
+                                            <div class="fill @barClass" style="width:@(pct.ToString("F0"))%;"></div>
+                                        </div>
+                                        <small class="text-muted d-block text-center mt-1">@(pct.ToString("F0"))%</small>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (hall.allocatedDepartments.Count > 0)
+                                        {
+                                            foreach (var d in hall.allocatedDepartments)
                                             {
-                                                <br />
-
-                                                <span class="badge bg-danger">TODAY</span>
+                                                <span class="badge bg-secondary me-1 mb-1">@d</span>
                                             }
-                                            else if (daysDiff == 1)
-                                            {
-                                                <br />
-
-                                                <span class="badge bg-warning text-dark">TOMORROW</span>
-                                            }
-                                            else if (daysDiff > 1 && daysDiff <= 7)
-                                            {
-                                                <br />
-
-                                                <small class="text-muted">In @daysDiff days</small>
-                                            }
-                                        </td>
-                                        <td class="text-center">
-                                            @if (!string.IsNullOrWhiteSpace(hall.examName))
-                                            {
-                                                <span class="exam-date-badge">@hall.examName</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">—</span>
-                                            }
-                                        </td>
-                                        <td class="text-center">@hall.blockName</td>
-                                        <td class="fw-semibold text-center">@hall.roomNumber</td>
-                                        <td class="text-center">@hall.totalDesks</td>
-                                        <td class="text-center">@hall.seatsPerDesk</td>
-                                        <td class="text-center fw-bold">@hall.totalSeats</td>
-                                        <td class="text-center text-danger fw-bold">@hall.occupiedSeats</td>
-                                        <td class="text-center text-success fw-bold">@hall.remainingSeats</td>
-                                        <td>
-                                            <div class="capacity-bar">
-                                                <div class="fill @barClass" style="width:@(pct.ToString("F0"))%;"></div>
-                                            </div>
-                                            <small class="text-muted d-block text-center mt-1">@(pct.ToString("F0"))%</small>
-                                        </td>
-                                        <td class="text-center">
-                                            @if (hall.allocatedDepartments.Count > 0)
-                                            {
-                                                foreach (var d in hall.allocatedDepartments)
-                                                {
-                                                    <span class="badge bg-secondary me-1 mb-1">@d</span>
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">—</span>
-                                            }
-                                        </td>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
                                     <td class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">
                                             <button type="button"
@@ -383,7 +532,6 @@
                                                     onclick="togglePanel(@hall.roomId)">
                                                 <i class="bi bi-chevron-down" id="icon-@hall.roomId"></i> Manage
                                             </button>
-
                                             <form asp-action="DeleteHall" method="post" class="d-inline">
                                                 <input type="hidden" name="roomId" value="@hall.roomId" />
                                                 <input type="hidden" name="forceDelete" value="true" />
@@ -391,40 +539,40 @@
                                                         class="btn btn-sm btn-outline-danger"
                                                         title="Delete hall"
                                                         onclick="return confirm('@(hall.occupiedSeats > 0
-                ? $"⚠️ DELETE {hall.roomNumber}?\n\n• This hall has {hall.occupiedSeats} allocated students\n• All allocations will be removed\n• This action cannot be undone!\n\nAre you absolutely sure?"
-                : $"⚠️ Delete {hall.roomNumber}?\n\nThis action cannot be undone!")');">
+                                                                                                                    ? $"⚠️ DELETE {hall.roomNumber}?\n\n• This hall has {hall.occupiedSeats} allocated students\n• All allocations will be removed\n• This action cannot be undone!\n\nAre you absolutely sure?"
+                                                                                                                    : $"⚠️ Delete {hall.roomNumber}?\n\nThis action cannot be undone!")');">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
                                         </div>
                                     </td>
-                                    </tr>
+                                </tr>
 
-                                    <!-- ─── EXPANDABLE PANEL ─── -->
-                                    <tr>
-                                        <td colspan="13" class="p-0 border-top-0">
-                                            <div class="alloc-panel" id="panel-@hall.roomId">
+                                <!-- EXPANDABLE PANEL ROW -->
+                                <tr class="panel-row">
+                                    <td colspan="13" class="p-0 border-top-0">
+                                        <div class="alloc-panel" id="panel-@hall.roomId">
 
-                                                <!-- ── Info ── -->
-                                                <div class="alert alert-info mb-3" style="font-size: .9rem;">
-                                                    <i class="bi bi-calendar-event me-2"></i>
-                                                    <strong>@hall.roomNumber (@hall.blockName)</strong> —
+                                            <div class="alert alert-info mb-3" style="font-size: .9rem;">
+                                                <i class="bi bi-calendar-event me-2"></i>
+                                                <strong>@hall.roomNumber (@hall.blockName)</strong> —
                                                 Exam on <strong>@(hall.examDate?.ToString("dd MMM yyyy") ?? "N/A")</strong>
-                                                    @if (!string.IsNullOrWhiteSpace(hall.examName))
-                                                    {
-                                                        <span> — @hall.examName</span>
-                                                    }
-                                                    <br />
-                                                    @hall.remainingSeats of @hall.totalSeats seats available
-                                                    @if (hall.seatsPerDesk == 2)
-                                                    {
-                                                        <span class="ms-2">| <i class="bi bi-people-fill"></i> Shared (diff depts)</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="ms-2">| <i class="bi bi-person-fill"></i> Single</span>
-                                                    }
-                                                </div>
+                                                @if (!string.IsNullOrWhiteSpace(hall.examName))
+                                                {
+                                                    <span> — @hall.examName</span>
+                                                }
+                                                <br />
+                                                @hall.remainingSeats of @hall.totalSeats seats available
+                                                @if (hall.seatsPerDesk == 2)
+                                                {
+                                                    <span class="ms-2">| <i class="bi bi-people-fill"></i> Shared (diff depts)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="ms-2">| <i class="bi bi-person-fill"></i> Single</span>
+                                                }
+                                            </div>
+
                                             @if (hall.occupiedSeats > 0)
                                             {
                                                 <div class="alert alert-warning mb-3 d-flex justify-content-between align-items-center">
@@ -443,192 +591,297 @@
                                                 </div>
                                             }
 
-                                                <!-- ── Allocate Students ── -->
-                                                <div class="sub-title"><i class="bi bi-person-plus"></i> Allocate Students</div>
+                                            <div class="sub-title"><i class="bi bi-person-plus"></i> Allocate Students</div>
 
-                                                <div class="row g-2 mb-3">
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-md-3">
+                                                    <label class="form-label form-label-sm">Allocation Mode</label>
+                                                    <select class="form-select form-select-sm"
+                                                            id="mode-@hall.roomId"
+                                                            onchange="switchMode(@hall.roomId)">
+                                                        <option value="department">📋 Department + Roll Range</option>
+                                                        <option value="manual">✍️ Manual Entry</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Department Mode -->
+                                            <form asp-action="AllocateStudents" method="post" class="dept-form" id="deptForm-@hall.roomId">
+                                                <input type="hidden" name="roomId" value="@hall.roomId" />
+                                                <input type="hidden" name="mode" value="department" />
+                                                <div class="row g-2 mb-2">
                                                     <div class="col-md-3">
-                                                        <label class="form-label form-label-sm">Allocation Mode</label>
-                                                        <select class="form-select form-select-sm"
-                                                                id="mode-@hall.roomId"
-                                                                onchange="switchMode(@hall.roomId)">
-                                                            <option value="department">📋 Department + Roll Range</option>
-                                                            <option value="manual">✍️ Manual Entry</option>
+                                                        <label class="form-label form-label-sm">Department <span class="text-danger">*</span></label>
+                                                        <select name="departmentId" class="form-select form-select-sm" required>
+                                                            <option value="">-- Select --</option>
+                                                            @foreach (var dept in Model.departments)
+                                                            {
+                                                                <option value="@dept.departmentId">@dept.departmentName</option>
+                                                            }
                                                         </select>
                                                     </div>
-                                                </div>
-
-                                                <!-- Department Mode -->
-                                                <form asp-action="AllocateStudents" method="post" class="dept-form" id="deptForm-@hall.roomId">
-                                                    <input type="hidden" name="roomId" value="@hall.roomId" />
-                                                    <input type="hidden" name="mode" value="department" />
-
-                                                    <div class="row g-2 mb-2">
-                                                        <div class="col-md-3">
-                                                            <label class="form-label form-label-sm">Department <span class="text-danger">*</span></label>
-                                                            <select name="departmentId" class="form-select form-select-sm" required>
-                                                                <option value="">-- Select --</option>
-                                                                @foreach (var dept in Model.departments)
-                                                                {
-                                                                    <option value="@dept.departmentId">@dept.departmentName</option>
-                                                                }
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <label class="form-label form-label-sm">Roll Start <span class="text-danger">*</span></label>
-                                                            <input type="text" name="rollStart" class="form-control form-control-sm"
-                                                                   placeholder="23bit001" required />
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <label class="form-label form-label-sm">Roll End <span class="text-danger">*</span></label>
-                                                            <input type="text" name="rollEnd" class="form-control form-control-sm"
-                                                                   placeholder="23bit030" required />
-                                                        </div>
-                                                        <div class="col-md-3 d-flex align-items-end">
-                                                            <button type="submit" class="btn btn-sm btn-primary w-100">
-                                                                <i class="bi bi-person-plus"></i> Allocate
-                                                            </button>
-                                                        </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label form-label-sm">Roll Start <span class="text-danger">*</span></label>
+                                                        <input type="text" name="rollStart" class="form-control form-control-sm" placeholder="23bit001" required />
                                                     </div>
-                                                </form>
-
-                                                <!-- Manual Mode -->
-                                                <form asp-action="AllocateStudents" method="post" class="manual-form" id="manualForm-@hall.roomId" style="display:none;">
-                                                    <input type="hidden" name="roomId" value="@hall.roomId" />
-                                                    <input type="hidden" name="mode" value="manual" />
-
-                                                    <div class="row g-2 mb-2">
-                                                        <div class="col-md-9">
-                                                            <label class="form-label form-label-sm">Roll Numbers (comma-separated) <span class="text-danger">*</span></label>
-                                                            <input type="text" name="manualRollNumbers" class="form-control form-control-sm"
-                                                                   placeholder="23bit001, 23bit005, 23bcs010" required />
-                                                        </div>
-                                                        <div class="col-md-3 d-flex align-items-end">
-                                                            <button type="submit" class="btn btn-sm btn-primary w-100">
-                                                                <i class="bi bi-person-plus"></i> Allocate
-                                                            </button>
-                                                        </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label form-label-sm">Roll End <span class="text-danger">*</span></label>
+                                                        <input type="text" name="rollEnd" class="form-control form-control-sm" placeholder="23bit030" required />
                                                     </div>
-                                                </form>
-
-                                                <hr class="my-3" />
-
-                                                <!-- ── Allocated Students ── -->
-                                                <div class="sub-title"><i class="bi bi-people-fill"></i> Allocated Students</div>
-                                                <div id="allocTable-@hall.roomId">
-                                                    <div class="text-muted text-center py-3" id="loadingMsg-@hall.roomId">
-                                                        <div class="spinner-border spinner-border-sm me-2" role="status">
-                                                            <span class="visually-hidden">Loading...</span>
-                                                        </div>
-                                                        Loading...
+                                                    <div class="col-md-3 d-flex align-items-end">
+                                                        <button type="submit" class="btn btn-sm btn-primary w-100">
+                                                            <i class="bi bi-person-plus"></i> Allocate
+                                                        </button>
                                                     </div>
                                                 </div>
+                                            </form>
 
+                                            <!-- Manual Mode -->
+                                            <form asp-action="AllocateStudents" method="post" class="manual-form" id="manualForm-@hall.roomId" style="display:none;">
+                                                <input type="hidden" name="roomId" value="@hall.roomId" />
+                                                <input type="hidden" name="mode" value="manual" />
+                                                <div class="row g-2 mb-2">
+                                                    <div class="col-md-9">
+                                                        <label class="form-label form-label-sm">Roll Numbers (comma-separated) <span class="text-danger">*</span></label>
+                                                        <input type="text" name="manualRollNumbers" class="form-control form-control-sm"
+                                                               placeholder="23bit001, 23bit005, 23bcs010" required />
+                                                    </div>
+                                                    <div class="col-md-3 d-flex align-items-end">
+                                                        <button type="submit" class="btn btn-sm btn-primary w-100">
+                                                            <i class="bi bi-person-plus"></i> Allocate
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            <hr class="my-3" />
+
+                                            <div class="sub-title"><i class="bi bi-people-fill"></i> Allocated Students</div>
+                                            <div id="allocTable-@hall.roomId">
+                                                <div class="text-muted text-center py-3" id="loadingMsg-@hall.roomId">
+                                                    <div class="spinner-border spinner-border-sm me-2" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                    Loading...
+                                                </div>
                                             </div>
-                                        </td>
-                                    </tr>
 
-                                    { sno++; }
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                { sno++; }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
-
     </div>
 
-    <script>
-        const _loaded = {};
+</div>
 
-        function togglePanel(roomId) {
-            const panel = document.getElementById('panel-' + roomId);
-            const icon  = document.getElementById('icon-'  + roomId);
-            if (panel.classList.toggle('open')) {
-                icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
-                if (!_loaded[roomId]) {
-                    fetchAllocations(roomId);
-                    _loaded[roomId] = true;
-                }
-            } else {
-                icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+<!-- ═══════════════════════════════════════════════════
+     ADD HALL MODAL
+     ═══════════════════════════════════════════════════ -->
+<div class="modal fade" id="addHallModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header" style="background: linear-gradient(135deg, #2c3e50, #34495e);">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-plus-circle me-2"></i> Add New Exam Hall
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="info-box mb-3">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <strong>Seating Configuration:</strong>
+                    <ul class="mb-0 mt-2" style="font-size: .85rem;">
+                        <li><strong>1 Seat/Desk:</strong> Each desk accommodates only 1 student</li>
+                        <li><strong>2 Seats/Desk:</strong> Each desk accommodates 2 students from <strong>different departments</strong></li>
+                    </ul>
+                </div>
+
+                <form asp-action="AddHall" method="post" id="addHallForm">
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Block <span class="text-danger">*</span></label>
+                            <select name="blockId" class="form-select" required>
+                                <option value="">-- Select Block --</option>
+                                @foreach (var block in Model.blocks)
+                                {
+                                    <option value="@block.blockId">@block.blockName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Hall Number <span class="text-danger">*</span></label>
+                            <input type="text" name="roomNumber" class="form-control" placeholder="e.g. C203" required />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Exam Date <span class="text-danger">*</span></label>
+                            <input type="date" name="examDate" class="form-control"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                            <div class="help-text"><i class="bi bi-calendar"></i> Date of exam</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Exam Name</label>
+                            <input type="text" name="examName" class="form-control" placeholder="e.g. Mid Term" />
+                            <div class="help-text">Optional</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Total Desks</label>
+                            <input type="number" name="totalDesks" class="form-control" value="30" min="1" max="100" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Seats per Desk</label>
+                            <select name="seatsPerDesk" class="form-select" required>
+                                <option value="1">1 — Single</option>
+                                <option value="2" selected>2 — Shared</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addHallForm" class="btn btn-success">
+                    <i class="bi bi-plus-lg"></i> Add Hall
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const _loaded = {};
+
+    function togglePanel(roomId) {
+        const panel = document.getElementById('panel-' + roomId);
+        const icon  = document.getElementById('icon-'  + roomId);
+        if (panel.classList.toggle('open')) {
+            icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+            if (!_loaded[roomId]) {
+                fetchAllocations(roomId);
+                _loaded[roomId] = true;
             }
+        } else {
+            icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
         }
+    }
 
-        function switchMode(roomId) {
-            const sel     = document.getElementById('mode-' + roomId);
-            const deptF   = document.getElementById('deptForm-'   + roomId);
-            const manualF = document.getElementById('manualForm-' + roomId);
-            if (sel.value === 'department') {
-                deptF.style.display   = '';
-                manualF.style.display = 'none';
-            } else {
-                deptF.style.display   = 'none';
-                manualF.style.display = '';
-            }
+    function switchMode(roomId) {
+        const sel     = document.getElementById('mode-'       + roomId);
+        const deptF   = document.getElementById('deptForm-'   + roomId);
+        const manualF = document.getElementById('manualForm-' + roomId);
+        if (sel.value === 'department') {
+            deptF.style.display   = '';
+            manualF.style.display = 'none';
+        } else {
+            deptF.style.display   = 'none';
+            manualF.style.display = '';
         }
+    }
 
-        async function fetchAllocations(roomId) {
-            const container = document.getElementById('allocTable-' + roomId);
+    async function fetchAllocations(roomId) {
+        const container = document.getElementById('allocTable-' + roomId);
+        try {
+            const res  = await fetch('/AdminHallLocator/GetAllocationsForRoom?roomId=' + roomId);
+            const rows = await res.json();
 
-            try {
-                const res   = await fetch('/AdminHallLocator/GetAllocationsForRoom?roomId=' + roomId);
-                const rows  = await res.json();
-
-                if (rows.length === 0) {
-                    container.innerHTML = '<div class="alert alert-info text-center mb-0"><i class="bi bi-info-circle me-2"></i>No students allocated yet.</div>';
-                    return;
-                }
-
-                let html = `
-                <div class="table-responsive">
-                    <table class="table table-bordered table-sm tbl-alloc mb-0">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">#</th>
-                                <th>Roll Number</th>
-                                <th>Department</th>
-                                <th>Desk</th>
-                                <th>Seat</th>
-                                <th style="width: 100px;">Remove</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-
-                rows.forEach((r, i) => {
-                    html += `
-                            <tr>
-                                <td>${i + 1}</td>
-                                <td class="fw-semibold">${r.rollNumber.toUpperCase()}</td>
-                                <td><span class="badge bg-secondary">${r.department}</span></td>
-                                <td>${r.deskNumber}</td>
-                                <td>${r.seatNumber}</td>
-                                <td>
-                                    <form action="/AdminHallLocator/RemoveAllocation" method="post" style="margin:0;">
-                                        <input type="hidden" name="hallSeatingId" value="${r.hallSeatingId}" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('⚠️ Remove ${r.rollNumber.toUpperCase()}?');">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>`;
-                });
-
-                html += `</tbody></table></div>`;
-                container.innerHTML = html;
+            if (rows.length === 0) {
+                container.innerHTML = '<div class="alert alert-info text-center mb-0"><i class="bi bi-info-circle me-2"></i>No students allocated yet.</div>';
+                return;
             }
-            catch (e) {
-                container.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error loading.</div>';
-            }
-        }
 
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert-dismissible');
-            alerts.forEach(alert => {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
+            let html = `
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm tbl-alloc mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Roll Number</th>
+                            <th>Department</th>
+                            <th>Desk</th>
+                            <th>Seat</th>
+                            <th style="width:100px;">Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            rows.forEach((r, i) => {
+                html += `
+                        <tr>
+                            <td>${i + 1}</td>
+                            <td class="fw-semibold">${r.rollNumber.toUpperCase()}</td>
+                            <td><span class="badge bg-secondary">${r.department}</span></td>
+                            <td>${r.deskNumber}</td>
+                            <td>${r.seatNumber}</td>
+                            <td>
+                                <form action="/AdminHallLocator/RemoveAllocation" method="post" style="margin:0;">
+                                    <input type="hidden" name="hallSeatingId" value="${r.hallSeatingId}" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('⚠️ Remove ${r.rollNumber.toUpperCase()}?');">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>`;
             });
-        }, 5000);
-    </script>
+
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
+        catch (e) {
+            container.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error loading allocations.</div>';
+        }
+    }
+
+    // ── SEARCH ─────────────────────────────────────────────────────────
+    function filterTable() {
+        const query   = document.getElementById('searchInput').value.toLowerCase().trim();
+        const rows    = document.querySelectorAll('#hallsTable tbody .hall-row');
+        let   visible = 0;
+
+        rows.forEach(row => {
+            const searchData = row.getAttribute('data-search') || '';
+            const panelRow   = row.nextElementSibling; // the expandable panel row
+
+            if (!query || searchData.includes(query)) {
+                row.classList.remove('row-hidden');
+                if (panelRow) panelRow.classList.remove('row-hidden');
+                visible++;
+            } else {
+                row.classList.add('row-hidden');
+                if (panelRow) panelRow.classList.add('row-hidden');
+            }
+        });
+
+        document.getElementById('noResults').style.display =
+            (visible === 0 && query.length > 0) ? 'block' : 'none';
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        filterTable();
+    }
+
+    // ── AUTO-DISMISS ALERTS ────────────────────────────────────────────
+    setTimeout(function () {
+        document.querySelectorAll('.alert-dismissible').forEach(alert => {
+            new bootstrap.Alert(alert).close();
+        });
+    }, 5000);
+</script>

@@ -20,6 +20,7 @@
                     <th>President</th>
                     <th>Contact Number</th>
                     <th>Description</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -27,46 +28,73 @@
     </div>
 </div>
 
-<!-- MODAL -->
+<!-- ADD CLUB MODAL -->
 <div class="modal fade" id="clubModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-
             <div class="modal-header">
                 <h5 class="modal-title">Add Club</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-
             <div class="modal-body">
                 <form id="clubForm">
-
                     <div class="mb-2">
                         <label>Club Name:</label>
                         <input id="clubName" class="form-control" placeholder="Enter Club Name" />
                     </div>
-
                     <div class="mb-2">
                         <label>President:</label>
                         <input id="president" class="form-control" placeholder="President Name" />
                     </div>
-
                     <div class="mb-2">
                         <label>Contact Number:</label>
                         <input id="contactNumber" class="form-control" placeholder="Contact Number" />
                     </div>
-
                     <div class="mb-2">
                         <label>Description:</label>
                         <textarea id="description" class="form-control" rows="3"></textarea>
                     </div>
-
                 </form>
             </div>
-
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="saveClub()">Save</button>
             </div>
+        </div>
+    </div>
+</div>
 
+<!-- EDIT CLUB MODAL -->
+<div class="modal fade" id="editClubModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Club</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editClubForm">
+                    <input type="hidden" id="editClubId" />
+                    <div class="mb-2">
+                        <label>Club Name:</label>
+                        <input id="editClubName" class="form-control" />
+                    </div>
+                    <div class="mb-2">
+                        <label>President:</label>
+                        <input id="editPresident" class="form-control" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Contact Number:</label>
+                        <input id="editContactNumber" class="form-control" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Description:</label>
+                        <textarea id="editDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="updateClub()">Update</button>
+            </div>
         </div>
     </div>
 </div>
@@ -76,7 +104,6 @@
         function loadClubs() {
             $.get('@Url.Action("getAllClubs", "EventDetails")', function (res) {
                 if (res.statusCode !== 200) return;
-
                 let rows = '';
                 res.data.forEach((c, i) => {
                     rows += `<tr>
@@ -85,9 +112,17 @@
                         <td>${c.president}</td>
                         <td>${c.contactNumber ?? ''}</td>
                         <td>${c.description ?? ''}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning"
+                                onclick="openEditClub(${c.mstClubId}, '${c.clubName}', '${c.president}', '${c.contactNumber ?? ''}', '${c.description ?? ''}')">
+                                <i class="bx bx-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteClub(${c.mstClubId})">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </td>
                     </tr>`;
                 });
-
                 $('#clubsTable tbody').html(rows);
             });
         }
@@ -101,10 +136,7 @@
 
             $.ajax({
                 url: '@Url.Action("addClub", "EventDetails")',
-                type: 'POST',
-                processData: false,
-                contentType: false,
-                data: formData,
+                type: 'POST', processData: false, contentType: false, data: formData,
                 success: function (res) {
                     if (res.statusCode === 200) {
                         $('#clubForm')[0].reset();
@@ -115,6 +147,41 @@
             });
         }
 
+        function openEditClub(id, name, president, contact, desc) {
+            $('#editClubId').val(id);
+            $('#editClubName').val(name);
+            $('#editPresident').val(president);
+            $('#editContactNumber').val(contact);
+            $('#editDescription').val(desc);
+            $('#editClubModal').modal('show');
+        }
+
+        function updateClub() {
+            var formData = new FormData();
+            formData.append("mstClubId", $('#editClubId').val());
+            formData.append("clubName", $('#editClubName').val());
+            formData.append("president", $('#editPresident').val());
+            formData.append("contactNumber", $('#editContactNumber').val());
+            formData.append("description", $('#editDescription').val());
+
+            $.ajax({
+                url: '@Url.Action("UpdateClub", "EventDetails")',
+                type: 'POST', processData: false, contentType: false, data: formData,
+                success: function (res) {
+                    if (res.statusCode === 200) {
+                        $('#editClubModal').modal('hide');
+                        loadClubs();
+                    }
+                }
+            });
+        }
+
+        function deleteClub(id) {
+            if (!confirm('Are you sure you want to delete this club?')) return;
+            $.post('@Url.Action("DeleteClub", "EventDetails")', { id }, function (res) {
+                if (res.statusCode === 200) loadClubs();
+            });
+        }
 
         $('#clubModal').on('hidden.bs.modal', function () {
             $('#clubForm')[0].reset();

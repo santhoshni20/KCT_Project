@@ -21,6 +21,52 @@ namespace ksi.Controllers
             return View();
         }
 
+
+        //[HttpPost]
+        //public IActionResult ToggleEventStatus(int id)
+        //{
+        //    var result = _eventRepo.toggleEventStatus(id);
+        //    return Json(new ApiResponseDTO
+        //    {
+        //        statusCode = result ? 200 : 500,
+        //        message = result ? "Status updated" : "Failed"
+        //    });
+        //}
+
+        [HttpPost]
+        public IActionResult DeleteEvent(int id)
+        {
+            var result = _eventRepo.deleteEvent(id);
+            return Json(new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 500,
+                message = result ? "Event deleted successfully" : "Failed to delete"
+            });
+        }
+
+
+        [HttpPost]
+        public IActionResult UpdateEvent([FromForm] EventDetailsDTO eventDto)
+        {
+            if (eventDto.brochureImage != null && eventDto.brochureImage.Length > 0)
+            {
+                var fileName = Guid.NewGuid() + Path.GetExtension(eventDto.brochureImage.FileName);
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                Directory.CreateDirectory(uploadPath);
+                var filePath = Path.Combine(uploadPath, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                eventDto.brochureImage.CopyTo(stream);
+                eventDto.brochureImagePath = "/uploads/" + fileName;
+            }
+
+            var result = _eventRepo.updateEvent(eventDto);
+            return Json(new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 500,
+                message = result ? "Event updated successfully" : "Failed to update"
+            });
+        }
+
         // GET: EventDetails/GetAllEvents
         [HttpGet]
         public IActionResult GetAllEvents()
@@ -66,6 +112,41 @@ namespace ksi.Controllers
         public IActionResult AddClubs()
         {
             return View();
+        }
+
+
+        [HttpPost]
+        public IActionResult UpdateClub([FromForm] EventDetailsDTO clubDto)
+        {
+            var result = _eventRepo.updateClub(clubDto);
+            return Json(new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 500,
+                message = result ? "Club updated successfully" : "Failed to update"
+            });
+        }
+
+
+        //[HttpPost]
+        //public IActionResult ToggleClubStatus(int id)
+        //{
+        //    var result = _eventRepo.toggleClubStatus(id);
+        //    return Json(new ApiResponseDTO
+        //    {
+        //        statusCode = result ? 200 : 500,
+        //        message = result ? "Status updated" : "Failed"
+        //    });
+        //}
+
+        [HttpPost]
+        public IActionResult DeleteClub(int id)
+        {
+            var result = _eventRepo.deleteClub(id);
+            return Json(new ApiResponseDTO
+            {
+                statusCode = result ? 200 : 500,
+                message = result ? "Club deleted successfully" : "Failed to delete"
+            });
         }
 
         [HttpGet]
